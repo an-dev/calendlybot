@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+{% load static %}
+<html class="h-100" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>RoomCompare - {% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta
+            name="description"
+            content=""
+    />
+    <link rel="icon" href="{% static 'web/img/favicon.ico' %}">
+    <link
+            href="{% static 'web/css/bootstrap.min.css' %}"
+            rel="stylesheet"
+            type="text/css"
+            media="all"
+    />
+    <link
+            href="{% static 'web/css/fontawesome.min.css' %}"
+            rel="stylesheet"
+            type="text/css"
+            media="all"
+    />
+    <link
+            href="{% static 'web/css/index.css' %}"
+            rel="stylesheet"
+            type="text/css"
+            media="all"
+    />
+    <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153135570-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-153135570-1');
+    </script>
+</head>
+<body class="d-flex flex-column h-100 bg-light">
+<div class="navbar-container ">
+    <nav
+            class="navbar navbar-expand-lg navbar-dark rmc-navbar font-weight-bold"
+            data-sticky="top"
+    >
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'web/img/logo.png' %}" alt="logo">
+                RoomCompare<small class="font-italic text-muted "> beta</small>
+            </a>
+            <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target=".navbar-collapse"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse">
+                <ul class="navbar-nav ml-auto text-center">
+                    {% block tutorial %}
+                    {% endblock %}
+                    <!--<li class="nav-item">-->
+                        <!--<a class="nav-link" href="/blog">Blog</a>-->
+                    <!--</li>-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About</a>
+                    </li>
+                    <!--<li class="nav-item">-->
+                        <!--<a class="nav-link" href="/contact">Contact us</a>-->
+                    <!--</li>-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/feedback">Feedback</a>
+                    </li>
+                    {% block cta %}
+                    {% endblock %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+{% block content %}
+{% endblock %}
+
+<footer class="bg-white pb-4 mt-auto py-3" id="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <small class="text-muted">&copy; <span id="current-year"></span> All rights reserved. <br>
+                    <!--<a href="/privacy" class="text-muted font-weight-bold">Privacy Policy</a>-->
+                    <!--and-->
+                    <!--<a href="/terms" class="text-muted font-weight-bold">Terms of Service</a>-->
+                </small>
+            </div>
+            <div class="col-6 text-right">
+                <small>
+                    <!--<br>-->
+                    <a href="/about" class="text-muted font-weight-bold mr-3">About</a>
+                    <a href="mailto:andy.idiaghe@gmail.com" class="text-muted font-weight-bold mr-3">Contact Us</a>
+                    <a href="https://twitter.com/roomcompare" class="text-muted"><i class="fab fa-twitter"></i></a>
+                </small>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script type="text/javascript" src="{% static 'web/js/jquery-3.3.1.slim.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'web/js/popper.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'web/js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'web/js/base.js' %}"></script>
+{% block js %}
+{% endblock %}
+</body>
+</html>
