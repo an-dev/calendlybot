@@ -1,0 +1,19 @@
+# Common
+.DS_Store
+.ignore
+.envrc
+.env
+[.]venv/
+
+# Python
+db.sqlite3
+.pytest_cache/
+
+# Unit test / coverage reports
+.cache
+tmp/
+
+# JetBrains
+/.idea
+/*.iml
+
