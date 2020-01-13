@@ -1,0 +1,42 @@
+{% extends 'web/base.html' %}
+{% block title %}About{% endblock %}
+{% block cta %}
+<li class="nav-item">
+    <a class="btn btn-light font-weight-bold" href="/compare" role="button">Compare Now</a>
+</li>
+{% endblock %}
+{% block content %}
+{% load static %}
+<section class="py-5 text-center">
+    <div class="container">
+        <h1 class="h2 mx-xl-6 font-weight-bold">About</h1>
+        <p class="lead">What is this?</p>
+        <div class="my-5">
+            <img class="img-fluid rmc-about"
+                 src="{% static 'web/img/illustrations/about.png' %}"
+                 alt="About illustration">
+        </div>
+        <div class="px-5 mx-5 text-left">
+            <p class="lead">
+                RoomCompare helps people to find the best flatshare ad on spareroom. This free online service allows you to compare different ads side by side so you can make a weighted decision hassle-free.
+            </p>
+            <p class="lead">
+                It all started when a friend was searching for yet another flat in London. Before long he had a whole bunch of tabs open on different spareroom tabs. Lots of things to consider for each one: price, location, current flatmates... So we figured, why not use a spreadsheet to track all of the information and check what are the best options?
+            </p>
+            <p class="lead">
+                As software developers, we decided to build a product to help solve this problem - even better than writing things down on a spreadsheet as that would still take a lot of time. Just like that, RoomCompare was born.
+            </p>
+            <p class="lead"><i>Disclaimer</i>: This service is not related, provided or endorsed by to Spareroom.co.uk </p>
+            <h2 class="h3 mx-xl-6 font-weight-bold">Feature requests</h2>
+            <p>
+                Find a specific feature to be missing? Feel free to add your idea <a href="/feedback" class="text-info">here</a>
+            </p>
+            <h2 class="h3 mx-xl-6 font-weight-bold">Contacts</h2>
+            <ul>
+                <li>Email: <a href="mailto:andy.idiaghe@gmail.com" class="text-info">support@roomcompare.co</a></li>
+                <li>Twitter: <a href="https://twitter.com/roomcompare" class="text-info">@roomcompare</a></li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}
