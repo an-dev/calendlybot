@@ -3,7 +3,7 @@
 <html class="h-100" lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>RoomCompare - {% block title %}{% endblock %}</title>
+    <title>CalendlyBot - {% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta
             name="description"
@@ -28,7 +28,6 @@
             type="text/css"
             media="all"
     />
-    <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153135570-1"></script>
     <script>
@@ -42,13 +41,13 @@
 <body class="d-flex flex-column h-100 bg-light">
 <div class="navbar-container ">
     <nav
-            class="navbar navbar-expand-lg navbar-dark rmc-navbar font-weight-bold"
+            class="navbar navbar-expand-lg navbar-light font-weight-bold"
             data-sticky="top"
     >
         <div class="container">
             <a class="navbar-brand" href="/">
                 <img src="{% static 'web/img/logo.png' %}" alt="logo">
-                RoomCompare<small class="font-italic text-muted "> beta</small>
+                CalendlyBot
             </a>
             <button
                     class="navbar-toggler"
@@ -62,19 +61,11 @@
             </button>
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav ml-auto text-center">
-                    {% block tutorial %}
-                    {% endblock %}
-                    <!--<li class="nav-item">-->
-                        <!--<a class="nav-link" href="/blog">Blog</a>-->
-                    <!--</li>-->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing">Pricing</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/about">About</a>
-                    </li>
-                    <!--<li class="nav-item">-->
-                        <!--<a class="nav-link" href="/contact">Contact us</a>-->
-                    <!--</li>-->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/feedback">Feedback</a>
                     </li>
                     {% block cta %}
                     {% endblock %}
