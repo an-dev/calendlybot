@@ -4,6 +4,7 @@
 .envrc
 .env
 [.]venv/
+*__pycache__/
 
 # Python
 db.sqlite3
