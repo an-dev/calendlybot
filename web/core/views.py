@@ -2,6 +2,8 @@ import logging
 import os
 
 import slack
+from calendly import Calendly
+from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -66,4 +68,11 @@ def auth(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def connect(request):
-    import pdb; pdb.set_trace()
+    calendly = Calendly(request.POST['text'])
+    print(calendly.echo())
+    client = slack.WebClient(token=os.environ["SLACK_USER_TOKEN"])
+    client.chat_postMessage(
+        channel=request.POST['user_id'],
+
+        text="Setup complete. You will now receive notifications on created and cancelled events.")
+    return HttpResponse(status=200)
