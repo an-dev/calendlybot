@@ -125,4 +125,5 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = os.path.join(STATIC_DIR, 'staticfiles')
-AUTH_USER_MODEL = 'core.User'
+
+SITE_URL = 'http://localhost:8000'
