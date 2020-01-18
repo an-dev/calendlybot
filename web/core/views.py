@@ -33,10 +33,13 @@ def send_message_to_users(workspace):
     response_users_list = client.users_list()
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
-        su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
+        su, created = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
+        if created:
+            su.name = user['real_name']
+            su.save()
         client.chat_postMessage(
             channel=su.slack_id,
-            text=f"Hello {user['real_name']}. I'm CalendlyBot. Type '/connect' to start!")
+            text=f"Hello {user['real_name']}. I'm CalendlyBot. Type `/connect` to start!")
 
 
 @require_http_methods(["GET"])
@@ -78,8 +81,9 @@ def auth(request):
 @require_http_methods(["POST"])
 def connect(request):
     try:
-        su = SlackUser.objects.get(slack_id=request.POST['user_id'],
-                                   workspace__slack_id=request.POST['team_id'])
+        workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
+        su, _ = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
+                                                workspace=workspace)
         client = slack.WebClient(token=su.workspace.bot_token)
         calendly = Calendly(request.POST['text'])
         response = calendly.echo()
@@ -112,20 +116,23 @@ def connect(request):
 def handle(request, signed_value):
     try:
         workspace_slack_id, user_slack_id = signing.loads(signed_value)
-        # user_email = filter(lambda x: x['primary'] is True,
-        #                     request.POST['payload']['event']['extended_assigned_to'])
         su = SlackUser.objects.get(slack_id=user_slack_id, workspace__slack_id=workspace_slack_id)
         client = slack.WebClient(token=su.workspace.bot_token)
 
-        event_type = 'created' if request.POST['event'] == 'invitee.created' else 'cancelled'
-        if event_type == 'created':
+        event_type = request.POST.get('event')
+        if event_type == 'invitee.created':
             msg = f"Hi, a new event has been scheduled."
-        else:
+
+        if event_type == 'invitee.cancelled':
             msg = f"Hi, the event has been cancelled."
-        client.chat_postMessage(
-            channel=su.slack_id,
-            text=msg)
-        return HttpResponse(status=200)
+
+        if event_type in ['invitee.created', 'invitee.cancelled']:
+            client.chat_postMessage(
+                channel=su.slack_id,
+                text=msg)
+            return HttpResponse(status=200)
+        logger.warning("Something went wrong. Could not handle event type.", request.POST)
+        return HttpResponse(status=400)
     except Exception:
         logger.exception("Could not handle hook event")
         return HttpResponse(status=500)
