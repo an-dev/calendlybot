@@ -34,9 +34,8 @@ def send_message_to_users(workspace):
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, created = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
-        if created:
-            su.name = user['real_name']
-            su.save()
+        su.name = user['real_name']
+        su.save()
         client.chat_postMessage(
             channel=su.slack_id,
             text=f"Hello {user['real_name']}. I'm CalendlyBot. Type `/connect` to start!")
@@ -121,10 +120,10 @@ def handle(request, signed_value):
 
         event_type = request.POST.get('event')
         if event_type == 'invitee.created':
-            msg = f"Hi, a new event has been scheduled."
+            msg = f"Hi {su.name}, a new event has been scheduled."
 
         if event_type == 'invitee.cancelled':
-            msg = f"Hi, the event has been cancelled."
+            msg = f"Hi {su.name}, the event has been cancelled."
 
         if event_type in ['invitee.created', 'invitee.cancelled']:
             client.chat_postMessage(
