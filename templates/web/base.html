@@ -9,7 +9,7 @@
             name="description"
             content=""
     />
-<!--    <link rel="icon" href="{% static 'web/img/favicon.ico' %}">-->
+    <link rel="icon" href="{% static 'web/img/favicon.ico' %}">
     <link
             href="{% static 'web/css/bootstrap.min.css' %}"
             rel="stylesheet"
@@ -40,13 +40,10 @@
 </head>
 <body class="d-flex flex-column h-100 bg-light">
 <div class="navbar-container ">
-    <nav
-            class="navbar navbar-expand-lg navbar-light font-weight-bold"
-            data-sticky="top"
-    >
+    <nav class="navbar navbar-expand-lg navbar-dark font-weight-bold cbot-bg shadow-lg">
         <div class="container">
             <a class="navbar-brand" href="/">
-<!--                <img src="{% static 'web/img/logo.png' %}" alt="logo">-->
+                <img src="{% static 'web/img/logo.png' %}" alt="logo">
                 CalendlyBot
             </a>
             <button
@@ -89,7 +86,7 @@
             </div>
             <div class="col-6 text-right">
                 <small>
-                    <!--<br>-->
+                    <br>
                     <a href="mailto:andy.idiaghe@gmail.com" class="text-muted font-weight-bold mr-3">Contact Us</a>
                     <a href="https://twitter.com/calendlybot" class="text-muted"><i class="fab fa-twitter"></i></a>
                 </small>
