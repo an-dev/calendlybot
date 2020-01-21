@@ -3,6 +3,7 @@ import os
 
 import slack
 from calendly import Calendly
+from django.conf import settings
 from django.core import signing
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
@@ -95,7 +96,7 @@ def connect(request):
         su.calendly_authtoken = request.POST['text']
         su.save()
         signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
-        response = calendly.create_webhook(f"https://04d7e20d.ngrok.io/handle/{signed_value}/")
+        response = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
         if not response['id']:
             client.chat_postMessage(
                 channel=su.slack_id,
