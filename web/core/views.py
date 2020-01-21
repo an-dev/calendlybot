@@ -52,7 +52,6 @@ def auth(request):
         # An empty string is a valid token for this request
         client = slack.WebClient(token="")
 
-        import pdb; pdb.set_trace()
         # Request the auth tokens from Slack
         response = client.oauth_v2_access(
             client_id=client_id,

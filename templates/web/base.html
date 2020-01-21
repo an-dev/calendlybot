@@ -9,7 +9,7 @@
             name="description"
             content=""
     />
-    <link rel="icon" href="{% static 'web/img/favicon.ico' %}">
+<!--    <link rel="icon" href="{% static 'web/img/favicon.ico' %}">-->
     <link
             href="{% static 'web/css/bootstrap.min.css' %}"
             rel="stylesheet"
@@ -46,7 +46,7 @@
     >
         <div class="container">
             <a class="navbar-brand" href="/">
-                <img src="{% static 'web/img/logo.png' %}" alt="logo">
+<!--                <img src="{% static 'web/img/logo.png' %}" alt="logo">-->
                 CalendlyBot
             </a>
             <button
@@ -61,11 +61,10 @@
             </button>
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav ml-auto text-center">
+                    {% block tutorial %}
+                    {% endblock %}
                     <li class="nav-item">
                         <a class="nav-link" href="/pricing">Pricing</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/about">About</a>
                     </li>
                     {% block cta %}
                     {% endblock %}
@@ -83,17 +82,16 @@
         <div class="row">
             <div class="col-6">
                 <small class="text-muted">&copy; <span id="current-year"></span> All rights reserved. <br>
-                    <!--<a href="/privacy" class="text-muted font-weight-bold">Privacy Policy</a>-->
-                    <!--and-->
-                    <!--<a href="/terms" class="text-muted font-weight-bold">Terms of Service</a>-->
+                    <a href="/privacy" class="text-muted font-weight-bold">Privacy Policy</a>
+                    and
+                    <a href="/terms" class="text-muted font-weight-bold">Terms of Service</a>
                 </small>
             </div>
             <div class="col-6 text-right">
                 <small>
                     <!--<br>-->
-                    <a href="/about" class="text-muted font-weight-bold mr-3">About</a>
                     <a href="mailto:andy.idiaghe@gmail.com" class="text-muted font-weight-bold mr-3">Contact Us</a>
-                    <a href="https://twitter.com/roomcompare" class="text-muted"><i class="fab fa-twitter"></i></a>
+                    <a href="https://twitter.com/calendlybot" class="text-muted"><i class="fab fa-twitter"></i></a>
                 </small>
             </div>
         </div>
