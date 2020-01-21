@@ -7,4 +7,4 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 django_heroku.settings(locals())
 
-SITE_URL = 'http://www.calendelybot.herokuapp.com'
+SITE_URL = 'https://www.calendlybot.herokuapp.com'
