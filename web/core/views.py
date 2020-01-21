@@ -29,17 +29,18 @@ def eligible_user(user):
     return user['is_bot'] is False and user['id'] != 'USLACKBOT'
 
 
-def send_message_to_users(workspace):
+def send_message_to_users(workspace, new_workspace):
     client = slack.WebClient(token=workspace.bot_token)
     response_users_list = client.users_list()
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
-        su, created = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
+        su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
         su.name = user['real_name']
         su.save()
-        client.chat_postMessage(
-            channel=su.slack_id,
-            text=f"Hello {user['real_name']}. I'm CalendlyBot. Type `/connect` to start!")
+        if new_workspace:
+            client.chat_postMessage(
+                channel=su.slack_id,
+                text=f"Hello {user['real_name']}. I'm CalendlyBot. Type `/connect` to start!")
 
 
 @require_http_methods(["GET"])
@@ -51,6 +52,7 @@ def auth(request):
         # An empty string is a valid token for this request
         client = slack.WebClient(token="")
 
+        import pdb; pdb.set_trace()
         # Request the auth tokens from Slack
         response = client.oauth_v2_access(
             client_id=client_id,
@@ -61,12 +63,11 @@ def auth(request):
         # Save the bot token to an environmental variable or to your data store
         # for later use
         # response doesn't have a bot object
-        workspace, created = Workspace.objects.get_or_create(slack_id=response['team']['id'])
-        if created:
-            workspace.bot_token = response['access_token']
-            workspace.save()
+        workspace, new = Workspace.objects.get_or_create(slack_id=response['team']['id'])
+        workspace.bot_token = response['access_token']
+        workspace.save()
 
-        send_message_to_users(workspace)
+        send_message_to_users(workspace, new)
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
