@@ -7,7 +7,7 @@ class SlackMarkdownEventCreatedMessage:
         self.invitee_email = invitee_email
         self.invitee_timezone = invitee_timezone
 
-    def get_block(self):
+    def get_blocks(self):
         return [
             {
                 "type": "section",
@@ -15,40 +15,44 @@ class SlackMarkdownEventCreatedMessage:
                     "type": "mrkdwn",
                     "text": f"Hi {self.name},\n:calendar: A new event has been *scheduled*."
                 }
-            },
-            {
-                "type": "divider"
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Event Type:*\n{self.event_name}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Invitee:*\n{self.invitee_name}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Event Date/Time:*\n{self.event_start_time}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Invitee Email:*\n<mailto:{self.invitee_email}|{self.invitee_email}>"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": " "
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Invitee Time Zone:*\n{self.invitee_timezone}"
-                    }
-                ]
             }
         ]
+
+    def get_attachments(self):
+        return [{
+            "color": "#00a3fa",
+            "blocks": [
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Event Type:*\n{self.event_name}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Invitee:*\n{self.invitee_name}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Event Date/Time:*\n{self.event_start_time}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Invitee Email:*\n<mailto:{self.invitee_email}|{self.invitee_email}>"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": " "
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Invitee Time Zone:*\n{self.invitee_timezone}"
+                        }
+                    ]
+                }
+            ]
+        }]
 
 
 class SlackMarkdownEventCanceledMessage:
@@ -59,7 +63,7 @@ class SlackMarkdownEventCanceledMessage:
         self.invitee_email = invitee_email
         self.canceler_name = canceler_name
 
-    def get_block(self):
+    def get_blocks(self):
         return [
             {
                 "type": "section",
@@ -67,11 +71,13 @@ class SlackMarkdownEventCanceledMessage:
                     "type": "mrkdwn",
                     "text": f"Hi {self.name},\n:x: The event below has been *canceled*."
                 }
-            },
-            {
-                "type": "divider"
-            },
-            {
+            }
+        ]
+
+    def get_attachments(self):
+        return [{
+            "color": "#00a3fa",
+            "blocks": [{
                 "type": "section",
                 "fields": [
                     {
@@ -91,5 +97,5 @@ class SlackMarkdownEventCanceledMessage:
                         "text": f"*Invitee Email:*\n*<mailto:{self.invitee_email}|{self.invitee_email}>*"
                     }
                 ]
-            }
-        ]
+            }]
+        }]
