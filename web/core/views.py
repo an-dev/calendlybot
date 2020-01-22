@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -10,7 +11,7 @@ from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from web.core.message import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCanceledMessage
+from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
 from web.core.models import SlackUser, Webhook, Workspace
 
 client_id = os.environ["SLACK_CLIENT_ID"]
@@ -36,7 +37,7 @@ def send_message_to_users(workspace, new_workspace):
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
-        su.name = user['real_name']
+        su.slack_name = user['real_name']
         su.save()
         if new_workspace:
             client.chat_postMessage(
@@ -88,7 +89,7 @@ def connect(request):
         client = slack.WebClient(token=su.workspace.bot_token)
         calendly = Calendly(request.POST['text'])
         response = calendly.echo()
-        if not response.get('email'):
+        if 'email' not in response:
             client.chat_postMessage(
                 channel=su.slack_id,
                 text="Could not find user in Calendly. Make sure the APIKey is correct.")
@@ -98,7 +99,7 @@ def connect(request):
         su.save()
         signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
         response = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
-        if not response['id']:
+        if 'id' not in response:
             client.chat_postMessage(
                 channel=su.slack_id,
                 text="Could not connect with Calendly API. Please retry.")
@@ -120,11 +121,12 @@ def handle(request, signed_value):
         su = SlackUser.objects.get(slack_id=user_slack_id, workspace__slack_id=workspace_slack_id)
         client = slack.WebClient(token=su.workspace.bot_token)
 
-        data = request.POST
+        data = json.loads(request.body)
         event_type = data.get('event')
 
         if event_type not in ['invitee.created', 'invitee.canceled']:
-            logger.exception("Something went wrong. Could not handle event type.", request.POST)
+            logger.exception(
+                "Something went wrong. Could not handle event type:\n{}".format(request.body))
             return HttpResponse(status=400)
 
         data = data['payload']
@@ -155,11 +157,21 @@ def handle(request, signed_value):
         if event_type in ['invitee.created', 'invitee.canceled']:
             client.chat_postMessage(
                 channel=su.slack_id,
-                txt=txt,
+                text=txt,
                 blocks=msg.get_blocks(),
                 attachments=msg.get_attachments()
             )
         return HttpResponse(status=200)
+    except SlackUser.DoesNotExist:
+        logger.exception("Could not find user")
     except Exception:
         logger.exception("Could not handle hook event")
-        return HttpResponse(status=500)
+        # # re-create webhook
+        # calendly = Calendly(su.calendly_authtoken)
+        # signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
+        # response = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
+        # if 'id' in response:
+        #     Webhook.objects.create(user=su, calendly_id=response['id'])
+        # else:
+        #     logger.error("Could not recreate webhook {}".format(response))
+    return HttpResponse(status=500)
