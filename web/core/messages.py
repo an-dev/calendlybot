@@ -20,7 +20,7 @@ class SlackMarkdownEventCreatedMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#00a3fa",
+            "color": "#2EB67D",
             "blocks": [
                 {
                     "type": "section",
@@ -76,7 +76,7 @@ class SlackMarkdownEventCanceledMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#00a3fa",
+            "color": "#E01E5A",
             "blocks": [{
                 "type": "section",
                 "fields": [

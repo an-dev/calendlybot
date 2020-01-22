@@ -5,6 +5,9 @@ class Workspace(models.Model):
     slack_id = models.CharField(max_length=16)
     bot_token = models.CharField(max_length=64)
 
+    def __str__(self):
+        return "Slack Workspace {}".format(self.slack_id)
+
 
 class SlackUser(models.Model):
     slack_id = models.CharField(max_length=16, unique=True)
@@ -16,7 +19,13 @@ class SlackUser(models.Model):
     class Meta:
         unique_together = ('slack_id', 'workspace')
 
+    def __str__(self):
+        return "Slack User {}".format(self.slack_id)
+
 
 class Webhook(models.Model):
     user = models.ForeignKey('SlackUser', related_name='webhooks', on_delete=models.CASCADE)
     calendly_id = models.PositiveIntegerField()
+
+    def __str__(self):
+        return "Calendly Hook {}".format(self.calendly_id)
