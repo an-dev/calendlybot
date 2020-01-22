@@ -3,29 +3,23 @@
 {% block title %}Home{% endblock %}
 {% block tutorial %}
 <li class="nav-item">
-    <a class="nav-link" href="/about">How it works</a>
-</li>
-{% endblock %}
-{% block cta %}
-<li class="nav-item">
-    <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}">
-        <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png"
-             srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
-    </a>
+    <a class="nav-link" href="/#how-it-works">How it works</a>
 </li>
 {% endblock %}
 {% block content %}
-<section id="how-it-works">
+<main class="text-light cbot-bg">
     <div class="container my-5 py-5">
-        <div class="row align-items-center justify-content-center">
-            <div class="col-lg-4">
-                <h2 class="h1 font-weight-bold">title</h2>
-                <p class="lead">Browse spareroom, and select flatshares you're interested in.</p>
+        <div class="row align-items-center justify-content-between">
+            <div class="col-lg-6">
+                <h2 class="h1 font-weight-bold">Calendly events for Slack</h2>
+                <p class="lead">Native calendly integration for slack. Receive event notifications directly in your
+                    workspace.</p>
                 <p>
-                    <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}">
-                        <img alt="Add to Slack" height="40" width="139"
-                             src="https://platform.slack-edge.com/img/add_to_slack.png"
-                             srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
+                    <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}"
+                       role="button" class="btn btn-lg btn-outline-light">
+                        <span class="d-flex align-items-center">
+                        <i class="fab fa-slack fa-2x"></i> &nbsp; Add to&nbsp;<span class="font-weight-bold">Slack</span>
+                        </span>
                     </a>
                 </p>
             </div>
@@ -34,14 +28,16 @@
             </div>
         </div>
     </div>
-</section>
-<section class="bg-white">
+</main>
+<section id="how-it-works" class="bg-white">
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
             <div class="col-lg-4 order-lg-2">
-                <h2 class="h1 font-weight-bold">02</h2>
-                <p class="lead">Copy and paste the links in the form. Let us extract all the info from your selected
-                    ads.</p>
+                <h2 class="h1 font-weight-bold">/connect</h2>
+                <p class="lead">Slash connect, followed by your <a
+                        href="https://developer.calendly.com/v1/docs/getting-your-authentication-token" target="_blank"
+                        class="font-weight-bold cbot-link">calendly authentication token</a> to connect your slack
+                    profile to calendly</p>
             </div>
             <div class="col-lg-6 order-lg-1 w-100">
                 <img src="https://via.placeholder.com/600x450" alt="Image" class="rounded shadow-3d w-100">
@@ -53,9 +49,9 @@
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
             <div class="col-lg-4">
-                <h2 class="h1 font-weight-bold">03</h2>
-                <p class="lead">Sit down, relax and compare side by side all the features. No more need for endless
-                    spreadsheets!</p>
+                <h2 class="h1 font-weight-bold">That's it!</h2>
+                <p class="lead">Sit down, relax and let us do the magic. Event invites and cancellations will now be
+                    sent directly to you by CalendlyBot</p>
             </div>
             <div class="col-lg-6 w-100">
                 <img src="https://via.placeholder.com/600x450" alt="Image" class="rounded shadow-3d w-100">
@@ -64,50 +60,51 @@
     </div>
 </section>
 
-<section>
+<section id="pricing">
     <div class="container">
         <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-            <h2 class="h1 font-weight-bold">Simple Pricing</h2>
-            <p class="lead">Quickly build an effective pricing table for your potential customers with this Bootstrap
-                example. It's built with default Bootstrap components and utilities with little customization.</p>
+            <h2 class="h1 font-weight-bold">Simple, transparent pricing</h2>
+            <p class="lead">
+                <!--CalendlyBot starts with a 7 day trial, no credit card required. After that it's-->
+                <!--<small>$</small>-->
+                <!--4 per user, per month. -->
+                We bill only users that have connected with the bot or received notifications in the last 30 days
+            </p>
         </div>
         <div class="row justify-content-center mb-5">
             <div class="col-md-8 col-lg-6">
-                <div class="card card-body align-items-center ">
-                    <div class="pt-md-2">
-                        <h4>Basic</h4>
-                    </div>
+                <div class="card card-body align-items-center">
                     <div class="d-flex align-items-start pb-md-2">
-                        <span class="h3">$</span>
+                        <span class="h3 font-weight-bold">$</span>
                         <span class="display-4 mb-0">4</span>
                     </div>
                     <span class="text-small text-muted">Per user, per month</span>
-                    <ul class="text-center list-unstyled my-2 my-md-4">
-                        <li class="py-1">
-                            <span>10k Visitors/mo</span>
-                        </li>
-                        <li class="py-1">
-                            <span>10 Funnels, 50 Pages</span>
-                        </li>
-                        <li class="py-1">
-                            <span>Unlimited Transactions</span>
-                        </li>
-                        <li class="py-1">
-                            <span>Analytics</span>
-                        </li>
-                        <li class="py-1">
-                            <span>Integrations</span>
-                        </li>
-                        <li class="py-1">
-                            <span class="text-muted text-strikethrough">Audience Data</span>
-                        </li>
-                        <li class="py-1">
-                            <span class="text-muted text-strikethrough">Premium Templates</span>
-                        </li>
-                        <li class="py-1">
-                            <span class="text-muted text-strikethrough">White Labelling</span>
-                        </li>
-                    </ul>
+                    <!--<ul class="text-center list-unstyled my-2 my-md-4">-->
+                    <!--<li class="py-1">-->
+                    <!--<span>10k Visitors/mo</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span>10 Funnels, 50 Pages</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span>Unlimited Transactions</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span>Analytics</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span>Integrations</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span class="text-muted text-strikethrough">Audience Data</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span class="text-muted text-strikethrough">Premium Templates</span>-->
+                    <!--</li>-->
+                    <!--<li class="py-1">-->
+                    <!--<span class="text-muted text-strikethrough">White Labelling</span>-->
+                    <!--</li>-->
+                    <!--</ul>-->
                     <p class="lead font-weight-bold">Start your free 7-day trial</p>
                     <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}">
                         <img alt="Add to Slack" height="40" width="139"
