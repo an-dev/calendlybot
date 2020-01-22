@@ -1,3 +1,15 @@
+html {
+    scroll-behavior: smooth;
+}
+
 .cbot-bg {
     background-color: #003c5b;
+}
+
+.cbot-border {
+    border-color: #dee2e65e !important;
+}
+
+.cbot-link {
+    color: #003c5b;
 }

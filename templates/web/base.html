@@ -40,7 +40,7 @@
 </head>
 <body class="d-flex flex-column h-100 bg-light">
 <div class="navbar-container ">
-    <nav class="navbar navbar-expand-lg navbar-dark font-weight-bold cbot-bg shadow-lg">
+    <nav class="navbar navbar-expand-lg navbar-dark font-weight-bold cbot-bg border-bottom cbot-border">
         <div class="container">
             <a class="navbar-brand" href="/">
                 <img src="{% static 'web/img/logo.png' %}" alt="logo">
@@ -61,10 +61,14 @@
                     {% block tutorial %}
                     {% endblock %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/pricing">Pricing</a>
+                        <a class="nav-link" href="/#pricing">Pricing</a>
                     </li>
-                    {% block cta %}
-                    {% endblock %}
+                    <li class="nav-item ml-lg-3">
+                        <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}">
+                            <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png"
+                                 srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -79,16 +83,17 @@
         <div class="row">
             <div class="col-6">
                 <small class="text-muted">&copy; <span id="current-year"></span> All rights reserved. <br>
-                    <a href="/privacy" class="text-muted font-weight-bold">Privacy Policy</a>
-                    and
-                    <a href="/terms" class="text-muted font-weight-bold">Terms of Service</a>
+                    <!--<a href="/privacy" class="text-muted font-weight-bold">Privacy Policy</a>-->
+                    <!--and-->
+                    <!--<a href="/terms" class="text-muted font-weight-bold">Terms of Service</a>-->
                 </small>
             </div>
             <div class="col-6 text-right">
                 <small>
-                    <br>
+                    <!--<br>-->
+                    <!--<a href="/faq" class="text-muted font-weight-bold mr-3">Faq</a>-->
                     <a href="mailto:andy.idiaghe@gmail.com" class="text-muted font-weight-bold mr-3">Contact Us</a>
-                    <a href="https://twitter.com/calendlybot" class="text-muted"><i class="fab fa-twitter"></i></a>
+                    <!--<a href="https://twitter.com/calendlybot" class="text-muted"><i class="fab fa-twitter"></i></a>-->
                 </small>
             </div>
         </div>
