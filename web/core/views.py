@@ -156,7 +156,8 @@ def handle(request, signed_value):
             client.chat_postMessage(
                 channel=su.slack_id,
                 txt=txt,
-                blocks=msg.get_block(),
+                blocks=msg.get_blocks(),
+                attachments=msg.get_attachments()
             )
         return HttpResponse(status=200)
     except Exception:
