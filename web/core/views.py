@@ -10,6 +10,7 @@ from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from web.core.message import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCanceledMessage
 from web.core.models import SlackUser, Webhook, Workspace
 
 client_id = os.environ["SLACK_CLIENT_ID"]
@@ -105,7 +106,7 @@ def connect(request):
         Webhook.objects.create(user=su, calendly_id=response['id'])
         client.chat_postMessage(
             channel=su.slack_id,
-            text="Setup complete. You will now receive notifications on created and cancelled events!")
+            text="Setup complete. You will now receive notifications on created and canceled events!")
     except Exception:
         logger.exception("Could not complete request")
     return HttpResponse(status=200)
@@ -119,20 +120,45 @@ def handle(request, signed_value):
         su = SlackUser.objects.get(slack_id=user_slack_id, workspace__slack_id=workspace_slack_id)
         client = slack.WebClient(token=su.workspace.bot_token)
 
-        event_type = request.POST.get('event')
+        data = request.POST
+        event_type = data.get('event')
+
+        if event_type not in ['invitee.created', 'invitee.canceled']:
+            logger.exception("Something went wrong. Could not handle event type.", request.POST)
+            return HttpResponse(status=400)
+
+        data = data['payload']
+        name = data['event']['assigned_to'][0]
         if event_type == 'invitee.created':
-            msg = f"Hi {su.name}, a new event has been scheduled."
+            message_values = {
+                'name': name,
+                'event_name': data['event_type']['name'],
+                'event_start_time': data['event']['invitee_start_time_pretty'],
+                'invitee_name': data['invitee']['name'],
+                'invitee_email': data['invitee']['email'],
+                'invitee_timezone': data['invitee']['timezone']
+            }
+            txt = f"Hi {name}. A new event has been scheduled."
+            msg = SlackMarkdownEventCreatedMessage(**message_values)
 
-        if event_type == 'invitee.cancelled':
-            msg = f"Hi {su.name}, the event has been cancelled."
+        if event_type == 'invitee.canceled':
+            message_values = {
+                'name': name,
+                'event_name': data['event_type']['name'],
+                'invitee_name': data['invitee']['name'],
+                'invitee_email': data['invitee']['email'],
+                'canceler_name': data['event']['canceler_name']
+            }
+            txt = f"Hi {name}. The event below has been canceled."
+            msg = SlackMarkdownEventCanceledMessage(**message_values)
 
-        if event_type in ['invitee.created', 'invitee.cancelled']:
+        if event_type in ['invitee.created', 'invitee.canceled']:
             client.chat_postMessage(
                 channel=su.slack_id,
-                text=msg)
-            return HttpResponse(status=200)
-        logger.warning("Something went wrong. Could not handle event type.", request.POST)
-        return HttpResponse(status=400)
+                txt=txt,
+                blocks=msg.get_block(),
+            )
+        return HttpResponse(status=200)
     except Exception:
         logger.exception("Could not handle hook event")
         return HttpResponse(status=500)
