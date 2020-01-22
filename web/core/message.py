@@ -13,7 +13,7 @@ class SlackMarkdownEventCreatedMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Hi {self.name},\n:calendar:A new event has been *scheduled*."
+                    "text": f"Hi {self.name},\n:calendar: A new event has been *scheduled*."
                 }
             },
             {
@@ -36,7 +36,7 @@ class SlackMarkdownEventCreatedMessage:
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Invitee Email:*\n*<mailto:{self.invitee_email}|{self.invitee_email}>*"
+                        "text": f"*Invitee Email:*\n<mailto:{self.invitee_email}|{self.invitee_email}>"
                     },
                     {
                         "type": "mrkdwn",
@@ -65,7 +65,7 @@ class SlackMarkdownEventCanceledMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Hi {self.name},\n:x:The event below has been *canceled*."
+                    "text": f"Hi {self.name},\n:x: The event below has been *canceled*."
                 }
             },
             {
@@ -84,7 +84,7 @@ class SlackMarkdownEventCanceledMessage:
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Canceled by:*\n*{self.canceler_name}*"
+                        "text": f"*Canceled by:*\n{self.canceler_name}"
                     },
                     {
                         "type": "mrkdwn",
