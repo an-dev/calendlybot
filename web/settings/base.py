@@ -126,4 +126,4 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(STATIC_DIR, 'staticfiles')
 
-SITE_URL = os.environ['SITE_URL']
+SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
