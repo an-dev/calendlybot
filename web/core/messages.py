@@ -94,7 +94,7 @@ class SlackMarkdownEventCanceledMessage:
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Invitee Email:*\n*<mailto:{self.invitee_email}|{self.invitee_email}>*"
+                        "text": f"*Invitee Email:*\n<mailto:{self.invitee_email}|{self.invitee_email}>"
                     }
                 ]
             }]
