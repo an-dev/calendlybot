@@ -142,7 +142,7 @@ def handle(request, signed_value):
                 'invitee_email': data['invitee']['email'],
                 'invitee_timezone': data['invitee']['timezone']
             }
-            txt = f"Hi {name}. A new event has been scheduled."
+            txt = f"Hi {name}, a new event has been scheduled."
             msg = SlackMarkdownEventCreatedMessage(**message_values)
 
         if event_type == 'invitee.canceled':
@@ -154,7 +154,7 @@ def handle(request, signed_value):
                 'invitee_email': data['invitee']['email'],
                 'canceler_name': data['event']['canceler_name']
             }
-            txt = f"Hi {name}. The event below has been canceled."
+            txt = f"Hi {name}, the event below has been canceled."
             msg = SlackMarkdownEventCanceledMessage(**message_values)
 
         if event_type in ['invitee.created', 'invitee.canceled']:
