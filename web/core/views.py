@@ -1,8 +1,8 @@
 import json
 import logging
 import os
-
 import slack
+
 from calendly import Calendly
 from django.conf import settings
 from django.core import signing
@@ -11,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from web.core.decorators import verify_request
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
 from web.core.models import SlackUser, Webhook, Workspace
 
@@ -79,6 +80,7 @@ def auth(request):
                             {'msg': msg})
 
 
+@verify_request
 @csrf_exempt
 @require_http_methods(["POST"])
 def connect(request):
