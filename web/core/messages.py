@@ -13,7 +13,7 @@ class SlackMarkdownEventCreatedMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Hi {self.name},\n:calendar: A new event has been *scheduled*."
+                    "text": f"Hi {self.name}, a new event has been *scheduled*."
                 }
             }
         ]
@@ -66,7 +66,7 @@ class SlackMarkdownEventCanceledMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Hi {self.name},\n:x: The event below has been *canceled*."
+                    "text": f"Hi {self.name}, the event below has been *canceled*."
                 }
             }
         ]
