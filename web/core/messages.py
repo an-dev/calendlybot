@@ -43,11 +43,7 @@ class SlackMarkdownEventCreatedMessage:
                         },
                         {
                             "type": "mrkdwn",
-                            "text": " "
-                        },
-                        {
-                            "type": "mrkdwn",
-                            "text": f"*Invitee Time Zone:*\n{self.invitee_timezone}"
+                            "text": f"*<https://calendly.com/app/scheduled_events/user/me|View invitee in Calendly>*"
                         }
                     ]
                 }
@@ -56,9 +52,10 @@ class SlackMarkdownEventCreatedMessage:
 
 
 class SlackMarkdownEventCanceledMessage:
-    def __init__(self, name, event_name, invitee_name, invitee_email, canceler_name):
+    def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email, canceler_name):
         self.name = name
         self.event_name = event_name
+        self.event_start_time = event_start_time
         self.invitee_name = invitee_name
         self.invitee_email = invitee_email
         self.canceler_name = canceler_name
@@ -90,12 +87,17 @@ class SlackMarkdownEventCanceledMessage:
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Canceled by:*\n{self.canceler_name}"
+                        "text": f"*Event Date/Time:*\n{self.event_start_time}"
                     },
                     {
                         "type": "mrkdwn",
                         "text": f"*Invitee Email:*\n<mailto:{self.invitee_email}|{self.invitee_email}>"
-                    }
+                    },
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Canceled by:*\n{self.canceler_name}"
+                    },
+
                 ]
             }]
         }]

@@ -149,6 +149,7 @@ def handle(request, signed_value):
             message_values = {
                 'name': name,
                 'event_name': data['event_type']['name'],
+                'event_start_time': data['event']['invitee_start_time_pretty'],
                 'invitee_name': data['invitee']['name'],
                 'invitee_email': data['invitee']['email'],
                 'canceler_name': data['event']['canceler_name']
