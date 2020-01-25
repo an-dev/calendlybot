@@ -13,6 +13,7 @@ from django.views.decorators.http import require_http_methods
 
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
 from web.core.models import SlackUser, Webhook, Workspace
+from web.core.services import SlackMessageService
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -43,6 +44,14 @@ def send_message_to_users(workspace, new_workspace):
             client.chat_postMessage(
                 channel=su.slack_id,
                 text=f"Hello {user['real_name']}. I'm CalendlyBot. Type `/connect` to start!")
+
+
+def has_active_hooks(calendly):
+    hooks = calendly.list_webhooks()
+    active_hooks = len([h for h in hooks['data'] if h['attributes']['state'] == 'active'])
+    if active_hooks > 1:
+        logger.warning('There should be 1 active hook per user. Please check this.')
+    return active_hooks > 0
 
 
 @require_http_methods(["GET"])
@@ -84,30 +93,37 @@ def auth(request):
 def connect(request):
     try:
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-        su, _ = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
-                                                workspace=workspace)
-        client = slack.WebClient(token=su.workspace.bot_token)
+        su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
+                                                      workspace=workspace)
+
+        # atm, we support just one authtoken per user. Calling this command effectively overwrites
         calendly = Calendly(request.POST['text'])
-        response = calendly.echo()
-        if 'email' not in response:
-            client.chat_postMessage(
-                channel=su.slack_id,
-                text="Could not find user in Calendly. Make sure the APIKey is correct.")
+        response_from_echo = calendly.echo()
+        slack_msg_service = SlackMessageService(su.workspace.bot_token)
+        if 'email' not in response_from_echo:
+            slack_msg_service.send(su.slack_id,
+                                   "Could not find user in Calendly. Make sure the APIKey is correct.")
             return HttpResponse(status=200)
-        su.calendly_email = response['email']
-        su.calendly_authtoken = request.POST['text']
-        su.save()
-        signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
-        response = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
-        if 'id' not in response:
-            client.chat_postMessage(
-                channel=su.slack_id,
-                text="Could not connect with Calendly API. Please retry.")
-            return HttpResponse(status=200)
-        Webhook.objects.create(user=su, calendly_id=response['id'])
-        client.chat_postMessage(
-            channel=su.slack_id,
-            text="Setup complete. You will now receive notifications on created and canceled events!")
+
+        # check if there's an existing working hook for this user
+        if not has_active_hooks(calendly):
+            signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
+            response_from_webhook_create = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
+            if 'id' not in response_from_webhook_create:
+                slack_msg_service.send(su.slack_id,
+                                       "Could not connect with Calendly API. Please retry.")
+                return HttpResponse(status=200)
+            Webhook.objects.create(user=su, calendly_id=response_from_webhook_create['id'])
+            su.calendly_authtoken = request.POST['text']
+            su.calendly_email = response_from_echo['email']
+            su.save()
+            slack_msg_service.send(su.slack_id,
+                                   "Setup complete. You will now receive notifications on created and canceled events!")
+        else:
+            # this effectively means that if someone uses another's apiKey
+            # if all its hooks are active they won't be able to setup
+            slack_msg_service.send(su.slack_id,
+                                   "The account is already setup to receive event notifications. Please contact support if you're experiencing issues.")
     except Exception:
         logger.exception("Could not complete request")
     return HttpResponse(status=200)
@@ -119,7 +135,6 @@ def handle(request, signed_value):
     try:
         workspace_slack_id, user_slack_id = signing.loads(signed_value)
         su = SlackUser.objects.get(slack_id=user_slack_id, workspace__slack_id=workspace_slack_id)
-        client = slack.WebClient(token=su.workspace.bot_token)
 
         data = json.loads(request.body)
         event_type = data.get('event')
@@ -155,11 +170,11 @@ def handle(request, signed_value):
             msg = SlackMarkdownEventCanceledMessage(**message_values)
 
         if event_type in ['invitee.created', 'invitee.canceled']:
-            client.chat_postMessage(
-                channel=su.slack_id,
-                text=txt,
-                blocks=msg.get_blocks(),
-                attachments=msg.get_attachments()
+            SlackMessageService(su.workspace.bot_token).send(
+                su.slack_id,
+                txt,
+                msg.get_blocks(),
+                msg.get_attachments()
             )
         return HttpResponse(status=200)
     except SlackUser.DoesNotExist:
