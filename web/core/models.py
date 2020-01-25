@@ -1,7 +1,8 @@
 from django.db import models
+from model_utils.models import TimeStampedModel
 
 
-class Workspace(models.Model):
+class Workspace(TimeStampedModel):
     slack_id = models.CharField(max_length=16)
     bot_token = models.CharField(max_length=64)
 
@@ -9,7 +10,7 @@ class Workspace(models.Model):
         return "Slack Workspace {}".format(self.slack_id)
 
 
-class SlackUser(models.Model):
+class SlackUser(TimeStampedModel):
     slack_id = models.CharField(max_length=16, unique=True)
     slack_name = models.CharField(max_length=64, blank=True, null=True)
     calendly_email = models.EmailField(unique=True, null=True)
@@ -23,7 +24,7 @@ class SlackUser(models.Model):
         return "Slack User {}".format(self.slack_id)
 
 
-class Webhook(models.Model):
+class Webhook(TimeStampedModel):
     user = models.ForeignKey('SlackUser', related_name='webhooks', on_delete=models.CASCADE)
     calendly_id = models.PositiveIntegerField()
 
