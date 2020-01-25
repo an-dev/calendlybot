@@ -1,8 +1,8 @@
 import json
 import logging
 import os
-
 import slack
+
 from calendly import Calendly
 from django.conf import settings
 from django.core import signing
@@ -11,6 +11,7 @@ from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from web.core.decorators import verify_request
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
@@ -88,6 +89,7 @@ def auth(request):
                             {'msg': msg})
 
 
+@verify_request
 @csrf_exempt
 @require_http_methods(["POST"])
 def connect(request):
@@ -155,18 +157,19 @@ def handle(request, signed_value):
                 'invitee_email': data['invitee']['email'],
                 'invitee_timezone': data['invitee']['timezone']
             }
-            txt = f"Hi {name}. A new event has been scheduled."
+            txt = f"Hi {name}, a new event has been scheduled."
             msg = SlackMarkdownEventCreatedMessage(**message_values)
 
         if event_type == 'invitee.canceled':
             message_values = {
                 'name': name,
                 'event_name': data['event_type']['name'],
+                'event_start_time': data['event']['invitee_start_time_pretty'],
                 'invitee_name': data['invitee']['name'],
                 'invitee_email': data['invitee']['email'],
                 'canceler_name': data['event']['canceler_name']
             }
-            txt = f"Hi {name}. The event below has been canceled."
+            txt = f"Hi {name}, the event below has been canceled."
             msg = SlackMarkdownEventCanceledMessage(**message_values)
 
         if event_type in ['invitee.created', 'invitee.canceled']:
