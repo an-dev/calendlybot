@@ -1,0 +1,15 @@
+{% extends 'web/base.html' %}
+{% block title %}Authentication{% endblock %}
+{% block content %}
+{% load static %}
+<section class="py-5 text-center">
+    <div class="container">
+        <h1 class="h2 mx-xl-6 font-weight-bold">Authentication</h1>
+        <button id="submit">Pay</button>
+    </div>
+</section>
+{% endblock %}
+{% block js %}
+  <script src="https://js.stripe.com/v3/"></script>
+  <script type="text/javascript" src="{% static 'web/js/upgrade.js' %}"></script>
+{% endblock %}
