@@ -4,13 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
     var stripe = Stripe('pk_test_ok6aS8NQwE5J1wpV3Oa7n2Qu00fzNa95ch');
     var checkoutSessionId = null;
 
-    var createCheckoutSession = function(isBuyingSticker) {
+    var createCheckoutSession = function(isAnnual = false) {
       fetch("/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ false })
+        body: JSON.stringify({ isAnnual })
       })
         .then(function(result) {
           return result.json();
