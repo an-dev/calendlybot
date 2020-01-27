@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     var checkoutSessionId = null;
 
     var createCheckoutSession = function(isAnnual = false) {
-      fetch("/create-checkout-session", {
+      fetch("session-create/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector("#submit").addEventListener("click", function(evt) {
       evt.preventDefault();
       createCheckoutSession();
+      debugger;
       // Initiate payment
       stripe
         .redirectToCheckout({
