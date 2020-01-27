@@ -3,8 +3,8 @@ from django.urls import path
 from web.payments import views
 
 urlpatterns = [
-    path('', views.upgrade, name='home'),
+    path('', views.upgrade, name='payments-home'),
     path('session-create/', views.session_create, name='session-create'),
-    path('cancel/', views.cancel, name='cancel'),
-    path('success/', views.success, name='success'),
+    path('cancel/', views.cancel, name='payments-cancel'),
+    path('success/', views.success, name='payments-success'),
 ]
