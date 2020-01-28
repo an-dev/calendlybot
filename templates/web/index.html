@@ -18,7 +18,8 @@
                     <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}"
                        role="button" class="btn btn-lg btn-outline-light">
                         <span class="d-flex align-items-center">
-                        <i class="fab fa-slack fa-2x"></i> &nbsp; Add to&nbsp;<span class="font-weight-bold">Slack</span>
+                        <i class="fab fa-slack fa-2x"></i> &nbsp; Add to&nbsp;<span
+                                class="font-weight-bold">Slack</span>
                         </span>
                     </a>
                 </p>
@@ -68,54 +69,64 @@
                 CalendlyBot starts with a 7 day trial, no credit card required.
             </p>
         </div>
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8 col-lg-6">
-                <div class="card card-body align-items-center">
+        <div class="row mb-5">
+            <div class="col-4">
+                <div class="align-items-center">
+                    <p class="lead font-weight-bold">Standard</p>
                     <div class="d-flex align-items-start pb-md-2">
                         <span class="h3 font-weight-bold">$</span>
-                        <span class="display-4 mb-0">4</span>
+                        <span class="display-4 mb-0">4<span class="cbot-display-sm">/month</span></span>
                     </div>
-                    <span class="text-small text-muted pb-md-4">Per user, per month</span>
-                    <!--<ul class="text-center list-unstyled my-2 my-md-4">-->
-                    <!--<li class="py-1">-->
-                    <!--<span>10k Visitors/mo</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span>10 Funnels, 50 Pages</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span>Unlimited Transactions</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span>Analytics</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span>Integrations</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span class="text-muted text-strikethrough">Audience Data</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span class="text-muted text-strikethrough">Premium Templates</span>-->
-                    <!--</li>-->
-                    <!--<li class="py-1">-->
-                    <!--<span class="text-muted text-strikethrough">White Labelling</span>-->
-                    <!--</li>-->
-                    <!--</ul>-->
-                    <p class="text-center">We bill only users that have connected with the bot or received notifications in the last 30 days</p>
-                    <p class="lead font-weight-bold">Start your free 7-day trial now</p>
-                    <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}">
-                        <img alt="Add to Slack" height="40" width="139"
-                             src="https://platform.slack-edge.com/img/add_to_slack.png"
-                             srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
-                    </a>
+                    <span class="text-small text-muted pb-md-4">up to 8 users</span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="align-items-center">
+                    <p class="lead font-weight-bold">Business</p>
+                    <div class="d-flex align-items-start pb-md-2">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">19<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">up to 20 users</span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="align-items-center">
+                    <p class="lead font-weight-bold">Enterprise</p>
+                    <div class="d-flex align-items-start pb-md-2">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">49<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">more than 20 users</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col text-center">
+                <span>Interested in a custom plan? <a href="#" class="hover-arrow">Get in touch</a>
+                </span>
                 </div>
             </div>
         </div>
     </div>
 </section>
-{% endblock %}
 
+<section class="cbot-bg text-light">
+    <div class="container">
+        <div class="col-12 col-md-9">
+            <p class="lead">
+                Receive notifications directly in your workspace. Install now!
+            </p>
+            <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}"
+               role="button" class="btn btn-lg btn-outline-light">
+        <span class="d-flex align-items-center">
+        <i class="fab fa-slack fa-2x"></i> &nbsp; Add to&nbsp;<span
+                class="font-weight-bold">Slack</span>
+        </span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
 {% block js %}
 {% load static %}
 {% endblock %}
