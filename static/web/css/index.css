@@ -13,3 +13,7 @@ html {
 .cbot-link {
     color: #003c5b;
 }
+
+.cbot-display-sm {
+    font-size: 1.5rem;
+}
