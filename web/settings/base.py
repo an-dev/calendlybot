@@ -128,6 +128,6 @@ STATIC_ROOT = os.path.join(STATIC_DIR, 'staticfiles')
 
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "<your publishable key>")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "<your secret key>")
-STRIPE_PLAN_ID = os.environ.get("STRIPE_PLAN_ID", "<your secret key>")
+STRIPE_PUBLIC_KEY = os.environ["STRIPE_PUBLIC_KEY"]
+STRIPE_SECRET_KEY = os.environ["STRIPE_SECRET_KEY"]
+STRIPE_PLAN_ID = os.environ["STRIPE_PLAN_ID"]

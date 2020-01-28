@@ -20,10 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    document.querySelector("#submit").addEventListener("click", function(evt) {
+    createCheckoutSession();
+
+    document.querySelector("#upgrade-sm").addEventListener("click", function(evt) {
       evt.preventDefault();
-      createCheckoutSession();
-      debugger;
       // Initiate payment
       stripe
         .redirectToCheckout({
