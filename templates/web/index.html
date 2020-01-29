@@ -9,11 +9,11 @@
 {% block content %}
 <main class="text-light cbot-bg">
     <div class="container my-5 py-5">
-        <div class="row align-items-center justify-content-between">
-            <div class="col-lg-6">
+        <div class="row text-center">
+            <div class="col">
                 <h2 class="h1 font-weight-bold">Calendly events for Slack</h2>
                 <p class="lead">Native calendly integration for slack. Receive event notifications directly in your
-                    workspace.</p>
+                    workspace with no need for unnecessary third-party services.</p>
                 <p>
                     <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}"
                        role="button" class="btn btn-lg btn-outline-light">
@@ -24,13 +24,10 @@
                     </a>
                 </p>
             </div>
-            <div class="col-lg-6 w-100">
-                <img src="https://via.placeholder.com/600x450" alt="Image" class="rounded shadow-3d w-100">
-            </div>
         </div>
     </div>
 </main>
-<section id="how-it-works" class="bg-white">
+<section id="how-it-works">
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
             <div class="col-lg-4 order-lg-2">
@@ -46,7 +43,7 @@
         </div>
     </div>
 </section>
-<section>
+<section class="bg-white">
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
             <div class="col-lg-4">
@@ -61,7 +58,7 @@
     </div>
 </section>
 
-<section id="pricing">
+<section id="pricing" class="my-5 py-5">
     <div class="container">
         <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
             <h2 class="h1 font-weight-bold">Simple, transparent pricing</h2>
@@ -69,11 +66,11 @@
                 CalendlyBot starts with a 7 day trial, no credit card required.
             </p>
         </div>
-        <div class="row mb-5">
+        <div class="row mb-5 text-center">
             <div class="col-4">
-                <div class="align-items-center">
+                <div>
                     <p class="lead font-weight-bold">Standard</p>
-                    <div class="d-flex align-items-start pb-md-2">
+                    <div>
                         <span class="h3 font-weight-bold">$</span>
                         <span class="display-4 mb-0">4<span class="cbot-display-sm">/month</span></span>
                     </div>
@@ -81,9 +78,9 @@
                 </div>
             </div>
             <div class="col-4">
-                <div class="align-items-center">
+                <div>
                     <p class="lead font-weight-bold">Business</p>
-                    <div class="d-flex align-items-start pb-md-2">
+                    <div>
                         <span class="h3 font-weight-bold">$</span>
                         <span class="display-4 mb-0">19<span class="cbot-display-sm">/month</span></span>
                     </div>
@@ -91,19 +88,13 @@
                 </div>
             </div>
             <div class="col-4">
-                <div class="align-items-center">
+                <div>
                     <p class="lead font-weight-bold">Enterprise</p>
-                    <div class="d-flex align-items-start pb-md-2">
+                    <div>
                         <span class="h3 font-weight-bold">$</span>
                         <span class="display-4 mb-0">49<span class="cbot-display-sm">/month</span></span>
                     </div>
                     <span class="text-small text-muted pb-md-4">more than 20 users</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col text-center">
-                <span>Interested in a custom plan? <a href="#" class="hover-arrow">Get in touch</a>
-                </span>
                 </div>
             </div>
         </div>
