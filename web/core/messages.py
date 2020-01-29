@@ -101,3 +101,21 @@ class SlackMarkdownEventCanceledMessage:
                 ]
             }]
         }]
+
+
+class SlackMarkdownUpgradeMessage:
+    def __init__(self, workspace):
+        self.workspace = workspace
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"An event was created or cancelled on your calendar.\n"
+                    f"Please upgrade to continue receiving detailed notifications.\n"
+                    f"Thanks for giving calendlyBot a try!"
+                }
+            }
+        ]

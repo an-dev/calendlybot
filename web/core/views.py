@@ -11,7 +11,7 @@ from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from web.core.decorators import verify_request
+from web.core.decorators import verify_request, requires_subscription
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
@@ -89,8 +89,8 @@ def auth(request):
                             {'msg': msg})
 
 
-@verify_request
 @csrf_exempt
+@verify_request
 @require_http_methods(["POST"])
 def connect(request):
     try:
@@ -132,6 +132,7 @@ def connect(request):
 
 
 @csrf_exempt
+@requires_subscription
 @require_http_methods(["POST"])
 def handle(request, signed_value):
     try:

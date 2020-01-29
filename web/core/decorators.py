@@ -4,8 +4,15 @@ import logging
 import os
 import time
 import functools
+from datetime import timedelta
 
+from django.core import signing
 from django.http import HttpResponse
+from django.utils import timezone
+
+from web.core.messages import SlackMarkdownUpgradeMessage
+from web.core.models import Workspace
+from web.core.services import SlackMessageService
 
 slack_signing_secret = os.environ['SLACK_SIGNING_SECRET']
 
@@ -38,4 +45,30 @@ def verify_request(func):
         except Exception:
             logger.exception("Could not verify request comes from slack")
             return HttpResponse(status=400)
+
+    return wrapper
+
+
+def requires_subscription(func):
+    @functools.wraps(func)
+    def wrapper(request, signed_value, *args, **kwargs):
+        try:
+            # if workspace does not have subscription
+            # check if vaild trial
+            workspace_slack_id, user_slack_id = signing.loads(signed_value)
+            workspace = Workspace.objects.get(id=workspace_slack_id)
+            trial_end = workspace.created + timedelta(days=7)
+            if not workspace.subscription or timezone.now().date() > trial_end:
+                msg = SlackMarkdownUpgradeMessage(workspace_slack_id)
+                SlackMessageService(workspace.bot_token).send(
+                    user_slack_id,
+                    "An event was created or cancelled on your calendar.",
+                    msg.get_blocks()
+                )
+            else:
+                return func(request, *args, **kwargs)
+        except Exception:
+            logger.exception("Could not verify request comes from slack")
+            return HttpResponse(status=400)
+
     return wrapper

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @require_http_methods(["GET"])
-def upgrade(request):
+def upgrade(request, session_id, plan_id):
     return TemplateResponse(request, 'web/upgrade.html')
 
 
