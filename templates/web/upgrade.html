@@ -1,15 +1,20 @@
 {% extends 'web/base.html' %}
-{% block title %}Authentication{% endblock %}
+{% block title %}Upgrade{% endblock %}
 {% block content %}
 {% load static %}
 <section class="py-5 text-center">
     <div class="container">
-        <button id="upgrade-sm">Small</button>
+        <!--<button id="upgrade-sm">Small</button>-->
         <!--<button id="upgrade-lg">Large</button>-->
     </div>
 </section>
 {% endblock %}
 {% block js %}
   <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    window.CBot = window.CBot || {};
+    window.CBot.SPK = '{{ settings.STRIPE_PUBLIC_KEY }}';
+    window.CBot.SCid = '{{ stripeCheckoutId }}';
+  </script>
   <script type="text/javascript" src="{% static 'web/js/upgrade.js' %}" defer></script>
 {% endblock %}

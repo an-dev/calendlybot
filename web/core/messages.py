@@ -1,5 +1,6 @@
 class SlackMarkdownEventCreatedMessage:
-    def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email, invitee_timezone):
+    def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
+                 invitee_timezone):
         self.name = name
         self.event_name = event_name
         self.event_start_time = event_start_time
@@ -52,7 +53,8 @@ class SlackMarkdownEventCreatedMessage:
 
 
 class SlackMarkdownEventCanceledMessage:
-    def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email, canceler_name):
+    def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
+                 canceler_name):
         self.name = name
         self.event_name = event_name
         self.event_start_time = event_start_time
@@ -103,7 +105,7 @@ class SlackMarkdownEventCanceledMessage:
         }]
 
 
-class SlackMarkdownUpgradeMessage:
+class SlackMarkdownUpgradePromptMessage:
     def __init__(self, workspace):
         self.workspace = workspace
 
@@ -114,8 +116,8 @@ class SlackMarkdownUpgradeMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"An event was created or cancelled on your calendar.\n"
-                    f"Please upgrade to continue receiving detailed notifications.\n"
-                    f"Thanks for giving calendlyBot a try!"
+                            f"Please type `\̣upgrade` to continue receiving detailed notifications.\n"
+                            f"Thanks for giving CalendlyBot a try!"
                 }
             }
         ]

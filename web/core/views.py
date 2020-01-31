@@ -1,8 +1,8 @@
 import json
 import logging
 import os
-import slack
 
+import slack
 from calendly import Calendly
 from django.conf import settings
 from django.core import signing
@@ -11,7 +11,7 @@ from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from web.core.decorators import verify_request, requires_subscription
+from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
@@ -110,7 +110,8 @@ def connect(request):
         # check if there's an existing working hook for this user
         if not has_active_hooks(calendly):
             signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
-            response_from_webhook_create = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
+            response_from_webhook_create = calendly.create_webhook(
+                f"{settings.SITE_URL}/handle/{signed_value}/")
             if 'id' not in response_from_webhook_create:
                 slack_msg_service.send(su.slack_id,
                                        "Could not connect with Calendly API. Please retry.")
@@ -129,6 +130,18 @@ def connect(request):
     except Exception:
         logger.exception("Could not complete request")
     return HttpResponse(status=200)
+
+
+@csrf_exempt
+@verify_request
+@require_http_methods(["POST"])
+def upgrade(request):
+    workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
+    client = slack.WebClient(token=workspace.bot_token)
+    response_users_list = client.users_list()
+
+    user_count = len([user for user in filter(lambda u: eligible_user(u), response_users_list['members'])])
+    
 
 
 @csrf_exempt
