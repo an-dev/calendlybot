@@ -44,6 +44,4 @@ def cancel(request):
 
 @require_http_methods(["GET"])
 def success(request):
-    import pdb;
-    pdb.set_trace()
     return TemplateResponse(request, 'web/upgrade.html')

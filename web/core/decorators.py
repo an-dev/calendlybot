@@ -10,7 +10,7 @@ from django.core import signing
 from django.http import HttpResponse
 from django.utils import timezone
 
-from web.core.messages import SlackMarkdownUpgradeMessage
+from web.core.messages import SlackMarkdownUpgradePromptMessage
 from web.core.models import Workspace
 from web.core.services import SlackMessageService
 
@@ -59,12 +59,13 @@ def requires_subscription(func):
             workspace = Workspace.objects.get(id=workspace_slack_id)
             trial_end = workspace.created + timedelta(days=7)
             if not workspace.subscription or timezone.now().date() > trial_end:
-                msg = SlackMarkdownUpgradeMessage(workspace_slack_id)
+                msg = SlackMarkdownUpgradePromptMessage(workspace_slack_id)
                 SlackMessageService(workspace.bot_token).send(
                     user_slack_id,
                     "An event was created or cancelled on your calendar.",
                     msg.get_blocks()
                 )
+                return HttpResponse(status=200)
             else:
                 return func(request, *args, **kwargs)
         except Exception:
