@@ -5,18 +5,26 @@
 <section class="py-5 text-center">
     <div class="container">
         <h1 class="h2 mx-xl-6 font-weight-bold">Subscribe</h1>
+        {% if has_subscription %}
+        <p class="lead">Looks like your workspace already has a valid Calenduck subscription.<br>Go ahead and use our
+            product on slack!</p>
+        {% else %}
         <p class="lead">
             Loading subscription page...
         </p>
+        <p id="help" class="hidden">This is taking some time. Try to reload the page or send us an <a
+                href="mailto:andy.idiaghe@gmail.com" class="font-weight-bold cbot-link">email</a></p>
+        {% endif %}
     </div>
 </section>
 {% endblock %}
 {% block js %}
-  <script src="https://js.stripe.com/v3/"></script>
-  <script>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
     window.CBot = window.CBot || {};
     window.CBot.SPK = '{{ stripePublishableKey }}';
     window.CBot.SCid = '{{ stripeCheckoutId }}';
-  </script>
-  <script type="text/javascript" src="{% static 'web/js/subscribe.js' %}" defer></script>
+    window.hasSubscription = '{{ has_subscription }}';
+</script>
+<script type="text/javascript" src="{% static 'web/js/subscribe.js' %}" defer></script>
 {% endblock %}

@@ -45,4 +45,4 @@ class Subscription(TimeStampedModel):
     plan = models.CharField(max_length=16, choices=PLANS)
 
     def __str__(self):
-        return "Subscription {} for workspace {}".format(self.plan, self.workspace.slack_id)
+        return "Subscription {} for workspace {}".format(self.plan, self.workspace.id)

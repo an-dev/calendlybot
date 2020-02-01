@@ -14,10 +14,17 @@ logger = logging.getLogger(__name__)
 @require_http_methods(["GET"])
 def subscribe(request, signed_session_id):
     session_id = signing.loads(signed_session_id, settings.CALENDLY_BOT_SUBSCRIBE_HASH)
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    data = stripe.checkout.Session.retrieve(session_id)
+    workspace_id = data.client_reference_id
+    if Subscription.objects.filter(workspace_id=workspace_id).exists():
+        context = {'has_subscription': True}
+    else:
+        context = {'stripeCheckoutId': session_id,
+                                     'stripePublishableKey': settings.STRIPE_PUBLIC_KEY}
     return TemplateResponse(request,
                             'web/subscribe.html',
-                            context={'stripeCheckoutId': session_id,
-                                     'stripePublishableKey': settings.STRIPE_PUBLIC_KEY})
+                            context=context)
 
 
 @require_http_methods(["GET"])
@@ -39,7 +46,6 @@ def switch_plan(plan_id):
 
 @require_http_methods(["GET"])
 def success(request):
-    context = {}
     try:
         if 'session_id' in request.GET:
             session_id = request.GET['session_id']
@@ -51,10 +57,7 @@ def success(request):
 
             Subscription.objects.create(workspace_id=workspace_id,
                                         plan=switch_plan(data.display_items[0].plan.id))
-    except ValueError:
-        context = {
-            'msg': "Looks like you've already paid for Calenduck. Go ahead and use our product in your slack workspace!"}
     except Exception:
         logger.exception('Could not create subscription')
 
-    return TemplateResponse(request, 'web/success.html', context)
+    return TemplateResponse(request, 'web/success.html')

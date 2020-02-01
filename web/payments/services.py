@@ -11,7 +11,7 @@ class WorkspaceUpgradeService:
 
     def __init__(self, workspace):
         self.client = slack.WebClient(token=workspace.bot_token)
-        self.workspace_id = workspace.bot_token
+        self.workspace_id = workspace.id
 
     def run(self):
         response_users_list = self.client.users_list()
@@ -29,6 +29,7 @@ class WorkspaceUpgradeService:
             cancel_url=f"{settings.SITE_URL}/subscribe/cancel/",
             payment_method_types=["card"],
             subscription_data={"items": [{"plan": plan_id}]},
-            clientReferenceId=self.workspace_id
+            client_reference_id=self.workspace_id,
+            billing_address_collection='auto',
         )
         return signing.dumps(checkout_session['id'], settings.CALENDLY_BOT_SUBSCRIBE_HASH)
