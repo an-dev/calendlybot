@@ -1,3 +1,6 @@
+from django.conf import settings
+
+
 class SlackMarkdownEventCreatedMessage:
     def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
                  invitee_timezone):
@@ -106,9 +109,6 @@ class SlackMarkdownEventCanceledMessage:
 
 
 class SlackMarkdownUpgradePromptMessage:
-    def __init__(self, workspace):
-        self.workspace = workspace
-
     def get_blocks(self):
         return [
             {
@@ -116,8 +116,24 @@ class SlackMarkdownUpgradePromptMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"An event was created or cancelled on your calendar.\n"
-                            f"Please type `\̣upgrade` to continue receiving detailed notifications.\n"
-                            f"Thanks for giving CalendlyBot a try!"
+                            f"Please type `\̣upgrade` to continue receiving detailed notifications."
+                }
+            }
+        ]
+
+
+class SlackMarkdownUpgradeLinkMessage:
+    def __init__(self, session_id):
+        self.session_id = session_id
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan.\n"
+                            "Thanks for giving Calenduck a try!"
                 }
             }
         ]

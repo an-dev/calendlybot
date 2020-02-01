@@ -1,9 +1,10 @@
 from django.db import models
+from model_utils import Choices
 from model_utils.models import TimeStampedModel
 
 
 class Workspace(TimeStampedModel):
-    slack_id = models.CharField(max_length=16)
+    slack_id = models.CharField(unique=True, max_length=16)
     bot_token = models.CharField(max_length=64)
 
     def __str__(self):
@@ -30,3 +31,18 @@ class Webhook(TimeStampedModel):
 
     def __str__(self):
         return "Calendly Hook {}".format(self.calendly_id)
+
+
+class Subscription(TimeStampedModel):
+
+    PLANS = Choices(
+        ("small", "Standard"),
+        ("medium", "Business"),
+        ("large", "Enterprise")
+    )
+
+    workspace = models.OneToOneField('Subscription', related_name='subscription', on_delete=models.CASCADE)
+    plan = models.CharField(max_length=16, choices=PLANS)
+
+    def __str__(self):
+        return "Subscription {} for workspace {}".format(self.plan, self.workspace.slack_id)

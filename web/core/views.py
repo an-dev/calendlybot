@@ -12,9 +12,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
-from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage
+from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage, \
+    SlackMarkdownUpgradeLinkMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
+from web.payments.services import WorkspaceUpgradeService
+from web.utils import eligible_user
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -27,10 +30,6 @@ logger = logging.getLogger(__name__)
 def index(request):
     return TemplateResponse(request, 'web/index.html',
                             {'oauth_scope': oauth_scope, 'client_id': client_id})
-
-
-def eligible_user(user):
-    return user['is_bot'] is False and user['id'] != 'USLACKBOT'
 
 
 def send_message_to_users(workspace, new_workspace):
@@ -136,12 +135,19 @@ def connect(request):
 @verify_request
 @require_http_methods(["POST"])
 def upgrade(request):
-    workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-    client = slack.WebClient(token=workspace.bot_token)
-    response_users_list = client.users_list()
+    try:
+        workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
+        su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
 
-    user_count = len([user for user in filter(lambda u: eligible_user(u), response_users_list['members'])])
-    
+        checkout_session_id = WorkspaceUpgradeService(workspace).run()
+
+        msg = SlackMarkdownUpgradeLinkMessage(checkout_session_id)
+        SlackMessageService(workspace.bot_token).send(su.slack_id,
+                                                      "Thanks for giving Calenduck a try!",
+                                                      msg.get_blocks())
+    except Exception:
+        logger.exception("Could not complete request")
+    return HttpResponse(status=200)
 
 
 @csrf_exempt

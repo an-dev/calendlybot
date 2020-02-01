@@ -59,7 +59,7 @@ def requires_subscription(func):
             workspace = Workspace.objects.get(id=workspace_slack_id)
             trial_end = workspace.created + timedelta(days=7)
             if not workspace.subscription or timezone.now().date() > trial_end:
-                msg = SlackMarkdownUpgradePromptMessage(workspace_slack_id)
+                msg = SlackMarkdownUpgradePromptMessage()
                 SlackMessageService(workspace.bot_token).send(
                     user_slack_id,
                     "An event was created or cancelled on your calendar.",
