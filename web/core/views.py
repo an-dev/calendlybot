@@ -43,7 +43,7 @@ def send_message_to_users(workspace, new_workspace):
         if new_workspace:
             client.chat_postMessage(
                 channel=su.slack_id,
-                text=f"Hello {user['real_name']}. I'm CalendlyBot. Type `/connect` to start!")
+                text=f"Hello {user['real_name']}. I'm Calenduck. Type `/connect` to start!")
 
 
 def has_active_hooks(calendly):

@@ -17,3 +17,8 @@ html {
 .cbot-display-sm {
     font-size: 1.5rem;
 }
+
+
+.hidden {
+    display: none;
+}
