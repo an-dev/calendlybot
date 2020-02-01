@@ -1,11 +1,13 @@
 {% extends 'web/base.html' %}
-{% block title %}Upgrade{% endblock %}
+{% block title %}Subscribe{% endblock %}
 {% block content %}
 {% load static %}
 <section class="py-5 text-center">
     <div class="container">
-        <!--<button id="upgrade-sm">Small</button>-->
-        <!--<button id="upgrade-lg">Large</button>-->
+        <h1 class="h2 mx-xl-6 font-weight-bold">Subscribe</h1>
+        <p class="lead">
+            Loading subscription page...
+        </p>
     </div>
 </section>
 {% endblock %}
@@ -13,8 +15,8 @@
   <script src="https://js.stripe.com/v3/"></script>
   <script>
     window.CBot = window.CBot || {};
-    window.CBot.SPK = '{{ settings.STRIPE_PUBLIC_KEY }}';
+    window.CBot.SPK = '{{ stripePublishableKey }}';
     window.CBot.SCid = '{{ stripeCheckoutId }}';
   </script>
-  <script type="text/javascript" src="{% static 'web/js/upgrade.js' %}" defer></script>
+  <script type="text/javascript" src="{% static 'web/js/subscribe.js' %}" defer></script>
 {% endblock %}

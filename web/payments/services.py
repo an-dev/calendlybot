@@ -1,17 +1,34 @@
+import slack
 import stripe
 from django.conf import settings
+from django.core import signing
+
+from web.utils import eligible_user
 
 
-class StripeSessionService:
-    def __init__(self):
-        self.stripe = settings.STRIPE_SECRET_KEY
+class WorkspaceUpgradeService:
+    stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    def create(self, workspace_id):
+    def __init__(self, workspace):
+        self.client = slack.WebClient(token=workspace.bot_token)
+        self.workspace_id = workspace.bot_token
 
-        checkout_session = self.stripe.checkout.Session.create(
-            success_url=settings.SITE_URL + "/upgrade/success/?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=f"{settings.SITE_URL}/upgrade/cancel/",
+    def run(self):
+        response_users_list = self.client.users_list()
+        user_count = len([user for user in filter(lambda u: eligible_user(u), response_users_list['members'])])
+
+        if user_count <= 8:
+            plan_id = settings.STRIPE_PLAN_ID_SM
+        elif 8 < user_count <= 20:
+            plan_id = settings.STRIPE_PLAN_ID_MD
+        else:
+            plan_id = settings.STRIPE_PLAN_ID_LG
+
+        checkout_session = stripe.checkout.Session.create(
+            success_url=settings.SITE_URL + "/subscribe/success/?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=f"{settings.SITE_URL}/subscribe/cancel/",
             payment_method_types=["card"],
             subscription_data={"items": [{"plan": plan_id}]},
+            clientReferenceId=self.workspace_id
         )
-        return self.client.chat_postMessage(**kwargs)
+        return signing.dumps(checkout_session['id'], settings.CALENDLY_BOT_SUBSCRIBE_HASH)

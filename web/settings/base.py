@@ -128,6 +128,10 @@ STATIC_ROOT = os.path.join(STATIC_DIR, 'staticfiles')
 
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
 
+CALENDLY_BOT_SUBSCRIBE_HASH = 'web.core.views.signed_id'
+
 STRIPE_PUBLIC_KEY = os.environ["STRIPE_PUBLIC_KEY"]
 STRIPE_SECRET_KEY = os.environ["STRIPE_SECRET_KEY"]
-STRIPE_PLAN_ID = os.environ["STRIPE_PLAN_ID"]
+STRIPE_PLAN_ID_SM = os.environ["STRIPE_PLAN_ID_SM"]
+STRIPE_PLAN_ID_MD = os.environ["STRIPE_PLAN_ID_MD"]
+STRIPE_PLAN_ID_LG = os.environ["STRIPE_PLAN_ID_LG"]

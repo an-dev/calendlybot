@@ -6,5 +6,6 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('auth/', views.auth, name='auth'),
     path('connect/', views.connect, name='connect'),
+    path('upgrade/', views.upgrade, name='upgrade'),
     re_path(r'^handle/(?P<signed_value>[-:\w]+)/$', views.handle, name='handle'),
 ]
