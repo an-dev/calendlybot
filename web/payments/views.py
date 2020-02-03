@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core import signing
 from django.template.response import TemplateResponse
 from django.views.decorators.http import require_http_methods
+from stripe.error import InvalidRequestError
 
 from web.core.models import Subscription
 
@@ -21,7 +22,7 @@ def subscribe(request, signed_session_id):
         context = {'has_subscription': True}
     else:
         context = {'stripeCheckoutId': session_id,
-                                     'stripePublishableKey': settings.STRIPE_PUBLIC_KEY}
+                   'stripePublishableKey': settings.STRIPE_PUBLIC_KEY}
     return TemplateResponse(request,
                             'web/subscribe.html',
                             context=context)
@@ -57,7 +58,12 @@ def success(request):
 
             Subscription.objects.create(workspace_id=workspace_id,
                                         plan=switch_plan(data.display_items[0].plan.id))
+    except InvalidRequestError:
+        logger.exception('Could not create subscription')
+        return TemplateResponse(request, 'web/error.html', context={
+            'msg': 'Expired payment session. Please try upgrading again'})
     except Exception:
         logger.exception('Could not create subscription')
+        return TemplateResponse(request, 'web/error.html')
 
     return TemplateResponse(request, 'web/success.html')

@@ -1,0 +1,17 @@
+{% extends 'web/base.html' %}
+{% block title %}Error{% endblock %}
+{% block content %}
+{% load static %}
+<section class="py-5 text-center">
+    <div class="container">
+        <h1 class="h2 mx-xl-6 font-weight-bold">Error</h1>
+        <p class="lead">
+            {% if msg %}
+                {{ msg }}
+            {% else %}
+                Uh oh. Looks like this didn't work. Try upgrading again or send us an <a href="mailto:andy.idiaghe@gmail.com" class="font-weight-bold cbot-link">email</a>
+            {% endif %}
+        </p>
+    </div>
+</section>
+{% endblock %}
