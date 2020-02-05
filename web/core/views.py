@@ -112,8 +112,11 @@ def connect(request):
             response_from_webhook_create = calendly.create_webhook(
                 f"{settings.SITE_URL}/handle/{signed_value}/")
             if 'id' not in response_from_webhook_create:
+                msg = 'Please retry'
+                if 'message' in response_from_webhook_create:
+                    msg = response_from_webhook_create['message']
                 slack_msg_service.send(su.slack_id,
-                                       "Could not connect with Calendly API. Please retry.")
+                                       f"Could not connect with Calendly API. {msg}.")
                 return HttpResponse(status=200)
             Webhook.objects.create(user=su, calendly_id=response_from_webhook_create['id'])
             su.calendly_authtoken = request.POST['text']
