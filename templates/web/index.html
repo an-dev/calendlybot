@@ -6,7 +6,7 @@
     <a class="nav-link" href="/#pricing">Pricing</a>
 </li>
 {% endblock %}
-{% block tutorial %}
+{% block cta %}
 <li class="nav-item ml-lg-3">
     <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}">
         <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png"
@@ -20,8 +20,11 @@
         <div class="row">
             <div class="col-md-5 col-12">
                 <h2 class="h1 font-weight-bold">Calendly events for Slack</h2>
-                <p class="lead">Native calendly integration for slack. Receive event notifications directly in your
+                <p class="lead">Native calendly integration for slack*. Receive event notifications directly in your
                     workspace with no need for unnecessary third-party services.</p>
+                <p class="font-italic">*Works only with Calendly <a class="font-weight-bold"
+                                                             href="https://help.calendly.com/hc/en-us/articles/223195488"
+                                                             target="_blank">Premium and Pro accounts</a></p>
                 <p>
                     <a href="https://slack.com/oauth/v2/authorize?scope={{oauth_scope}}&client_id={{client_id}}"
                        role="button" class="btn btn-lg btn-outline-light">
