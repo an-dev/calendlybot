@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage, \
-    SlackMarkdownUpgradeLinkMessage
+    SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
 from web.payments.services import WorkspaceUpgradeService
@@ -130,7 +130,7 @@ def connect(request):
             slack_msg_service.send(su.slack_id,
                                    "The account is already setup to receive event notifications. Please contact support if you're experiencing issues.")
     except Exception:
-        logger.exception("Could not complete request")
+        logger.exception("Could not complete connect request")
     return HttpResponse(status=200)
 
 
@@ -149,7 +149,25 @@ def upgrade(request):
                                                       "Thanks for giving Calenduck a try!",
                                                       msg.get_blocks())
     except Exception:
-        logger.exception("Could not complete request")
+        logger.exception("Could not complete upgrade request")
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
+@verify_request
+@require_http_methods(["POST"])
+def upgrade(request):
+    try:
+        workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
+        su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
+
+        msg = SlackMarkdownHelpMessage()
+        SlackMessageService(workspace.bot_token).send(su.slack_id,
+                                                      "Here are some useful tips!",
+                                                      msg.get_blocks(),
+                                                      msg.get_attachments())
+    except Exception:
+        logger.exception("Could not complete help request")
     return HttpResponse(status=200)
 
 
