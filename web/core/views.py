@@ -156,7 +156,7 @@ def upgrade(request):
 @csrf_exempt
 @verify_request
 @require_http_methods(["POST"])
-def upgrade(request):
+def support(request):
     try:
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
         su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
