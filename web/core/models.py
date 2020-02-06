@@ -41,7 +41,7 @@ class Subscription(TimeStampedModel):
         ("large", "Enterprise")
     )
 
-    workspace = models.OneToOneField('Subscription', related_name='subscription', on_delete=models.CASCADE)
+    workspace = models.OneToOneField('Workspace', related_name='subscription', on_delete=models.CASCADE)
     plan = models.CharField(max_length=16, choices=PLANS)
 
     def __str__(self):

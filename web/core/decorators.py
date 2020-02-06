@@ -58,7 +58,7 @@ def requires_subscription(func):
             workspace_slack_id, user_slack_id = signing.loads(signed_value)
             workspace = Workspace.objects.get(slack_id=workspace_slack_id)
             trial_end = workspace.created + timedelta(days=7)
-            if not workspace.subscription or timezone.now().date() > trial_end:
+            if not hasattr(workspace, 'subscription') or timezone.now().date() > trial_end:
                 msg = SlackMarkdownUpgradePromptMessage()
                 SlackMessageService(workspace.bot_token).send(
                     user_slack_id,
