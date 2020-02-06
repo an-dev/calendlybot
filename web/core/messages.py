@@ -116,7 +116,7 @@ class SlackMarkdownUpgradePromptMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"An event was created or cancelled on your calendar.\n"
-                            f"Please type `\̣upgrade` to continue receiving detailed notifications."
+                    f"Please type `\̣upgrade` to continue receiving detailed notifications."
                 }
             }
         ]
@@ -133,7 +133,46 @@ class SlackMarkdownUpgradeLinkMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan.\n"
-                            "Thanks for giving Calenduck a try!"
+                    "Thanks for giving Calenduck a try!"
                 }
             }
         ]
+
+
+class SlackMarkdownHelpMessage:
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Here are some useful tips!"
+                }
+            }
+        ]
+
+    def get_attachments(self):
+        return [{
+            "color": "#36C5F0",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "• `/connect`: Connect your Slack account to Calendly\n• `/upgrade`: Upgrade to a new plan based on your workspace size"
+                    }
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "Still need some help? *<mailto:andy.idiaghe@gmail.com|Contact us>*"
+                        }
+                    ]
+                }
+            ]
+        }]
