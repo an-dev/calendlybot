@@ -4,7 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    var hasSubscription = window.hasSubscription || true;
+
+    var hasSubscription = window.hasSubscription ? Number(window.hasSubscription) : 1;
 
     if (!Boolean(hasSubscription)) {
         var stripe = Stripe(CBot.SPK);
