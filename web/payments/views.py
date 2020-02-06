@@ -18,11 +18,13 @@ def subscribe(request, signed_session_id):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     data = stripe.checkout.Session.retrieve(session_id)
     workspace_id = data.client_reference_id
+
     if Subscription.objects.filter(workspace_id=workspace_id).exists():
-        context = {'has_subscription': True}
+        context = {'hasSubscription': 1}
     else:
         context = {'stripeCheckoutId': session_id,
-                   'stripePublishableKey': settings.STRIPE_PUBLIC_KEY}
+                   'stripePublishableKey': settings.STRIPE_PUBLIC_KEY,
+                   'hasSubscription': 0}
     return TemplateResponse(request,
                             'web/subscribe.html',
                             context=context)

@@ -116,7 +116,7 @@ class SlackMarkdownUpgradePromptMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"An event was created or cancelled on your calendar.\n"
-                    f"Please type `\̣upgrade` to continue receiving detailed notifications."
+                    f"Please type `/upgrade` to continue receiving detailed notifications."
                 }
             }
         ]
