@@ -128,7 +128,7 @@ def connect(request):
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
             slack_msg_service.send(su.slack_id,
-                                   "The account is already setup to receive event notifications. Please contact support if you're experiencing issues.")
+                                   "Your account is already setup to receive event notifications. Please contact support if you're experiencing issues.")
     except Exception:
         logger.exception("Could not complete connect request")
     return HttpResponse(status=200)
