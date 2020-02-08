@@ -13,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage, \
-    SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage
+    SlackMarkdownHelpMessage, SlackMarkdownUpgradeLinkMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
 from web.payments.services import WorkspaceUpgradeService
@@ -38,12 +38,12 @@ def send_message_to_users(workspace, new_workspace):
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
-        su.slack_name = user['real_name']
+        su.slack_name = user['display_name']
         su.save()
         if new_workspace:
             client.chat_postMessage(
                 channel=su.slack_id,
-                text=f"Hello {user['real_name']}. I'm Calenduck. Type `/connect` to start!")
+                text=f"Hello {user['display_name']}. I'm Calenduck. Type `/connect` to start!")
 
 
 def has_active_hooks(calendly):
