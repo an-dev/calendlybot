@@ -32,6 +32,11 @@ def index(request):
                             {'oauth_scope': oauth_scope, 'client_id': client_id})
 
 
+@require_http_methods(["GET"])
+def faq(request):
+    return TemplateResponse(request, 'web/faq.html')
+
+
 def send_message_to_users(workspace, new_workspace):
     client = slack.WebClient(token=workspace.bot_token)
     response_users_list = client.users_list()
