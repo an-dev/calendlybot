@@ -1,4 +1,4 @@
 from .staging import *
 
 DEBUG = False
-SITE_URL = 'https://www.calenduck.co'
+SITE_URL = 'http://www.calenduck.co'
