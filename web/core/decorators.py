@@ -67,7 +67,7 @@ def requires_subscription(func):
                 )
                 return HttpResponse(status=200)
             else:
-                return func(request, *args, **kwargs)
+                return func(request, signed_value, *args, **kwargs)
         except Exception:
             logger.exception("Could not verify request comes from slack")
             return HttpResponse(status=400)
