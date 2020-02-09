@@ -1,11 +1,11 @@
 {% extends 'web/base.html' %}
-{% block title %}Frequenly Asked Questions{% endblock %}
+{% block title %}Frequently Asked Questions{% endblock %}
 {% block content %}
 {% load static %}
-<section class="py-5 text-center">
+<section class="py-5">
     <div class="container">
         <h1 class="h2 mx-xl-6 font-weight-bold">Frequently Asked Questions</h1>
-        <p class="lead mt-5 mb-0">
+        <p class="lead mb-0">
             Who is behind this?
         </p>
         <p class="mb-4">
@@ -16,7 +16,10 @@
             Is it secure?
         </p>
         <p class="mb-4">
-            We use OAuth and we do not share any of your contacts with third parties or other entities.
+            We use OAuth and we do not share any of your contacts with third parties or other entities unless it's
+            necessary for extra functionality.
+            <br>
+            Read more on our <a class="font-weight-bold cbot-link" href="/privacy/" target="_blank">Privacy Policy</a>.
         </p>
         <p class="lead mb-0">
             Why does it cost money?
@@ -25,11 +28,20 @@
             Subscription fees pay for server costs and development of new features.
         </p>
         <p class="lead mb-0">
+            I am not receiving event notifications!
+        </p>
+        <p class="mb-4">
+            Calenduck relies on Calendly to send notifications when events are scheduled or cancelled.<br>
+            Please check their <a class="font-weight-bold cbot-link"
+                                  href="https://www.calendlystatus.com/" target="_blank">status page</a> for more info
+            or contact us.
+        </p>
+        <p class="lead mb-0">
             How do I request a feature?
         </p>
         <p class="mb-4">
             <a href="mailto:andy.idiaghe@gmail.com"
-               class="cbot-link font-weight-bold">Email us</a>. We'd love to hear from you.
+               class="cbot-link font-weight-bold">Contact us</a>. We'd love to hear from you.
         </p>
     </div>
 </section>
