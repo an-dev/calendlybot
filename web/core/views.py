@@ -37,6 +37,11 @@ def faq(request):
     return TemplateResponse(request, 'web/faq.html')
 
 
+@require_http_methods(["GET"])
+def privacy(request):
+    return TemplateResponse(request, 'web/privacy.html')
+
+
 def send_message_to_users(workspace, new_workspace):
     client = slack.WebClient(token=workspace.bot_token)
     response_users_list = client.users_list()
