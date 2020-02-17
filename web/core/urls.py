@@ -4,6 +4,7 @@ from web.core import views
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('install/', views.install, name='install'),
     path('faq/', views.faq, name='faq'),
     path('privacy/', views.privacy, name='privacy'),
     path('auth/', views.auth, name='auth'),
