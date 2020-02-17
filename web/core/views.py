@@ -7,6 +7,7 @@ from calendly import Calendly
 from django.conf import settings
 from django.core import signing
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -28,8 +29,12 @@ logger = logging.getLogger(__name__)
 
 @require_http_methods(["GET"])
 def index(request):
-    return TemplateResponse(request, 'web/index.html',
-                            {'oauth_scope': oauth_scope, 'client_id': client_id})
+    return TemplateResponse(request, 'web/index.html')
+
+
+@require_http_methods(["GET"])
+def install(request):
+    return redirect(f"https://slack.com/oauth/v2/authorize?scope={oauth_scope}&client_id={client_id}")
 
 
 @require_http_methods(["GET"])
