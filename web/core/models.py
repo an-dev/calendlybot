@@ -1,11 +1,19 @@
+from datetime import timedelta
+
 from django.db import models
+from django.utils import timezone
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
+
+
+def set_trial_end():
+    return timezone.now().date() + timedelta(days=7)
 
 
 class Workspace(TimeStampedModel):
     slack_id = models.CharField(unique=True, max_length=16)
     bot_token = models.CharField(max_length=64)
+    trial_end = models.DateField(default=set_trial_end)
 
     def __str__(self):
         return "Slack Workspace {}".format(self.slack_id)
