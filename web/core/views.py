@@ -34,7 +34,8 @@ def index(request):
 
 @require_http_methods(["GET"])
 def install(request):
-    return redirect(f"https://slack.com/oauth/v2/authorize?scope={oauth_scope}&client_id={client_id}")
+    return redirect(
+        f"https://slack.com/oauth/v2/authorize?scope={oauth_scope}&client_id={client_id}")
 
 
 @require_http_methods(["GET"])
@@ -47,18 +48,18 @@ def privacy(request):
     return TemplateResponse(request, 'web/privacy.html')
 
 
-def send_message_to_users(workspace, new_workspace):
+def create_users(workspace, admin_id):
     client = slack.WebClient(token=workspace.bot_token)
     response_users_list = client.users_list()
+    admin = None
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
         su.slack_name = user['display_name']
         su.save()
-        if new_workspace:
-            client.chat_postMessage(
-                channel=su.slack_id,
-                text=f"Hello {user['display_name']}. I'm Calenduck. Type `/connect` to start!")
+        if user['id'] == admin_id:
+            admin = su
+    return admin
 
 
 def has_active_hooks(calendly):
@@ -92,7 +93,13 @@ def auth(request):
         workspace.bot_token = response['access_token']
         workspace.save()
 
-        send_message_to_users(workspace, new)
+        if new:
+            user = create_users(workspace, response['authed_user']['id'])
+
+            if user:
+                client.chat_postMessage(
+                    channel=user.slack_id,
+                    text=f"Hi {user.slack_name}. I'm Calenduck. Type `/connect` to start!")
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
@@ -111,6 +118,8 @@ def connect(request):
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
         su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
                                                       workspace=workspace)
+        su.slack_name = request.POST['display_name']
+        su.save()
 
         # atm, we support just one authtoken per user. Calling this command effectively overwrites
         calendly = Calendly(request.POST['text'])
