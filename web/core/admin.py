@@ -19,6 +19,7 @@ class WebhooksInline(admin.StackedInline):
 
 class SlackUserAdmin(admin.ModelAdmin):
     inlines = (WebhooksInline,)
+    readonly_fields = ('workspace',)
 
 
 admin.site.register(Workspace, WorkspaceAdmin)

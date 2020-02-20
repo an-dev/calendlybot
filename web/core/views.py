@@ -55,7 +55,7 @@ def create_users(workspace, admin_id):
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
-        su.slack_name = user['display_name']
+        su.slack_name = user['real_name']
         su.save()
         if user['id'] == admin_id:
             admin = su
@@ -97,6 +97,7 @@ def auth(request):
             user = create_users(workspace, response['authed_user']['id'])
 
             if user:
+                client.token = workspace.bot_token
                 client.chat_postMessage(
                     channel=user.slack_id,
                     text=f"Hi {user.slack_name}. I'm Calenduck. Type `/connect` to start!")
@@ -118,7 +119,7 @@ def connect(request):
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
         su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
                                                       workspace=workspace)
-        su.slack_name = request.POST['display_name']
+        su.slack_name = request.POST['real_name']
         su.save()
 
         # atm, we support just one authtoken per user. Calling this command effectively overwrites
