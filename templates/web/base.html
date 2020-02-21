@@ -7,10 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta
             name="description"
-            content=""
+            content="Native Slack integration for Calendly. Receive Slack messages for Calendly new Calendly scheduled and cancelled events. No third party needed."
     />
     <meta name="slack-app-id" content="AS7JCAATV">
     <link rel="icon" href="{% static 'web/img/favicon.ico' %}">
+    <link
+            href="{% static 'web/css/index.css' %}"
+            rel="stylesheet"
+            type="text/css"
+            media="all"
+    />
     <link
             href="{% static 'web/css/bootstrap.min.css' %}"
             rel="stylesheet"
@@ -29,12 +35,6 @@
             type="text/css"
             media="all"
     />
-    <link
-            href="{% static 'web/css/index.css' %}"
-            rel="stylesheet"
-            type="text/css"
-            media="all"
-    />
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-158067941-1"></script>
     <script>
@@ -43,6 +43,7 @@
       gtag('js', new Date());
 
       gtag('config', 'UA-158067941-1');
+
     </script>
 </head>
 <body class="d-flex flex-column h-100 bg-light">
@@ -106,9 +107,9 @@
     </div>
 </footer>
 
-<script type="text/javascript" src="{% static 'web/js/jquery-3.3.1.slim.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'web/js/popper.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'web/js/bootstrap.min.js' %}"></script>
+<script defer type="text/javascript" src="{% static 'web/js/jquery-3.3.1.slim.min.js' %}"></script>
+<!--<script type="text/javascript" src="{% static 'web/js/popper.min.js' %}"></script>-->
+<script defer type="text/javascript" src="{% static 'web/js/bootstrap.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'web/js/base.js' %}"></script>
 {% block js %}
 {% endblock %}

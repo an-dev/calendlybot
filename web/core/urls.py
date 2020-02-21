@@ -13,3 +13,5 @@ urlpatterns = [
     path('help/', views.support, name='support'),
     re_path(r'^handle/(?P<signed_value>[-:\w]+)/$', views.handle, name='handle'),
 ]
+
+core_map_paths = ('index', 'faq', 'privacy')
