@@ -55,7 +55,7 @@ def create_users(workspace, admin_id):
 
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
-        su.slack_name = user['real_name']
+        su.slack_name = user['profile'].get('first_name', user['profile']['real_name'])
         su.save()
         if user['id'] == admin_id:
             admin = su
@@ -119,8 +119,6 @@ def connect(request):
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
         su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
                                                       workspace=workspace)
-        su.slack_name = request.POST['real_name']
-        su.save()
 
         # atm, we support just one authtoken per user. Calling this command effectively overwrites
         calendly = Calendly(request.POST['text'])
@@ -153,7 +151,8 @@ def connect(request):
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
             slack_msg_service.send(su.slack_id,
-                                   "Your account is already setup to receive event notifications. Please contact support if you're experiencing issues.")
+                                   "Your account is already setup to receive event notifications. "
+                                   "Please contact support if you're experiencing issues.")
     except Exception:
         logger.exception("Could not complete connect request")
     return HttpResponse(status=200)
