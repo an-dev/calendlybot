@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from model_utils import Choices
@@ -7,7 +8,7 @@ from model_utils.models import TimeStampedModel
 
 
 def set_trial_end():
-    return timezone.now().date() + timedelta(days=7)
+    return timezone.now().date() + timedelta(days=settings.TRIAL_DAYS)
 
 
 class Workspace(TimeStampedModel):

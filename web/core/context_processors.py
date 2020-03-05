@@ -8,4 +8,5 @@ def settings(request):
     """
     return {
         'GTAG_ID': django_settings.GTAG_ID,
+        'TRIAL_DAYS': django_settings.TRIAL_DAYS,
     }

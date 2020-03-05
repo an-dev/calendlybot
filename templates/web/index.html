@@ -23,8 +23,8 @@
                 <p class="lead">Direct calendly integration for slack*. Receive event notifications directly in your
                     workspace with no need for unnecessary third-party services.</p>
                 <p class="font-italic">*Works only with Calendly <a class="font-weight-bold text-white"
-                                                             href="https://help.calendly.com/hc/en-us/articles/223195488"
-                                                             target="_blank">Premium and Pro accounts</a></p>
+                                                                    href="https://help.calendly.com/hc/en-us/articles/223195488"
+                                                                    target="_blank">Premium and Pro accounts</a></p>
                 <p>
                     <a href="/install/"
                        role="button" class="btn btn-lg btn-outline-light">
@@ -74,7 +74,8 @@
             </div>
             <div class="col-lg-6 w-100">
                 <div>
-                    <img src="{% static 'web/img/complete.png' %}" alt="Image of a completed connection between slack and calendly"
+                    <img src="{% static 'web/img/complete.png' %}"
+                         alt="Image of a completed connection between slack and calendly"
                          class="rounded shadow-3d w-100">
                 </div>
             </div>
@@ -87,7 +88,8 @@
         <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
             <h2 class="h1 font-weight-bold">Simple, transparent pricing</h2>
             <p class="lead">
-                Calenduck starts with a 7 day trial, no credit card required.<br>After that you'll be asked
+                Calenduck starts with a <span class="font-weight-bold"> {{ TRIAL_DAYS }} day trial </span>, no credit
+                card required.<br>After that you'll be asked
                 to upgrade to continue receiving event notifications.
             </p>
         </div>
@@ -147,6 +149,18 @@
         </div>
     </div>
 </section>
+<div class="alert alert-info alert-dismissible fade show rounded-0 cbot-alert" role="alert">
+    <div class="text-center">
+        <span class="font-weight-bold">Join the early access!</span> 30 day trial and early access to new features for
+        beta
+        users. <a href="https://calenduck.typeform.com/to/rpwD2R" target="_blank" role="button"
+                  class="alert-link">Learn More</a>
+    </div>
+
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
 {% endblock %}
 {% block js %}
 {% load static %}

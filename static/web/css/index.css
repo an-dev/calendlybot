@@ -22,3 +22,10 @@ html {
 .hidden {
     display: none;
 }
+
+.cbot-alert {
+    position: fixed !important;
+    width: 100%;
+    z-index: 999;
+    bottom: -16px;
+}
