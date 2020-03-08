@@ -56,9 +56,11 @@ def create_users(workspace, admin_id):
     for user in filter(lambda u: eligible_user(u), response_users_list['members']):
         su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
         su.slack_name = user['profile'].get('first_name', user['profile']['real_name'])
-        su.save()
+        su.slack_email = user['profile']['email']
         if user['id'] == admin_id:
             admin = su
+            su.is_installer = True
+        su.save()
     return admin
 
 
