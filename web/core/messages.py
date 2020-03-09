@@ -159,7 +159,7 @@ class SlackMarkdownHelpMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "• `/duck connect`: Connect your Slack account to Calendly\n• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
+                        "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
                     }
                 },
                 {
@@ -170,8 +170,8 @@ class SlackMarkdownHelpMessage:
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": "Still need some help? *<mailto:andy.idiaghe@gmail.com|Contact us>*"
-                        }
+                            "text": "Don't know how to get your calendly token? *<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\nStill need some help? *<mailto:andy.idiaghe@gmail.com|Contact us>*"
+                        },
                     ]
                 }
             ]
