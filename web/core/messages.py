@@ -116,7 +116,7 @@ class SlackMarkdownUpgradePromptMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"An event was created or cancelled on your calendar.\n"
-                    f"Please type `/upgrade` to continue receiving detailed notifications."
+                            f"Please type `/duck upgrade` to continue receiving detailed notifications."
                 }
             }
         ]
@@ -133,7 +133,7 @@ class SlackMarkdownUpgradeLinkMessage:
                 "text": {
                     "type": "mrkdwn",
                     "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan.\n"
-                    "Thanks for giving Calenduck a try!"
+                            "Thanks for giving Calenduck a try!"
                 }
             }
         ]
@@ -159,7 +159,7 @@ class SlackMarkdownHelpMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "• `/connect`: Connect your Slack account to Calendly\n• `/upgrade`: Upgrade to a new plan based on your workspace size"
+                        "text": "• `/duck connect`: Connect your Slack account to Calendly\n• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
                     }
                 },
                 {
