@@ -125,7 +125,7 @@ def commands(request):
                                                           workspace=workspace)
             slack_msg_service = SlackMessageService(workspace.bot_token)
             slack_msg_service.send(su.slack_id,
-                                   "Could not find command. Try typing `@calenduck help` if you're lost.")
+                                   "Could not find command. Try typing `/duck help` if you're lost.")
             return HttpResponse(status=200)
         return globals()[command](request)
     except Exception:
