@@ -139,7 +139,8 @@ def connect(request):
                                                   workspace=workspace)
 
     # atm, we support just one authtoken per user. Calling this command effectively overwrites
-    calendly = Calendly(request.POST['text'].split(' ')[1])
+    token = request.POST['text'].split(' ')[1]
+    calendly = Calendly(token)
     response_from_echo = calendly.echo()
     slack_msg_service = SlackMessageService(su.workspace.bot_token)
     if 'email' not in response_from_echo:
@@ -162,7 +163,7 @@ def connect(request):
                                    f"Could not connect with Calendly API. {msg}.")
             return HttpResponse(status=200)
         Webhook.objects.create(user=su, calendly_id=response_from_webhook_create['id'])
-        su.calendly_authtoken = request.POST['text']
+        su.calendly_authtoken = token
         su.calendly_email = response_from_echo['email']
         su.save()
         slack_msg_service.send(su.slack_id,
