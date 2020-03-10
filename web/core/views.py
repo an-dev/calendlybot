@@ -144,7 +144,7 @@ def connect(request):
     slack_msg_service = SlackMessageService(su.workspace.bot_token)
     if 'email' not in response_from_echo:
         slack_msg_service.send(su.slack_id,
-                               "Could not find user in Calendly. Make sure the APIKey is correct.")
+                               "Could not find user in Calendly. Make sure the token is correct.")
         return HttpResponse(status=200)
 
     # check if there's an existing working hook for this user
