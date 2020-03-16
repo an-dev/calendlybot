@@ -9,6 +9,8 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('auth/', views.auth, name='auth'),
     path('commands/', views.commands, name='commands'),
+    path('interactions/', views.interactions, name='interactions'),
+    path('destinations/', views.get_destinations, name='destinations'),
     re_path(r'^handle/(?P<signed_value>[-:\w]+)/$', views.handle, name='handle'),
 ]
 

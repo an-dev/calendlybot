@@ -176,3 +176,36 @@ class SlackMarkdownHelpMessage:
                 }
             ]
         }]
+
+
+class SlackMarkdownNotificationDestinationMessage:
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Where do you want me to send event notifications from this Calendly account?"
+                },
+                "accessory": {
+                    "type": "external_select",
+                    "placeholder": {
+                        "type": "plain_text",
+                        "text": "Select an option",
+                    },
+                }
+            }, {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Confirm",
+                        },
+                        "value": "confirm_hook_dest"
+                    }
+                ]
+            }
+        ]

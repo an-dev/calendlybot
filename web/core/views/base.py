@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 
@@ -7,45 +6,20 @@ from calendly import Calendly
 from django.conf import settings
 from django.core import signing
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from web.core.decorators import requires_subscription, verify_request
-from web.core.messages import SlackMarkdownEventCanceledMessage, SlackMarkdownEventCreatedMessage, \
-    SlackMarkdownHelpMessage, SlackMarkdownUpgradeLinkMessage
+from web.core.decorators import verify_request
+from web.core.messages import SlackMarkdownNotificationDestinationMessage
 from web.core.models import SlackUser, Webhook, Workspace
 from web.core.services import SlackMessageService
-from web.payments.services import WorkspaceUpgradeService
 from web.utils import eligible_user, COMMAND_LIST
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
-oauth_scope = os.environ["SLACK_BOT_SCOPE"]
 
 logger = logging.getLogger(__name__)
-
-
-@require_http_methods(["GET"])
-def index(request):
-    return render(request, 'web/index.html')
-
-
-@require_http_methods(["GET"])
-def install(request):
-    return redirect(
-        f"https://slack.com/oauth/v2/authorize?scope={oauth_scope}&client_id={client_id}")
-
-
-@require_http_methods(["GET"])
-def faq(request):
-    return TemplateResponse(request, 'web/faq.html')
-
-
-@require_http_methods(["GET"])
-def privacy(request):
-    return TemplateResponse(request, 'web/privacy.html')
 
 
 def create_users(workspace, admin_id):
@@ -151,6 +125,9 @@ def connect(request):
 
     # check if there's an existing working hook for this user
     if not has_active_hooks(calendly):
+
+        # ask user where they want to send the hook
+
         signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
         response_from_webhook_create = calendly.create_webhook(
             f"{settings.SITE_URL}/handle/{signed_value}/")
@@ -177,91 +154,24 @@ def connect(request):
     return HttpResponse(status=200)
 
 
-def upgrade(request):
-    workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-    su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
-
-    checkout_session_id = WorkspaceUpgradeService(workspace).run()
-
-    msg = SlackMarkdownUpgradeLinkMessage(checkout_session_id)
-    SlackMessageService(workspace.bot_token).send(su.slack_id,
-                                                  "Thanks for giving Calenduck a try!",
-                                                  msg.get_blocks())
-    return HttpResponse(status=200)
-
-
-def help(request):
-    workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-    su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
-
-    msg = SlackMarkdownHelpMessage()
-    SlackMessageService(workspace.bot_token).send(su.slack_id,
-                                                  "Here are some useful tips!",
-                                                  msg.get_blocks(),
-                                                  msg.get_attachments())
+def setup_handle_destination(slack_msg_service, su):
+    msg = SlackMarkdownNotificationDestinationMessage()
+    slack_msg_service.send(su.slack_id, msg)
     return HttpResponse(status=200)
 
 
 @csrf_exempt
-@requires_subscription
+@verify_request
 @require_http_methods(["POST"])
-def handle(request, signed_value):
-    try:
-        workspace_slack_id, user_slack_id = signing.loads(signed_value)
-        su = SlackUser.objects.get(slack_id=user_slack_id, workspace__slack_id=workspace_slack_id)
+def get_destinations():
+    import pdb; pdb.set_trace()
+    return HttpResponse(status=200)
 
-        data = json.loads(request.body)
-        event_type = data.get('event')
 
-        if event_type not in ['invitee.created', 'invitee.canceled']:
-            logger.exception(
-                "Something went wrong. Could not handle event type:\n{}".format(request.body))
-            return HttpResponse(status=400)
-
-        data = data['payload']
-        name = data['event']['assigned_to'][0]
-        if event_type == 'invitee.created':
-            message_values = {
-                'name': name,
-                'event_name': data['event_type']['name'],
-                'event_start_time': data['event']['invitee_start_time_pretty'],
-                'invitee_name': data['invitee']['name'],
-                'invitee_email': data['invitee']['email'],
-                'invitee_timezone': data['invitee']['timezone']
-            }
-            txt = f"Hi {name}, a new event has been scheduled."
-            msg = SlackMarkdownEventCreatedMessage(**message_values)
-
-        if event_type == 'invitee.canceled':
-            message_values = {
-                'name': name,
-                'event_name': data['event_type']['name'],
-                'event_start_time': data['event']['invitee_start_time_pretty'],
-                'invitee_name': data['invitee']['name'],
-                'invitee_email': data['invitee']['email'],
-                'canceler_name': data['event']['canceler_name']
-            }
-            txt = f"Hi {name}, the event below has been canceled."
-            msg = SlackMarkdownEventCanceledMessage(**message_values)
-
-        if event_type in ['invitee.created', 'invitee.canceled']:
-            SlackMessageService(su.workspace.bot_token).send(
-                su.slack_id,
-                txt,
-                msg.get_blocks(),
-                msg.get_attachments()
-            )
-        return HttpResponse(status=200)
-    except SlackUser.DoesNotExist:
-        logger.exception("Could not find user")
-    except Exception:
-        logger.exception("Could not handle hook event")
-        # # re-create webhook
-        # calendly = Calendly(su.calendly_authtoken)
-        # signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
-        # response = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
-        # if 'id' in response:
-        #     Webhook.objects.create(user=su, calendly_id=response['id'])
-        # else:
-        #     logger.error("Could not recreate webhook {}".format(response))
-    return HttpResponse(status=500)
+@csrf_exempt
+@verify_request
+@require_http_methods(["POST"])
+def interactions():
+    import pdb;
+    pdb.set_trace()
+    return HttpResponse(status=200)
