@@ -74,6 +74,7 @@ def has_active_hooks(calendly_client):
 
 @require_http_methods(["GET"])
 def auth(request):
+    error = False
     try:
         # Retrieve the auth code from the request params
         auth_code = request.GET['code']
@@ -111,10 +112,9 @@ def auth(request):
         msg = "Auth complete!"
     except Exception:
         logger.exception("Could not complete auth setup")
-        msg = "Uh oh. Could not setup auth. " \
-              "Please retry or contact us at support@calenduck.co or give us a shout on twitter @calenduckapp"
-    return TemplateResponse(request, 'web/auth.html',
-                            {'msg': msg})
+        msg = "Uh oh. Could not setup auth."
+        error = True
+    return TemplateResponse(request, 'web/auth.html', {'msg': msg, 'error': error})
 
 
 @csrf_exempt
