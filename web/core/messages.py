@@ -170,7 +170,7 @@ class SlackMarkdownHelpMessage:
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": "Don't know how to get your calendly token? *<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\nStill need some help? *<mailto:andy.idiaghe@gmail.com|Contact us>*"
+                            "text": "Don't know how to get your calendly token? *<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\nStill need some help? *<mailto:support@calenduck.co|Contact us>*"
                         },
                     ]
                 }
