@@ -48,6 +48,7 @@ def has_active_hooks(calendly_client):
 
 @require_http_methods(["GET"])
 def auth(request):
+    error = False
     try:
         # Retrieve the auth code from the request params
         auth_code = request.GET['code']
@@ -69,22 +70,25 @@ def auth(request):
         workspace.bot_token = response['access_token']
         workspace.save()
 
-        if new:
-            user = create_users(workspace, response['authed_user']['id'])
-
-            if user:
-                client.token = workspace.bot_token
+        user = create_users(workspace, response['authed_user']['id'])
+        if user:
+            client.token = workspace.bot_token
+            if new:
                 client.chat_postMessage(
                     channel=user.slack_id,
                     text=f"Hi {user.slack_name}. I'm Calenduck. Type `/duck connect` to start!")
+            else:
+                client.chat_postMessage(
+                    channel=user.slack_id,
+                    text=f"Welcome back {user.slack_name}. Type `/duck connect` to start!")
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
     except Exception:
         logger.exception("Could not complete auth setup")
-        msg = "Uh oh. Could not setup auth. Please retry."
-    return TemplateResponse(request, 'web/auth.html',
-                            {'msg': msg})
+        msg = "Uh oh. Could not setup auth."
+        error = True
+    return TemplateResponse(request, 'web/auth.html', {'msg': msg, 'error': error})
 
 
 @csrf_exempt
