@@ -111,7 +111,8 @@ def auth(request):
         msg = "Auth complete!"
     except Exception:
         logger.exception("Could not complete auth setup")
-        msg = "Uh oh. Could not setup auth. Please retry."
+        msg = "Uh oh. Could not setup auth. " \
+              "Please retry or contact us at support@calenduck.co or give us a shout on twitter @calenduckapp"
     return TemplateResponse(request, 'web/auth.html',
                             {'msg': msg})
 
