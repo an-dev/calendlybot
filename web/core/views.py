@@ -98,9 +98,14 @@ def auth(request):
         user = create_users(workspace, response['authed_user']['id'])
         if user:
             client.token = workspace.bot_token
-            client.chat_postMessage(
-                channel=user.slack_id,
-                text=f"Hi {user.slack_name}. I'm Calenduck. Type `/duck connect` to start!")
+            if new:
+                client.chat_postMessage(
+                    channel=user.slack_id,
+                    text=f"Hi {user.slack_name}. I'm Calenduck. Type `/duck connect` to start!")
+            else:
+                client.chat_postMessage(
+                    channel=user.slack_id,
+                    text=f"Welcome back {user.slack_name}. Type `/duck connect` to start!")
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
