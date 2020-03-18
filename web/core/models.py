@@ -33,7 +33,7 @@ class SlackUser(TimeStampedModel):
         unique_together = ('slack_id', 'workspace')
 
     def __str__(self):
-        return "Slack User {}".format(self.slack_id)
+        return "Slack User {}:{}".format(self.slack_id, self.slack_email)
 
 
 class Webhook(TimeStampedModel):
