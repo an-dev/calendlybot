@@ -6,10 +6,13 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from web.core.decorators import requires_subscription
+from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCanceledMessage
-from web.core.models import SlackUser
+from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
+from web.utils import COMMAND_LIST
+from web.core.views import commands as slack_commands
+
 
 logger = logging.getLogger(__name__)
 
@@ -88,3 +91,24 @@ def handle(request, signed_value):
         # else:
         #     logger.error("Could not recreate webhook {}".format(response))
     return HttpResponse(status=500)
+
+
+@csrf_exempt
+@verify_request
+@require_http_methods(["POST"])
+def commands(request):
+    try:
+        command = request.POST['text'].split(' ')[0]
+        if command not in COMMAND_LIST:
+            workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
+            su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
+                                                          workspace=workspace)
+            slack_msg_service = SlackMessageService(workspace.bot_token)
+            slack_msg_service.send(su.slack_id,
+                                   "Could not find command. Try typing `/duck help` if you're lost.")
+            return HttpResponse(status=200)
+        method_to_call = getattr(slack_commands, command)
+        return method_to_call(request)
+    except Exception:
+        logger.exception("Error executing command")
+        return HttpResponse(status=200)

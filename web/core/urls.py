@@ -1,17 +1,16 @@
 from django.urls import path, re_path
 
-from web.core import views
+from web.core.views import base, static, handlers
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('install/', views.install, name='install'),
-    path('faq/', views.faq, name='faq'),
-    path('privacy/', views.privacy, name='privacy'),
-    path('auth/', views.auth, name='auth'),
-    path('commands/', views.commands, name='commands'),
-    path('interactions/', views.interactions, name='interactions'),
-    path('destinations/', views.get_destinations, name='destinations'),
-    re_path(r'^handle/(?P<signed_value>[-:\w]+)/$', views.handle, name='handle'),
+    path('', static.index, name='index'),
+    path('install/', static.install, name='install'),
+    path('faq/', static.faq, name='faq'),
+    path('privacy/', static.privacy, name='privacy'),
+    path('auth/', base.auth, name='auth'),
+    path('commands/', handlers.commands, name='commands'),
+    path('interactions/', base.interactions, name='interactions'),
+    re_path(r'^handle/(?P<signed_value>[-:\w]+)/$', handlers.handle, name='handle'),
 ]
 
 core_map_paths = ('index', 'faq', 'privacy')
