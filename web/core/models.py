@@ -33,11 +33,12 @@ class SlackUser(TimeStampedModel):
         unique_together = ('slack_id', 'workspace')
 
     def __str__(self):
-        return "Slack User {}".format(self.slack_id)
+        return "Slack User {}:{}".format(self.slack_id, self.slack_email)
 
 
 class Webhook(TimeStampedModel):
-    user = models.ForeignKey('SlackUser', related_name='webhooks', on_delete=models.CASCADE)
+    # TODO: Clean webhooks manually as they need to cleaned on Calendly's side as well
+    user = models.ForeignKey('SlackUser', related_name='webhooks', null=True, on_delete=models.SET_NULL)
     calendly_id = models.PositiveIntegerField()
 
     def __str__(self):
