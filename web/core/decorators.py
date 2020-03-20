@@ -67,7 +67,7 @@ def requires_subscription(func):
             else:
                 return func(request, signed_value, *args, **kwargs)
         except Exception:
-            logger.exception("Could not verify request comes from slack")
+            logger.exception("Could not verify if view needs subscription")
             return HttpResponse(status=400)
 
     return wrapper
