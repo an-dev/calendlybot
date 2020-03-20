@@ -186,14 +186,7 @@ class SlackMarkdownNotificationDestinationMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Where do you want me to send event notifications from this Calendly account?"
-                },
-                "accessory": {
-                    "type": "external_select",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Select an option",
-                    },
+                    "text": "Where do you want me to send event notifications?"
                 }
             }, {
                 "type": "actions",
@@ -202,9 +195,17 @@ class SlackMarkdownNotificationDestinationMessage:
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Confirm",
+                            "text": "Send to me"
                         },
-                        "value": "confirm_hook_dest"
+                        "action_id": "hook_dest_self"
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Send to a channel"
+                        },
+                        "action_id": "hook_dest_channel"
                     }
                 ]
             }
