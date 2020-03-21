@@ -9,11 +9,11 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
-from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage
+from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
-from web.core.views.commands import setup_handle_destination
-from web.utils import eligible_user
+from web.core.actions import *
+from web.utils import eligible_user, setup_handle_destination
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -32,7 +32,7 @@ def create_users(workspace, admin_id):
         su.slack_email = user['profile']['email']
         if user['id'] == admin_id:
             admin = su
-            su.is_installer = True
+            su.manager = True
         su.save()
     return admin
 
@@ -57,7 +57,6 @@ def auth(request):
         # Save the bot token to an environmental variable or to your data store
         # for later use
         # response doesn't have a bot object
-        import pdb; pdb.set_trace()
         workspace, new = Workspace.objects.get_or_create(slack_id=response['team']['id'])
         workspace.bot_token = response['access_token']
         workspace.name = response['team'].get('name')
@@ -69,11 +68,11 @@ def auth(request):
             if new:
                 client.chat_postMessage(
                     channel=user.slack_id,
-                    text=f"Hi {user.slack_name}. I'm Calenduck. Type `/duck connect` to start!")
+                    text=f"Hi {user.slack_name}, I'm Calenduck. {STATIC_START_MSG}")
             else:
                 client.chat_postMessage(
                     channel=user.slack_id,
-                    text=f"Welcome back {user.slack_name}. Type `/duck connect` to start!")
+                    text=f"Welcome back {user.slack_name}. {STATIC_START_MSG}")
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
@@ -88,34 +87,35 @@ def auth(request):
 @verify_request
 @require_http_methods(["POST"])
 def interactions(request):
-    data = json.loads(request.POST['payload'])
-    action = data['actions'][0]['action_id']
-    response_url = data['response_url']
-    user_id, workspace_id = data['user']['id'], data['user']['team_id']
-    su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
-    slack_msg_service = SlackMessageService(su.workspace.bot_token)
     try:
-        if action == 'btn_hook_dest_self':
+        data = json.loads(request.POST['payload'])
+        action = data['actions'][0]['action_id']
+        response_url = data['response_url']
+        user_id, workspace_id = data['user']['id'], data['user']['team_id']
+        su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
+        slack_msg_service = SlackMessageService(su.workspace.bot_token)
+
+        if action == BTN_HOOK_DEST_SELF:
             return setup_handle_destination(response_url, su)
-        elif action == 'btn_hook_dest_channel':
+        elif action == BTN_HOOK_DEST_CHANNEL:
             msg = SlackMarkdownNotificationDestinationChannelMessage()
             slack_msg_service.update_interaction(
                 response_url,
                 blocks=msg.get_blocks()
             )
-        elif action == 'select_hook_dest_channel':
+        elif action == SELECT_HOOK_DEST_CHANNEL:
             channel = data['actions'][0]['selected_channel']
             return setup_handle_destination(response_url, su, channel)
         else:
-            if action == 'btn_cancel':
+            if action == BTN_CANCEL:
                 slack_msg_service.update_interaction(
                     response_url,
-                    text="You can pick things up later by typing `/duck connect [calendly token]`")
+                    text="You can pick things up later by typing `/duck connect [calendly token]`.")
             else:
-                slack_msg_service.send(su.slack_id, "I don\'t think I understand. Try again or contact us for help.")
+                slack_msg_service.send(su.slack_id, f"I don\'t think I understand. {STATIC_HELP_MSG}")
     except Exception:
         logger.exception("Could not parse interaction")
         slack_msg_service.update_interaction(
             response_url,
-            text="Could not parse interaction. Try again or contact us for help.")
+            text=f"Could not parse interaction. {STATIC_HELP_MSG}")
     return HttpResponse(status=200)

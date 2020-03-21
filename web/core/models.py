@@ -18,7 +18,7 @@ class Workspace(TimeStampedModel):
     name = models.CharField(max_length=128, null=True, blank=True)
 
     def __str__(self):
-        return "{}({})".format(self.name, self.slack_id)
+        return "{} ({})".format(self.name, self.slack_id)
 
 
 class SlackUser(TimeStampedModel):
@@ -34,16 +34,17 @@ class SlackUser(TimeStampedModel):
         unique_together = ('slack_id', 'workspace')
 
     def __str__(self):
-        return "Slack User {}:{}".format(self.slack_id, self.slack_email)
+        return "{} ({})".format(self.slack_email, self.slack_id)
 
 
 class Webhook(TimeStampedModel):
     # TODO: Clean webhooks manually as they need to cleaned on Calendly's side as well
     user = models.ForeignKey('SlackUser', related_name='webhooks', null=True, on_delete=models.SET_NULL)
     calendly_id = models.PositiveIntegerField()
+    destination_id = models.CharField(max_length=32, null=True, blank=True)
 
     def __str__(self):
-        return "Calendly Hook {}".format(self.calendly_id)
+        return "{}".format(self.calendly_id)
 
 
 class Subscription(TimeStampedModel):
@@ -58,4 +59,4 @@ class Subscription(TimeStampedModel):
     plan = models.CharField(max_length=16, choices=PLANS)
 
     def __str__(self):
-        return "Subscription {} for workspace {}".format(self.plan, self.workspace.id)
+        return "{} plan for workspace {}".format(self.plan, self.workspace.slack_id)
