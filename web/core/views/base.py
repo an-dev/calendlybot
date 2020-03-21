@@ -9,9 +9,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
+from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
-from web.core.views.commands import connect_self
+from web.core.views.commands import setup_handle_destination
 from web.utils import eligible_user
 
 client_id = os.environ["SLACK_CLIENT_ID"]
@@ -87,20 +88,32 @@ def auth(request):
 def interactions(request):
     data = json.loads(request.POST['payload'])
     action = data['actions'][0]['action_id']
+    response_url = data['response_url']
     user_id, workspace_id = data['user']['id'], data['user']['team_id']
     su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
-    ts, channel = data['container']['message_ts'], data['container']['channel_id']
-    if action == 'btn_hook_dest_self':
-        return connect_self(su, ts, channel)
-    elif action == 'btn_hook_dest_channel':
-        # send message with channel list
-        pass
-    else:
-        slack_msg_service = SlackMessageService(su.workspace.bot_token)
-        if action == 'btn_cancel':
-            slack_msg_service.update(channel,
-                                     ts,
-                                     "You can pick things up later by typing `/duck connect [calendly token]`")
+    slack_msg_service = SlackMessageService(su.workspace.bot_token)
+    try:
+        if action == 'btn_hook_dest_self':
+            return setup_handle_destination(response_url, su)
+        elif action == 'btn_hook_dest_channel':
+            msg = SlackMarkdownNotificationDestinationChannelMessage()
+            slack_msg_service.update_interaction(
+                response_url,
+                blocks=msg.get_blocks()
+            )
+        elif action == 'select_hook_dest_channel':
+            channel = data['actions'][0]['selected_channel']
+            return setup_handle_destination(response_url, su, channel)
         else:
-            slack_msg_service.send(su.slack_id, "I don\'t think I understand. Try again or contact us for help.")
+            if action == 'btn_cancel':
+                slack_msg_service.update_interaction(
+                    response_url,
+                    text="You can pick things up later by typing `/duck connect [calendly token]`")
+            else:
+                slack_msg_service.send(su.slack_id, "I don\'t think I understand. Try again or contact us for help.")
+    except Exception:
+        logger.exception("Could not parse interaction")
+        slack_msg_service.update_interaction(
+            response_url,
+            text="Could not parse interaction. Try again or contact us for help.")
     return HttpResponse(status=200)
