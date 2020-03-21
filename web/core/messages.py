@@ -235,14 +235,15 @@ class SlackMarkdownNotificationDestinationChannelMessage:
                     "placeholder": {
                         "type": "plain_text",
                         "text": "Select channel",
-                    }
+                    },
+                    "action_id": "select_hook_dest_channel"
                 }
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Not sure yet? Click here!"
+                    "text": "Not sure yet? No worries."
                 },
                 "accessory": {
                     "type": "button",

@@ -50,8 +50,8 @@ def get_cancelled_event_message_data(data):
 @require_http_methods(["POST"])
 def handle(request, signed_value):
     try:
-        workspace_slack_id, user_slack_id = signing.loads(signed_value)
-        su = SlackUser.objects.get(slack_id=user_slack_id, workspace__slack_id=workspace_slack_id)
+        workspace_slack_id, destination_slack_id = signing.loads(signed_value)
+        workspace = Workspace.object.get(slack_id=workspace_slack_id)
 
         data = json.loads(request.body)
         event_type = data.get('event')
@@ -71,15 +71,13 @@ def handle(request, signed_value):
             msg = SlackMarkdownEventCanceledMessage(**message_values)
 
         if event_type in ['invitee.created', 'invitee.canceled']:
-            SlackMessageService(su.workspace.bot_token).send(
-                su.slack_id,
+            SlackMessageService(workspace.bot_token).send(
+                destination_slack_id,
                 txt,
                 msg.get_blocks(),
                 msg.get_attachments()
             )
         return HttpResponse(status=200)
-    except SlackUser.DoesNotExist:
-        logger.exception("Could not find user")
     except Exception:
         logger.exception("Could not handle hook event")
         # # re-create webhook
@@ -90,7 +88,7 @@ def handle(request, signed_value):
         #     Webhook.objects.create(user=su, calendly_id=response['id'])
         # else:
         #     logger.error("Could not recreate webhook {}".format(response))
-    return HttpResponse(status=500)
+        return HttpResponse(status=500)
 
 
 @csrf_exempt
