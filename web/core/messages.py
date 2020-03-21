@@ -1,5 +1,10 @@
 from django.conf import settings
 
+from web.core.actions import *
+
+STATIC_START_MSG = 'Type `/duck connect` to start!'
+STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
+
 
 class SlackMarkdownEventCreatedMessage:
     def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
@@ -159,7 +164,8 @@ class SlackMarkdownHelpMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
+                        "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n"
+                                "• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
                     }
                 },
                 {
@@ -170,7 +176,9 @@ class SlackMarkdownHelpMessage:
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": "Don't know how to get your calendly token? *<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\nStill need some help? *<mailto:support@calenduck.co|Contact us>*"
+                            "text": "Don't know how to get your calendly token? "
+                                    "*<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\n"
+                                    "Still need some help? *<mailto:support@calenduck.co|Contact us>*"
                         },
                     ]
                 }
@@ -197,15 +205,15 @@ class SlackMarkdownNotificationDestinationMessage:
                             "type": "plain_text",
                             "text": "Send to me"
                         },
-                        "action_id": "btn_hook_dest_self"
+                        "action_id": BTN_HOOK_DEST_SELF
                     },
                     {
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Send to a channel"
+                            "text": "Send to channel"
                         },
-                        "action_id": "btn_hook_dest_channel"
+                        "action_id": BTN_HOOK_DEST_CHANNEL
                     },
                     {
                         "type": "button",
@@ -213,7 +221,7 @@ class SlackMarkdownNotificationDestinationMessage:
                             "type": "plain_text",
                             "text": "Maybe later"
                         },
-                        "action_id": "btn_cancel"
+                        "action_id": BTN_CANCEL
                     }
                 ]
             }
@@ -236,7 +244,7 @@ class SlackMarkdownNotificationDestinationChannelMessage:
                         "type": "plain_text",
                         "text": "Select channel",
                     },
-                    "action_id": "select_hook_dest_channel"
+                    "action_id": SELECT_HOOK_DEST_CHANNEL
                 }
             },
             {
@@ -251,7 +259,7 @@ class SlackMarkdownNotificationDestinationChannelMessage:
                         "type": "plain_text",
                         "text": "Maybe later",
                     },
-                    "action_id": "btn_cancel"
+                    "action_id": BTN_CANCEL
                 }
             }
         ]

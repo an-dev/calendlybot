@@ -31,7 +31,8 @@ class WebhooksInline(admin.StackedInline):
 class SlackUserAdmin(admin.ModelAdmin):
     inlines = (WebhooksInline,)
     fields = (
-    'slack_id', 'slack_name', 'slack_email', 'manager', 'calendly_email', 'calendly_authtoken', 'created', 'modified', 'workspace')
+        'slack_id', 'slack_name', 'slack_email', 'manager', 'calendly_email', 'calendly_authtoken', 'created',
+        'modified', 'workspace')
     readonly_fields = ('slack_id', 'slack_name', 'slack_email', 'created', 'modified')
     raw_id_fields = ('workspace',)
     list_display = ('slack_email', 'calendly_authtoken', 'workspace', 'manager', 'created')
