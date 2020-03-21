@@ -57,8 +57,10 @@ def auth(request):
         # Save the bot token to an environmental variable or to your data store
         # for later use
         # response doesn't have a bot object
+        import pdb; pdb.set_trace()
         workspace, new = Workspace.objects.get_or_create(slack_id=response['team']['id'])
         workspace.bot_token = response['access_token']
+        workspace.name = response['team'].get('name')
         workspace.save()
 
         user = create_users(workspace, response['authed_user']['id'])

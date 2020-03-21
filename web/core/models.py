@@ -15,9 +15,10 @@ class Workspace(TimeStampedModel):
     slack_id = models.CharField(unique=True, max_length=16)
     bot_token = models.CharField(max_length=64)
     trial_end = models.DateField(default=set_trial_end)
+    name = models.CharField(max_length=128, null=True, blank=True)
 
     def __str__(self):
-        return "Slack Workspace {}".format(self.slack_id)
+        return "{}({})".format(self.name, self.slack_id)
 
 
 class SlackUser(TimeStampedModel):
@@ -27,7 +28,7 @@ class SlackUser(TimeStampedModel):
     calendly_email = models.EmailField(unique=True, null=True)
     calendly_authtoken = models.CharField(max_length=64, unique=True, null=True)
     workspace = models.ForeignKey('Workspace', related_name='slackusers', on_delete=models.CASCADE)
-    is_installer = models.BooleanField(default=False)
+    manager = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('slack_id', 'workspace')
