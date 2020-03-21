@@ -12,3 +12,7 @@ class SlackMessageService:
         if attachments:
             kwargs['attachments'] = attachments
         return self.client.chat_postMessage(**kwargs)
+
+    def update(self, channel, ts, text, blocks=()):
+        kwargs = {'channel': channel, 'ts': ts, 'text': text, 'blocks': blocks}
+        return self.client.chat_update(**kwargs)

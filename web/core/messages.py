@@ -197,7 +197,7 @@ class SlackMarkdownNotificationDestinationMessage:
                             "type": "plain_text",
                             "text": "Send to me"
                         },
-                        "action_id": "hook_dest_self"
+                        "action_id": "btn_hook_dest_self"
                     },
                     {
                         "type": "button",
@@ -205,8 +205,52 @@ class SlackMarkdownNotificationDestinationMessage:
                             "type": "plain_text",
                             "text": "Send to a channel"
                         },
-                        "action_id": "hook_dest_channel"
+                        "action_id": "btn_hook_dest_channel"
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Maybe later"
+                        },
+                        "action_id": "btn_cancel"
                     }
                 ]
+            }
+        ]
+
+
+class SlackMarkdownNotificationDestinationChannelMessage:
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Where should I send notifications to?"
+                },
+                "accessory": {
+                    "type": "channels_select",
+                    "placeholder": {
+                        "type": "plain_text",
+                        "text": "Select channel",
+                    }
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Not sure yet? Click here!"
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Maybe later",
+                    },
+                    "action_id": "btn_cancel"
+                }
             }
         ]

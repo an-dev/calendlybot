@@ -1,9 +1,11 @@
 from calendly import Calendly
+from django.core import signing
+from django.conf import settings
 from django.http import HttpResponse
 
 from web.core.messages import SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage, \
     SlackMarkdownNotificationDestinationMessage
-from web.core.models import Workspace, SlackUser
+from web.core.models import Workspace, SlackUser, Webhook
 from web.core.services import SlackMessageService
 from web.payments.services import WorkspaceUpgradeService
 import logging
@@ -45,13 +47,13 @@ def has_active_hooks(calendly_client):
 
 
 def connect(request):
+    workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
+    slack_msg_service = SlackMessageService(workspace.bot_token)
     try:
-        workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
         su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
                                                       workspace=workspace)
 
         # atm, we support just one authtoken per user. Calling this command effectively overwrites
-        slack_msg_service = SlackMessageService(su.workspace.bot_token)
         token = request.POST['text'].split(' ')[1]
         calendly = Calendly(token)
         response_from_echo = calendly.echo()
@@ -64,25 +66,11 @@ def connect(request):
         # check if there's an existing working hook for this user
         if not has_active_hooks(calendly):
             # ask user where they want to send the hook
+            su.calendly_authtoken = token
+            su.calendly_email = response_from_echo['email']
+            su.save()
             return setup_handle_destination(slack_msg_service, su)
 
-            # signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
-            # response_from_webhook_create = calendly.create_webhook(
-            #     f"{settings.SITE_URL}/handle/{signed_value}/")
-            # if 'id' not in response_from_webhook_create:
-            #     msg = 'Please retry'
-            #     if 'message' in response_from_webhook_create:
-            #         msg = response_from_webhook_create['message']
-            #     logger.warning(f'Could not setup Calendly webhook.', msg)
-            #     slack_msg_service.send(su.slack_id,
-            #                            f"Could not connect with Calendly API. {msg}.")
-            #     return HttpResponse(status=200)
-            # Webhook.objects.create(user=su, calendly_id=response_from_webhook_create['id'])
-            # su.calendly_authtoken = token
-            # su.calendly_email = response_from_echo['email']
-            # su.save()
-            # slack_msg_service.send(su.slack_id,
-            #                        "Setup complete. You will now receive notifications on created and canceled events!")
         else:
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
@@ -95,10 +83,45 @@ def connect(request):
                                "Looks like you forgot the Calendly token. Try typing `/duck help` if you're lost.")
     except Exception:
         logger.exception('Could not connect to calendly')
+        slack_msg_service.send(request.POST['user_id'],
+                               "Could not connect to Calendly. Try again or contact us for help.")
     return HttpResponse(status=200)
 
 
 def setup_handle_destination(slack_msg_service, su):
     msg = SlackMarkdownNotificationDestinationMessage()
-    slack_msg_service.send(su.slack_id, 'test', msg.get_blocks())
+    slack_msg_service.send(su.slack_id, 'Where do you want me to send event notifications?', msg.get_blocks())
     return HttpResponse(status=200)
+
+
+def connect_self(su, ts, channel):
+    slack_msg_service = SlackMessageService(su.workspace.bot_token)
+    try:
+        signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
+        calendly = Calendly(su.calendly_authtoken)
+        response_from_webhook_create = calendly.create_webhook(
+            f"{settings.SITE_URL}/handle/{signed_value}/")
+        if 'id' not in response_from_webhook_create:
+            msg = 'Please retry'
+            errors = {}
+            if 'message' in response_from_webhook_create:
+                msg, errors = response_from_webhook_create['message'], response_from_webhook_create['errors']
+            logger.error(f'Could not setup Calendly webhook. {msg} {errors}')
+            slack_msg_service.update(channel,
+                                     ts,
+                                     f"Could not connect with Calendly API. {msg}.")
+            return HttpResponse(status=200)
+        Webhook.objects.create(user=su, calendly_id=response_from_webhook_create['id'])
+        slack_msg_service.update(channel,
+                                 ts,
+                                 "Setup complete. You will now receive notifications on created and canceled events!")
+    except Exception:
+        logger.exception('Could not connect to calendly')
+        slack_msg_service.update(channel,
+                                 ts,
+                                 "Could not connect to Calendly. Try again or contact us for help.")
+    return HttpResponse(status=200)
+
+
+def connect_channel():
+    pass
