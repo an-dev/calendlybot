@@ -10,6 +10,8 @@ from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
 from web.core.models import SlackUser, Workspace
+from web.core.services import SlackMessageService
+from web.core.views.commands import connect_self
 from web.utils import eligible_user
 
 client_id = os.environ["SLACK_CLIENT_ID"]
@@ -82,18 +84,23 @@ def auth(request):
 @csrf_exempt
 @verify_request
 @require_http_methods(["POST"])
-def get_destinations():
-    import pdb; pdb.set_trace()
-    return HttpResponse(status=200)
-
-
-@csrf_exempt
-@verify_request
-@require_http_methods(["POST"])
 def interactions(request):
-    import pdb;
-    pdb.set_trace()
-    import json
     data = json.loads(request.POST['payload'])
-    # switch data['action'] and call correct method accordingly
+    action = data['actions'][0]['action_id']
+    user_id, workspace_id = data['user']['id'], data['user']['team_id']
+    su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
+    ts, channel = data['container']['message_ts'], data['container']['channel_id']
+    if action == 'btn_hook_dest_self':
+        return connect_self(su, ts, channel)
+    elif action == 'btn_hook_dest_channel':
+        # send message with channel list
+        pass
+    else:
+        slack_msg_service = SlackMessageService(su.workspace.bot_token)
+        if action == 'btn_cancel':
+            slack_msg_service.update(channel,
+                                     ts,
+                                     "You can pick things up later by typing `/duck connect [calendly token]`")
+        else:
+            slack_msg_service.send(su.slack_id, "I don\'t think I understand. Try again or contact us for help.")
     return HttpResponse(status=200)
