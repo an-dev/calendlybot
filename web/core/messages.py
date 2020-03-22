@@ -5,6 +5,10 @@ from web.core.actions import *
 STATIC_START_MSG = 'Type `/duck connect` to start!'
 STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
 
+SCHEDULED_MSG_COLOR = '#2EB67D'
+CANCELLED_MSG_COLOR = '#E01E5A'
+INFO_MSG_COLOR = '#36C5F0'
+
 
 class SlackMarkdownEventCreatedMessage:
     def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
@@ -29,7 +33,7 @@ class SlackMarkdownEventCreatedMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#2EB67D",
+            "color": SCHEDULED_MSG_COLOR,
             "blocks": [
                 {
                     "type": "section",
@@ -83,7 +87,7 @@ class SlackMarkdownEventCanceledMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#E01E5A",
+            "color": CANCELLED_MSG_COLOR,
             "blocks": [{
                 "type": "section",
                 "fields": [
@@ -158,7 +162,7 @@ class SlackMarkdownHelpMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#36C5F0",
+            "color": INFO_MSG_COLOR,
             "blocks": [
                 {
                     "type": "section",
@@ -196,7 +200,13 @@ class SlackMarkdownNotificationDestinationMessage:
                     "type": "mrkdwn",
                     "text": "Where do you want me to send event notifications?"
                 }
-            }, {
+            }
+        ]
+
+    def get_attachments(self):
+        return [{
+            "color": INFO_MSG_COLOR,
+            "blocks": [{
                 "type": "actions",
                 "elements": [
                     {
@@ -224,8 +234,8 @@ class SlackMarkdownNotificationDestinationMessage:
                         "action_id": BTN_CANCEL
                     }
                 ]
-            }
-        ]
+            }]
+        }]
 
 
 class SlackMarkdownNotificationDestinationChannelMessage:
