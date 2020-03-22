@@ -59,24 +59,23 @@ def handle(request, signed_value):
         if event_type not in ['invitee.created', 'invitee.canceled']:
             logger.exception(
                 "Something went wrong. Could not handle event type:\n{}".format(request.body))
-            return HttpResponse(status=400)
+        else:
+            data = data['payload']
+            if event_type == 'invitee.created':
+                txt, message_values = get_created_event_message_data(data)
+                msg = SlackMarkdownEventCreatedMessage(**message_values)
 
-        data = data['payload']
-        if event_type == 'invitee.created':
-            txt, message_values = get_created_event_message_data(data)
-            msg = SlackMarkdownEventCreatedMessage(**message_values)
+            if event_type == 'invitee.canceled':
+                txt, message_values = get_cancelled_event_message_data(data)
+                msg = SlackMarkdownEventCanceledMessage(**message_values)
 
-        if event_type == 'invitee.canceled':
-            txt, message_values = get_cancelled_event_message_data(data)
-            msg = SlackMarkdownEventCanceledMessage(**message_values)
-
-        if event_type in ['invitee.created', 'invitee.canceled']:
-            SlackMessageService(workspace.bot_token).send(
-                destination_slack_id,
-                txt,
-                msg.get_blocks(),
-                msg.get_attachments()
-            )
+            if event_type in ['invitee.created', 'invitee.canceled']:
+                SlackMessageService(workspace.bot_token).send(
+                    destination_slack_id,
+                    txt,
+                    msg.get_blocks(),
+                    msg.get_attachments()
+                )
     except Exception:
         logger.exception("Could not handle hook event")
         # # re-create webhook

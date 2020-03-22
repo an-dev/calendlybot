@@ -63,12 +63,13 @@ def connect(request):
             su.save()
             # ask user where they want to send the hook
             msg = SlackMarkdownNotificationDestinationMessage()
-            slack_msg_service.send(su.slack_id, 'Where do you want me to send event notifications?', msg.get_blocks())
+            slack_msg_service.send(su.slack_id, 'Where do you want me to send event notifications?', msg.get_blocks(),
+                                   msg.get_attachments())
             return HttpResponse(status=200)
         else:
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
-            logger.error('Trying to setup Calendly token on already setup account', su.slack_id)
+            logger.error(f'Trying to setup Calendly token on already setup account: {su.slack_id}')
             slack_msg_service.send(su.slack_id,
                                    "Your account is already setup to receive event notifications. "
                                    "Please contact support if you're experiencing issues.")
