@@ -50,29 +50,30 @@ def connect(request):
         token = request.POST['text'].split(' ')[1]
         calendly = Calendly(token)
         response_from_echo = calendly.echo()
+
         if 'email' not in response_from_echo:
             logger.info(f'User {su.slack_email} does not have paid account')
             slack_msg_service.send(su.slack_id,
                                    "Could not find user in Calendly. Make sure the token is correct.")
             return HttpResponse(status=200)
 
-        # check if there's an existing working hook for this user
-        if not has_active_hooks(calendly):
-            su.calendly_authtoken = token
-            su.calendly_email = response_from_echo['email']
-            su.save()
-            # ask user where they want to send the hook
-            msg = SlackMarkdownNotificationDestinationMessage()
-            slack_msg_service.send(su.slack_id, 'Where do you want me to send event notifications?', msg.get_blocks(),
-                                   msg.get_attachments())
-            return HttpResponse(status=200)
-        else:
+        if has_active_hooks(calendly):
+            # check if there's an existing working hook for this user
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
             logger.error(f'Trying to setup Calendly token on already setup account: {su.slack_id}')
             slack_msg_service.send(su.slack_id,
                                    "Your account is already setup to receive event notifications. "
                                    "Please contact support if you're experiencing issues.")
+            return HttpResponse(status=200)
+
+        su.calendly_authtoken = token
+        su.calendly_email = response_from_echo['email']
+        su.save()
+        # ask user where they want to send the hook
+        msg = SlackMarkdownNotificationDestinationMessage()
+        slack_msg_service.send(su.slack_id, 'Where do you want me to send event notifications?', msg.get_blocks(),
+                               msg.get_attachments())
     except IndexError:
         logger.warning('Missing calendly key')
         slack_msg_service.send(user_id,

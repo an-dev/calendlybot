@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
-from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCanceledMessage
+from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCanceledMessage, STATIC_HELP_MSG
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
 from web.utils import COMMAND_LIST
@@ -101,7 +101,7 @@ def commands(request):
                                                           workspace=workspace)
             slack_msg_service = SlackMessageService(workspace.bot_token)
             slack_msg_service.send(su.slack_id,
-                                   "Could not find command. Try typing `/duck help` if you're lost.")
+                                   f"Could not find command. {STATIC_HELP_MSG}")
             return HttpResponse(status=200)
         method_to_call = getattr(slack_commands, command)
         return method_to_call(request)
