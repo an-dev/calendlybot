@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -5,6 +6,8 @@ from django.db import models
 from django.utils import timezone
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
+
+logger = logging.getLogger(__name__)
 
 
 def set_trial_end():
@@ -38,7 +41,6 @@ class SlackUser(TimeStampedModel):
 
 
 class Webhook(TimeStampedModel):
-    # TODO: Clean webhooks manually as they need to cleaned on Calendly's side as well
     user = models.ForeignKey('SlackUser', related_name='webhooks', null=True, on_delete=models.SET_NULL)
     calendly_id = models.PositiveIntegerField()
     destination_id = models.CharField(max_length=32, null=True, blank=True)

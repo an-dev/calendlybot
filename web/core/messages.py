@@ -2,8 +2,9 @@ from django.conf import settings
 
 from web.core.actions import *
 
-STATIC_START_MSG = 'Type `/duck connect` to start!'
+STATIC_START_MSG = 'Type `/duck connect [calendly token]` to start!'
 STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
+STATIC_FREE_ACCT_MSG = "Can't find a valid token on this account. Type `/duck help` if you're lost."
 
 SCHEDULED_MSG_COLOR = '#2EB67D'
 CANCELLED_MSG_COLOR = '#E01E5A'
@@ -141,7 +142,7 @@ class SlackMarkdownUpgradeLinkMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan.\n"
+                    "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan. "
                             "Thanks for giving Calenduck a try!"
                 }
             }
@@ -169,7 +170,9 @@ class SlackMarkdownHelpMessage:
                     "text": {
                         "type": "mrkdwn",
                         "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n"
-                                "• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
+                                "• `/duck disconnect`: Disconnect your Slack account from Calendly\n"
+                                "• `/duck upgrade`: Upgrade to a new plan based on your workspace size\n"
+                                "• `/duck help`: See this message\n"
                     }
                 },
                 {
@@ -182,6 +185,7 @@ class SlackMarkdownHelpMessage:
                             "type": "mrkdwn",
                             "text": "Don't know how to get your calendly token? "
                                     "*<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\n"
+                                    "Have a free account? Calenduck works only with *<https://help.calendly.com/hc/en-us/articles/223195488|Premium and Pro>* accounts\n"
                                     "Still need some help? *<mailto:support@calenduck.co|Contact us>*"
                         },
                     ]
