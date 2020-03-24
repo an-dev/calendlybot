@@ -13,7 +13,6 @@ from web.core.services import SlackMessageService
 from web.utils import COMMAND_LIST
 from web.core.views import commands as slack_commands
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -102,9 +101,9 @@ def commands(request):
             slack_msg_service = SlackMessageService(workspace.bot_token)
             slack_msg_service.send(su.slack_id,
                                    f"Could not find command. {STATIC_HELP_MSG}")
-            return HttpResponse(status=200)
-        method_to_call = getattr(slack_commands, command)
-        return method_to_call(request)
+        else:
+            method_to_call = getattr(slack_commands, command)
+            return method_to_call(request)
     except Exception:
         logger.exception("Error executing command")
-        return HttpResponse(status=200)
+    return HttpResponse(status=200)

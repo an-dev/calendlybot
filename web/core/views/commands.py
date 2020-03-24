@@ -2,13 +2,14 @@ from calendly import Calendly
 from django.http import HttpResponse
 
 from web.core.messages import SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage, \
-    SlackMarkdownNotificationDestinationMessage, STATIC_HELP_MSG
-from web.core.models import Workspace, SlackUser
+    SlackMarkdownNotificationDestinationMessage, STATIC_HELP_MSG, STATIC_START_MSG, STATIC_FREE_ACCT_MSG
+from web.core.models import Workspace, SlackUser, Webhook
 from web.core.services import SlackMessageService
 from web.payments.services import WorkspaceUpgradeService
 import logging
 
-from web.utils import has_active_hooks
+from web.utils import has_active_hooks, remove_hooks, has_hooks
+from web.utils.errors import InvalidTokenError
 
 logger = logging.getLogger(__name__)
 
@@ -77,9 +78,43 @@ def connect(request):
     except IndexError:
         logger.warning('Missing calendly key')
         slack_msg_service.send(user_id,
-                               f"Looks like you forgot the Calendly token. {STATIC_HELP_MSG}")
+                               f"Looks like you forgot to add a Calendly token. {STATIC_HELP_MSG}")
+    except InvalidTokenError:
+        logger.warning('User is not using pro or premium account')
+        slack_msg_service.send(user_id, STATIC_FREE_ACCT_MSG)
     except Exception:
         logger.exception('Could not connect to calendly')
         slack_msg_service.send(user_id,
                                f"Could not connect to Calendly. {STATIC_HELP_MSG}")
+    return HttpResponse(status=200)
+
+
+def disconnect(request):
+    user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
+    workspace = Workspace.objects.get(slack_id=workspace_id)
+    slack_msg_service = SlackMessageService(workspace.bot_token)
+    try:
+        # check if active webtokens are present
+        # delete them
+        # delete the webhook object as well
+        su = SlackUser.objects.get(slack_id=user_id)
+        calendly = Calendly(su.calendly_authtoken)
+        if has_hooks(calendly) and remove_hooks(calendly):
+            slack_msg_service.send(user_id,
+                                   "Account successfully disconnected.\n"
+                                   "Type `/duck connect [calendly token]` to associate another Calendly account.")
+        else:
+            logger.warning(f'Trying to delete non existent webhooks for user {user_id}')
+            slack_msg_service.send(user_id,
+                                   f"No webhooks found on this account. {STATIC_START_MSG}")
+
+        if Webhook.objects.filter(user__slack_id=user_id).exists():
+            Webhook.objects.filter(user__slack_id=user_id).first().delete()
+    except InvalidTokenError:
+        logger.warning('User does not have a valid token')
+        slack_msg_service.send(user_id, STATIC_FREE_ACCT_MSG)
+    except Exception:
+        logger.exception('Could not disconnect account from calendly.')
+        slack_msg_service.send(user_id,
+                               f"Could not disconnect account. {STATIC_HELP_MSG}")
     return HttpResponse(status=200)

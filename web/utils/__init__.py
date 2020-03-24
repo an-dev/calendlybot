@@ -9,10 +9,11 @@ from web.core.models import Webhook
 from web.core.services import SlackMessageService
 
 from web.core.messages import STATIC_HELP_MSG
+from web.utils.errors import InvalidTokenError
 
 logger = logging.getLogger(__name__)
 
-COMMAND_LIST = ['connect', 'upgrade', 'help']
+COMMAND_LIST = ['connect', 'disconnect', 'upgrade', 'help']
 
 
 def eligible_user(user):
@@ -21,10 +22,32 @@ def eligible_user(user):
 
 def has_active_hooks(calendly_client):
     hooks = calendly_client.list_webhooks()
+    if hooks.get('type') == 'authentication_error':
+        raise InvalidTokenError('')
+
     active_hooks = len([h for h in hooks['data'] if h['attributes']['state'] == 'active'])
     if active_hooks > 1:
         logger.error('There should be 1 active hook per user. Please check this.')
     return active_hooks > 0
+
+
+def has_hooks(calendly_client):
+    hooks = calendly_client.list_webhooks()
+    if hooks.get('type') == 'authentication_error':
+        raise InvalidTokenError('')
+
+    return len(hooks['data'])
+
+
+def remove_hooks(calendly_client):
+    res = True
+    hooks = calendly_client.list_webhooks()
+    for hook in hooks['data']:
+        response = calendly_client.remove_webhook(hook['id'])
+        if response.get('success') in [False, None]:
+            logger.error(f"Could not delete Calendly webhook for {hook['id']}")
+            res = False
+    return res
 
 
 def setup_handle_destination(response_url, su, channel=None):
