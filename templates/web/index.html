@@ -45,10 +45,10 @@
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
             <div class="col-lg-4 order-lg-2">
-                <h2 class="h1 font-weight-bold">/connect</h2>
-                <p class="lead">Slash connect, followed by your <a
+                <h2 class="h1 font-weight-bold">Connect</h2>
+                <p class="lead">Type <code>/duck connect</code>, followed by your <a
                         href="https://developer.calendly.com/v1/docs/getting-your-authentication-token" target="_blank"
-                        class="font-weight-bold cbot-link">Calendly authentication token</a> to authnticate your Slack
+                        class="font-weight-bold cbot-link">Calendly authentication token</a> to authenticate your Slack
                     profile with Calendly</p>
             </div>
             <div class="col-lg-6 order-lg-1 w-100">
@@ -83,13 +83,33 @@
     </div>
 </section>
 
+<section class="border-bottom cbot-border">
+    <div class="container my-5 py-5">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-4 order-lg-2">
+                <h2 class="h1 font-weight-bold">Stuck?</h2>
+                <p class="lead">Type <code>/duck help</code> for some useful tips or feel free to <a
+                        href="mailto:andy.idiaghe@gmail.com" target="_blank"
+                        class="font-weight-bold cbot-link">drop us a message</a>
+                </p>
+            </div>
+            <div class="col-lg-6 order-lg-1 w-100">
+                <div>
+                    <img src="{% static 'web/img/help.png' %}" alt="Image on how to receive helpful tips from Calenduck"
+                         class="rounded shadow-3d w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section id="pricing" class="my-5 py-5">
     <div class="container">
-        <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+        <div class="px-3 pb-3 py-md-4 mx-auto text-center">
             <h2 class="h1 font-weight-bold">Simple, transparent pricing</h2>
             <p class="lead">
                 <strike>
-                    Calenduck starts with a <span class="font-weight-bold"> {{ TRIAL_DAYS }} day trial</span>, no credit
+                    Calenduck starts with a <span class="font-weight-bold">{{ TRIAL_DAYS }} day trial</span>, no credit
                     card required.<br>After that you'll be asked
                     to upgrade to continue receiving event notifications.
                 </strike>
@@ -144,8 +164,9 @@
     </div>
     <div class="text-center">
         <p class="lead">
-            Need a custom plan? Want an extra feature? <a href="mailto:andy.idiaghe@gmail.com"
-                                                          class="cbot-link font-weight-bold">Get in touch</a>
+            Need a custom plan? Want an extra feature?<br> <a href="mailto:andy.idiaghe@gmail.com"
+                                                          class="cbot-link font-weight-bold">Get in touch</a>or give us a shout
+                on twitter <a href="https://twitter.com/calenduckapp" target="_blank" class="cbot-link font-weight-bold">@calenduckapp</a>
         </p>
     </div>
     </div>
