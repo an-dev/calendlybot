@@ -60,14 +60,14 @@ def requires_subscription(func):
                 msg = SlackMarkdownUpgradePromptMessage()
                 SlackMessageService(workspace.bot_token).send(
                     user_slack_id,
-                    "An event was created or cancelled on your calendar.",
+                    "New event on your calendar.",
                     msg.get_blocks()
                 )
                 return HttpResponse(status=200)
             else:
                 return func(request, signed_value, *args, **kwargs)
         except Exception:
-            logger.exception("Could not verify request comes from slack")
+            logger.exception("Could not verify if view needs subscription")
             return HttpResponse(status=400)
 
     return wrapper

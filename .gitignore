@@ -1,7 +1,7 @@
 # Common
 .DS_Store
 .ignore
-.envrc
+.envrc*
 .env
 [.]venv/
 *__pycache__/
