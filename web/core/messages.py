@@ -1,5 +1,15 @@
 from django.conf import settings
 
+from web.core.actions import *
+
+STATIC_START_MSG = 'Type `/duck connect [calendly token]` to start!'
+STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
+STATIC_FREE_ACCT_MSG = "Can't find a valid token on this account. Type `/duck help` if you're lost."
+
+SCHEDULED_MSG_COLOR = '#2EB67D'
+CANCELLED_MSG_COLOR = '#E01E5A'
+INFO_MSG_COLOR = '#36C5F0'
+
 
 class SlackMarkdownEventCreatedMessage:
     def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
@@ -24,7 +34,7 @@ class SlackMarkdownEventCreatedMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#2EB67D",
+            "color": SCHEDULED_MSG_COLOR,
             "blocks": [
                 {
                     "type": "section",
@@ -78,7 +88,7 @@ class SlackMarkdownEventCanceledMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#E01E5A",
+            "color": CANCELLED_MSG_COLOR,
             "blocks": [{
                 "type": "section",
                 "fields": [
@@ -132,7 +142,7 @@ class SlackMarkdownUpgradeLinkMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan.\n"
+                    "text": f"*<{settings.SITE_URL}/subscribe/{self.session_id}/|Click here>* to upgrade your plan. "
                             "Thanks for giving Calenduck a try!"
                 }
             }
@@ -153,13 +163,16 @@ class SlackMarkdownHelpMessage:
 
     def get_attachments(self):
         return [{
-            "color": "#36C5F0",
+            "color": INFO_MSG_COLOR,
             "blocks": [
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n• `/duck upgrade`: Upgrade to a new plan based on your workspace size"
+                        "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n"
+                                "• `/duck disconnect`: Disconnect your Slack account from Calendly\n"
+                                "• `/duck upgrade`: Upgrade to a new plan based on your workspace size\n"
+                                "• `/duck help`: See this message\n"
                     }
                 },
                 {
@@ -170,9 +183,97 @@ class SlackMarkdownHelpMessage:
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": "Don't know how to get your calendly token? *<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\nStill need some help? *<mailto:support@calenduck.co|Contact us>*"
+                            "text": "Don't know how to get your calendly token? "
+                                    "*<https://developer.calendly.com/v1/docs/getting-your-authentication-token|Click here>*\n"
+                                    "Have a free account? Calenduck works only with *<https://help.calendly.com/hc/en-us/articles/223195488|Premium and Pro>* accounts\n"
+                                    "Still need some help? *<mailto:support@calenduck.co|Contact us>*"
                         },
                     ]
                 }
             ]
         }]
+
+
+class SlackMarkdownNotificationDestinationMessage:
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Where do you want me to send event notifications?"
+                }
+            }
+        ]
+
+    def get_attachments(self):
+        return [{
+            "color": INFO_MSG_COLOR,
+            "blocks": [{
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Send to me"
+                        },
+                        "action_id": BTN_HOOK_DEST_SELF
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Send to channel"
+                        },
+                        "action_id": BTN_HOOK_DEST_CHANNEL
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Maybe later"
+                        },
+                        "action_id": BTN_CANCEL
+                    }
+                ]
+            }]
+        }]
+
+
+class SlackMarkdownNotificationDestinationChannelMessage:
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Where should I send notifications to?"
+                },
+                "accessory": {
+                    "type": "channels_select",
+                    "placeholder": {
+                        "type": "plain_text",
+                        "text": "Select channel",
+                    },
+                    "action_id": SELECT_HOOK_DEST_CHANNEL
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Not sure yet? No worries."
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Maybe later",
+                    },
+                    "action_id": BTN_CANCEL
+                }
+            }
+        ]
