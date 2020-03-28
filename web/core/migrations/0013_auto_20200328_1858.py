@@ -26,8 +26,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(remove_extra_users, migrations.RunPython.noop),
-        migrations.RemoveField(
-            model_name='slackuser',
-            name='manager',
-        ),
     ]
