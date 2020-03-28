@@ -1,8 +1,8 @@
 import json
 import logging
 import os
-
 import slack
+
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -13,28 +13,12 @@ from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
 from web.core.actions import *
-from web.utils import eligible_user, setup_handle_destination
+from web.utils import setup_handle_destination, get_user_count
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
 
 logger = logging.getLogger(__name__)
-
-
-def create_users(workspace, admin_id):
-    client = slack.WebClient(token=workspace.bot_token)
-    response_users_list = client.users_list()
-    admin = None
-
-    for user in filter(lambda u: eligible_user(u), response_users_list['members']):
-        su, _ = SlackUser.objects.get_or_create(slack_id=user['id'], workspace=workspace)
-        su.slack_name = user['profile'].get('first_name', user['profile']['real_name'])
-        su.slack_email = user['profile']['email']
-        if user['id'] == admin_id:
-            admin = su
-            su.manager = True
-        su.save()
-    return admin
 
 
 @require_http_methods(["GET"])
@@ -53,26 +37,36 @@ def auth(request):
             client_secret=client_secret,
             code=auth_code
         )
+        token = response['access_token']
+        user_id = response['authed_user']['id']
 
         # Save the bot token to an environmental variable or to your data store
         # for later use
         # response doesn't have a bot object
-        workspace, new = Workspace.objects.get_or_create(slack_id=response['team']['id'])
-        workspace.bot_token = response['access_token']
+        workspace, new_workspace = Workspace.objects.get_or_create(slack_id=response['team']['id'])
+        workspace.bot_token = token
         workspace.name = response['team'].get('name')
         workspace.save()
 
-        user = create_users(workspace, response['authed_user']['id'])
-        if user:
+        get_user_count(workspace)
+
+        client = slack.WebClient(token=token)
+        user_info = client.users_info(user=user_id)
+        su, new_user = SlackUser.objects.get_or_create(slack_id=user_id, workspace=workspace)
+        su.slack_name = user_info['user']['profile'].get('first_name', user_info['user']['profile']['real_name'])
+        su.slack_email = user_info['user']['profile']['email']
+        su.save()
+
+        if su and new_user:
             client.token = workspace.bot_token
-            if new:
+            if new_user:
                 client.chat_postMessage(
-                    channel=user.slack_id,
-                    text=f"Hi {user.slack_name}, I'm Calenduck. {STATIC_START_MSG}")
+                    channel=su.slack_id,
+                    text=f"Hi {su.slack_name}, I'm Calenduck. {STATIC_START_MSG}")
             else:
                 client.chat_postMessage(
-                    channel=user.slack_id,
-                    text=f"Welcome back {user.slack_name}. {STATIC_START_MSG}")
+                    channel=su.slack_id,
+                    text=f"Welcome back {su.slack_name}. {STATIC_START_MSG}")
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"

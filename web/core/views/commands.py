@@ -1,3 +1,4 @@
+import slack
 from calendly import Calendly
 from django.http import HttpResponse
 
@@ -44,8 +45,13 @@ def connect(request):
     workspace = Workspace.objects.get(slack_id=workspace_id)
     slack_msg_service = SlackMessageService(workspace.bot_token)
     try:
-        su, created = SlackUser.objects.get_or_create(slack_id=user_id,
-                                                      workspace=workspace)
+        su, new_user = SlackUser.objects.get_or_create(slack_id=user_id, workspace=workspace)
+        if new_user:
+            client = slack.WebClient(token=workspace.bot_token)
+            user_info = client.users_info(user=user_id)
+            su.slack_name = user_info['user']['profile'].get('first_name', user_info['user']['profile']['real_name'])
+            su.slack_email = user_info['user']['profile']['email']
+            su.save()
 
         # atm, we support just one authtoken per user. Calling this command effectively overwrites
         token = request.POST['text'].split(' ')[1]

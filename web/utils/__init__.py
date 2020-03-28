@@ -1,4 +1,6 @@
 import logging
+
+import slack
 from django.conf import settings
 
 from calendly import Calendly
@@ -18,6 +20,15 @@ COMMAND_LIST = ['connect', 'disconnect', 'upgrade', 'help']
 
 def eligible_user(user):
     return user['is_bot'] is False and user['id'] != 'USLACKBOT'
+
+
+def get_user_count(workspace):
+    client = slack.WebClient(token=workspace.bot_token)
+    response_users_list = client.users_list()
+
+    count = len([u for u in response_users_list['members'] if eligible_user(u)])
+    workspace.user_count = count
+    workspace.save()
 
 
 def has_active_hooks(calendly_client):

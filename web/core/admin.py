@@ -8,19 +8,12 @@ class SubscriptionInline(admin.StackedInline):
     model = Subscription
 
 
-def tot_users(obj):
-    return obj.slackusers.count()
-
-
-tot_users.short_description = 'Total users'
-
-
 class WorkspaceAdmin(admin.ModelAdmin):
     inlines = (SubscriptionInline,)
-    fields = ('name', 'slack_id', 'bot_token', 'trial_end', 'created', 'modified')
-    readonly_fields = ('name', 'slack_id', 'bot_token', 'created', 'modified')
+    fields = ('name', 'slack_id', 'bot_token', 'user_count', 'trial_end', 'created', 'modified')
+    readonly_fields = ('slack_id', 'bot_token', 'user_count', 'created', 'modified')
 
-    list_display = ('name', 'slack_id', 'trial_end', 'subscription', tot_users, 'created')
+    list_display = ('name', 'slack_id', 'trial_end', 'subscription', 'user_count', 'created')
 
 
 class WebhooksInline(admin.StackedInline):
@@ -31,11 +24,11 @@ class WebhooksInline(admin.StackedInline):
 class SlackUserAdmin(admin.ModelAdmin):
     inlines = (WebhooksInline,)
     fields = (
-        'slack_id', 'slack_name', 'slack_email', 'manager', 'calendly_email', 'calendly_authtoken', 'created',
+        'slack_id', 'slack_name', 'slack_email', 'calendly_email', 'calendly_authtoken', 'created',
         'modified', 'workspace')
     readonly_fields = ('slack_id', 'slack_name', 'slack_email', 'created', 'modified')
     raw_id_fields = ('workspace',)
-    list_display = ('slack_email', 'calendly_authtoken', 'workspace', 'manager', 'created')
+    list_display = ('slack_email', 'calendly_authtoken', 'workspace', 'created')
 
 
 admin.site.register(Workspace, WorkspaceAdmin)
