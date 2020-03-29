@@ -63,10 +63,12 @@ def handle(request, signed_value):
             if event_type == 'invitee.created':
                 txt, message_values = get_created_event_message_data(data)
                 msg = SlackMarkdownEventCreatedMessage(**message_values)
+                logger.info(f'Received created event: {message_values}')
 
             if event_type == 'invitee.canceled':
                 txt, message_values = get_cancelled_event_message_data(data)
                 msg = SlackMarkdownEventCanceledMessage(**message_values)
+                logger.info(f'Received cancelled event: {message_values}')
 
             if event_type in ['invitee.created', 'invitee.canceled']:
                 SlackMessageService(workspace.bot_token).send(
@@ -105,5 +107,5 @@ def commands(request):
             method_to_call = getattr(slack_commands, command)
             return method_to_call(request)
     except Exception:
-        logger.exception("Error executing command")
+        logger.exception(f"Error executing command: {request.POST}")
     return HttpResponse(status=200)
