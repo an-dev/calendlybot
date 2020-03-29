@@ -124,7 +124,7 @@ def disconnect(request):
         else:
             logger.warning(f'Trying to delete non existent webhooks for user {user_id}')
             slack_msg_service.send(user_id,
-                                   f"No webhooks found on this account. {STATIC_START_MSG}")
+                                   f"Doesn't seem like this account was connected. {STATIC_START_MSG}")
 
         if Webhook.objects.filter(user__slack_id=user_id).exists():
             Webhook.objects.filter(user__slack_id=user_id).first().delete()
