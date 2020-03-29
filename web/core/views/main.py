@@ -39,6 +39,7 @@ def auth(request):
         )
         token = response['access_token']
         user_id = response['authed_user']['id']
+        logger.info(f"Authed user is {response['authed_user']}")
 
         # Save the bot token to an environmental variable or to your data store
         # for later use
@@ -71,7 +72,7 @@ def auth(request):
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
     except Exception:
-        logger.exception("Could not complete auth setup")
+        logger.exception(f"Could not complete auth setup: {request.GET}")
         msg = "Uh oh. Could not setup auth."
         error = True
     return TemplateResponse(request, 'web/auth.html', {'msg': msg, 'error': error})
@@ -89,6 +90,8 @@ def interactions(request):
         su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
         slack_msg_service = SlackMessageService(su.workspace.bot_token)
 
+        logger.info(f"{user_id} user is interacting with {action}")
+
         if action == BTN_HOOK_DEST_SELF:
             return setup_handle_destination(response_url, su)
         elif action == BTN_HOOK_DEST_CHANNEL:
@@ -99,6 +102,7 @@ def interactions(request):
             )
         elif action == SELECT_HOOK_DEST_CHANNEL:
             channel = data['actions'][0]['selected_channel']
+            logger.info(f"{channel} channel selected")
             return setup_handle_destination(response_url, su, channel)
         else:
             if action == BTN_CANCEL:
