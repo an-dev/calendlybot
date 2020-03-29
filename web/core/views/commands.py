@@ -80,8 +80,9 @@ def connect(request):
             # if all its hooks are active they won't be able to setup
             logger.error(f'Trying to setup Calendly token on already setup account: {su.slack_id}')
             slack_msg_service.send(su.slack_id,
-                                   "Your account is already setup to receive event notifications. "
-                                   "Please contact support if you're experiencing issues.")
+                                   "Your account is already setup to receive event notifications.\n"
+                                   "Type `/duck disconnect` for a fresh install"
+                                   " or contact support if you're experiencing issues.")
             return HttpResponse(status=200)
 
         su.calendly_authtoken = token
@@ -124,7 +125,7 @@ def disconnect(request):
         else:
             logger.warning(f'Trying to delete non existent webhooks for user {user_id}')
             slack_msg_service.send(user_id,
-                                   f"Doesn't seem like this account was connected. {STATIC_START_MSG}")
+                                   f"Doesn't seem like this account is connected. {STATIC_START_MSG}")
 
         if Webhook.objects.filter(user__slack_id=user_id).exists():
             Webhook.objects.filter(user__slack_id=user_id).first().delete()
