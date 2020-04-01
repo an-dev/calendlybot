@@ -124,6 +124,7 @@ def disconnect(request):
                                    "Type `/duck connect [calendly token]` to associate another Calendly account.")
         else:
             logger.warning(f'Trying to delete non existent webhooks for user {user_id}')
+            Webhook.objects.filter(user=su).delete()
             slack_msg_service.send(user_id,
                                    f"Doesn't seem like this account is connected. {STATIC_START_MSG}")
 
