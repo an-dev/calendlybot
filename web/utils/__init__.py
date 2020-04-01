@@ -82,13 +82,19 @@ def setup_handle_destination(response_url, su, channel=None):
                 f"{settings.SITE_URL}/handle/{signed_value}/")
 
             if 'id' not in webhook_create_response:
-                errors = {}
+                errors = ''
                 if 'message' in webhook_create_response:
-                    errors = webhook_create_response['errors']
+                    errors = webhook_create_response.get('errors', webhook_create_response.get('message'))
                 logger.error(f'Could not setup Calendly webhook. {errors}')
+
+                if errors:
+                    errors_detail = errors
+                else:
+                    errors_detail = STATIC_HELP_MSG
+
                 slack_msg_service.update_interaction(
                     response_url,
-                    text=f"Could not connect with Calendly API. {STATIC_HELP_MSG}")
+                    text=f"Could not connect with Calendly API. {errors_detail}")
             else:
                 Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'],
                                        destination_id=destination_id)
