@@ -90,7 +90,7 @@ def interactions(request):
         su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
         slack_msg_service = SlackMessageService(su.workspace.bot_token)
 
-        logger.info(f"{user_id} user is interacting with {action}")
+        logger.info(f"User {user_id} is interacting with {action}")
 
         if action == BTN_HOOK_DEST_SELF:
             return setup_handle_destination(response_url, su)

@@ -125,7 +125,7 @@ class SlackMarkdownUpgradePromptMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"An event was created or cancelled on your calendar.\n"
+                    "text": f"A meeting was created or cancelled on your calendar.\n"
                             f"Please type `/duck upgrade` to continue receiving detailed notifications."
                 }
             }

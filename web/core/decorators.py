@@ -60,7 +60,7 @@ def requires_subscription(func):
                 msg = SlackMarkdownUpgradePromptMessage()
                 SlackMessageService(workspace.bot_token).send(
                     user_slack_id,
-                    "New event on your calendar.",
+                    "A meeting was created or cancelled on your calendar.",
                     msg.get_blocks()
                 )
                 return HttpResponse(status=200)
