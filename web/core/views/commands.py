@@ -17,8 +17,10 @@ logger = logging.getLogger(__name__)
 
 def upgrade(request):
     try:
+        user_id = request.POST['user_id']
+        logger.info(f'User {user_id} is trying to upgrade')
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-        su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
+        su = SlackUser.objects.get(slack_id=user_id, workspace=workspace)
 
         checkout_session_id = WorkspaceUpgradeService(workspace).run()
 
@@ -35,8 +37,10 @@ def upgrade(request):
 
 def help(request):
     try:
+        user_id = request.POST['user_id']
+        logger.info(f'User {user_id} is looking for help')
         workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-        su = SlackUser.objects.get(slack_id=request.POST['user_id'], workspace=workspace)
+        su = SlackUser.objects.get(slack_id=user_id, workspace=workspace)
 
         msg = SlackMarkdownHelpMessage()
         SlackMessageService(workspace.bot_token).send(su.slack_id,
@@ -53,10 +57,12 @@ def help(request):
 def connect(request):
     try:
         user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
+        logger.info(f'User {user_id} is trying to connect to Calendly')
         workspace = Workspace.objects.get(slack_id=workspace_id)
         slack_msg_service = SlackMessageService(workspace.bot_token)
         su, new_user = SlackUser.objects.get_or_create(slack_id=user_id, workspace=workspace)
         if new_user:
+            logger.info(f'User {user_id} is new!')
             client = slack.WebClient(token=workspace.bot_token)
             user_info = client.users_info(user=user_id)
             su.slack_name = user_info['user']['profile'].get('first_name', user_info['user']['profile']['real_name'])
@@ -65,11 +71,12 @@ def connect(request):
 
         # atm, we support just one authtoken per user. Calling this command effectively overwrites
         token = request.POST['text'].split(' ')[1]
+        logger.info(f'User {user_id} is using token {token}')
         calendly = Calendly(token)
         response_from_echo = calendly.echo()
 
         if 'email' not in response_from_echo:
-            logger.info(f'User {su.slack_email} does not have paid account')
+            logger.info(f'User {user_id} does not have paid account')
             slack_msg_service.send(su.slack_id,
                                    "Could not find user in Calendly. Make sure the token is correct.")
             return HttpResponse(status=200)
@@ -78,7 +85,7 @@ def connect(request):
             # check if there's an existing working hook for this user
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
-            logger.error(f'Trying to setup Calendly token on already setup account: {su.slack_id}')
+            logger.error(f'Trying to setup Calendly token on already setup account: {user_id}')
             slack_msg_service.send(su.slack_id,
                                    "Your account is already setup to receive event notifications.\n"
                                    "Type `/duck disconnect` for a fresh install"
@@ -111,6 +118,7 @@ def connect(request):
 def disconnect(request):
     try:
         user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
+        logger.info(f'User {user_id} is trying to disconnect from Calendly')
         workspace = Workspace.objects.get(slack_id=workspace_id)
         slack_msg_service = SlackMessageService(workspace.bot_token)
         # check if active webtokens are present
