@@ -13,13 +13,14 @@ INFO_MSG_COLOR = '#36C5F0'
 
 class SlackMarkdownEventCreatedMessage:
     def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
-                 invitee_timezone):
+                 invitee_timezone, location=None):
         self.name = name
         self.event_name = event_name
         self.event_start_time = event_start_time
         self.invitee_name = invitee_name
         self.invitee_email = invitee_email
         self.invitee_timezone = invitee_timezone
+        self.location = location
 
     def get_blocks(self):
         return [
@@ -54,6 +55,10 @@ class SlackMarkdownEventCreatedMessage:
                         {
                             "type": "mrkdwn",
                             "text": f"*Invitee Email:*\n<mailto:{self.invitee_email}|{self.invitee_email}>"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Location:\n{self.location}*"
                         },
                         {
                             "type": "mrkdwn",

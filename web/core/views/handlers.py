@@ -25,7 +25,8 @@ def get_created_event_message_data(data):
         'event_start_time': data['event']['invitee_start_time_pretty'],
         'invitee_name': data['invitee']['name'],
         'invitee_email': data['invitee']['email'],
-        'invitee_timezone': data['invitee']['timezone']
+        'invitee_timezone': data['invitee']['timezone'],
+        'location': data['event_type']['location']
     }
     return simple_text, msg_object
 
