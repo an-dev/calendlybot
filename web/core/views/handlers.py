@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
-from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCanceledMessage, STATIC_HELP_MSG
+from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCancelledMessage, STATIC_HELP_MSG
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
 from web.utils import COMMAND_LIST
@@ -26,7 +26,7 @@ def get_created_event_message_data(data):
         'invitee_name': data['invitee']['name'],
         'invitee_email': data['invitee']['email'],
         'invitee_timezone': data['invitee']['timezone'],
-        'location': data['event_type']['location']
+        'location': data['event']['location']
     }
     return simple_text, msg_object
 
@@ -68,7 +68,7 @@ def handle(request, signed_value):
 
             if event_type == 'invitee.canceled':
                 txt, message_values = get_cancelled_event_message_data(data)
-                msg = SlackMarkdownEventCanceledMessage(**message_values)
+                msg = SlackMarkdownEventCancelledMessage(**message_values)
                 logger.info(f'Received cancelled event: {message_values}')
 
             if event_type in ['invitee.created', 'invitee.canceled']:
@@ -80,14 +80,6 @@ def handle(request, signed_value):
                 )
     except Exception:
         logger.exception("Could not handle hook event")
-        # # re-create webhook
-        # calendly = Calendly(su.calendly_authtoken)
-        # signed_value = signing.dumps((su.workspace.slack_id, su.slack_id))
-        # response = calendly.create_webhook(f"{settings.SITE_URL}/handle/{signed_value}/")
-        # if 'id' in response:
-        #     Webhook.objects.create(user=su, calendly_id=response['id'])
-        # else:
-        #     logger.error("Could not recreate webhook {}".format(response))
     return HttpResponse(status=200)
 
 

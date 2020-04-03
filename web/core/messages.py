@@ -58,11 +58,11 @@ class SlackMarkdownEventCreatedMessage:
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*Location:\n{self.location}*"
+                            "text": f"*Location:*\n{self.location if self.location else 'N/A'}"
                         },
                         {
                             "type": "mrkdwn",
-                            "text": f"*<https://calendly.com/app/scheduled_events/user/me|View invitee in Calendly>*"
+                            "text": "\n\n*<https://calendly.com/app/scheduled_events/user/me|View invitee on Calendly>*"
                         }
                     ]
                 }
@@ -70,7 +70,7 @@ class SlackMarkdownEventCreatedMessage:
         }]
 
 
-class SlackMarkdownEventCanceledMessage:
+class SlackMarkdownEventCancelledMessage:
     def __init__(self, name, event_name, event_start_time, invitee_name, invitee_email,
                  canceler_name):
         self.name = name
@@ -130,7 +130,7 @@ class SlackMarkdownUpgradePromptMessage:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"A meeting was created or cancelled on your calendar.\n"
+                    "text": f"An event was created or cancelled on your calendar.\n"
                             f"Please type `/duck upgrade` to continue receiving detailed notifications."
                 }
             }
