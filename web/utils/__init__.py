@@ -98,12 +98,18 @@ def setup_handle_destination(response_url, su, channel=None):
             else:
                 Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'],
                                        destination_id=destination_id)
+                msg = "Setup complete. You will now receive notifications on created and canceled events!"
                 if channel:
-                    # join channel if not already there
-                    slack_msg_service.client.conversations_join(channel=destination_id)
+                    # if private channel the bot needs to be invited
+                    if channel.startswith('G'):
+                        msg = "Almost there! Type `/invite calenduck` in the selected private channel to receive notifications on created and canceled events!"
+                    else:
+                        # join channel if not already there
+                        slack_msg_service.client.conversations_join(channel=destination_id)
+
                 slack_msg_service.update_interaction(
                     response_url,
-                    text="Setup complete. You will now receive notifications on created and canceled events!")
+                    text=msg)
     except Exception:
         logger.exception('Could not connect to calendly')
         slack_msg_service.update_interaction(
