@@ -108,7 +108,7 @@ def interactions(request):
             if action == BTN_CANCEL:
                 slack_msg_service.update_interaction(
                     response_url,
-                    text="You can pick things up later by typing `/duck connect [calendly token]`.")
+                    text="You can pick things up later by typing `/duck connect your-calendly-token`.")
             else:
                 slack_msg_service.send(su.slack_id, f"I don\'t think I understand. {STATIC_HELP_MSG}")
     except Exception:

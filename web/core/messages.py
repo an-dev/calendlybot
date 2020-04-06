@@ -2,7 +2,7 @@ from django.conf import settings
 
 from web.core.actions import *
 
-STATIC_START_MSG = 'Type `/duck connect [calendly token]` to start!'
+STATIC_START_MSG = 'Type `/duck connect your-calendly-token` to start!'
 STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
 STATIC_FREE_ACCT_MSG = "Can't find a valid token on this account. Type `/duck help` if you're lost."
 
@@ -169,7 +169,7 @@ class SlackMarkdownHelpMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "• `/duck connect [calendly token]`: Connect your Slack account to Calendly\n"
+                        "text": "• `/duck connect your-calendly-token`: Connect your Slack account to Calendly\n"
                                 "• `/duck disconnect`: Disconnect your Slack account from Calendly\n"
                                 "• `/duck upgrade`: Upgrade to a new plan based on your workspace size\n"
                                 "• `/duck help`: See this message\n"
