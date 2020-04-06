@@ -1,5 +1,4 @@
 {% extends 'web/base.html' %}
-{% load static %}
 {% block title %}Calendly + Slack direct integration{% endblock %}
 {% block pricing %}
 <li class="nav-item">
@@ -15,16 +14,14 @@
 </li>
 {% endblock %}
 {% block content %}
-<main class="text-light cbot-bg">
+{% load static %}
+<main class="text-light text-center text-center cbot-bg">
     <div class="container my-5 py-5">
         <div class="row">
-            <div class="col-md-5 col-12">
+            <div class="col-12">
                 <h1 class="h1 font-weight-bold">Calendly events for Slack</h1>
-                <p class="lead">Direct Calendly integration for Slack*. Receive event notifications directly in your
-                    workspace with no need for unnecessary third-party services.</p>
-                <p class="font-italic font-weight-bold">*Works only with Calendly <a class="font-weight-bold text-white"
-                                                                    href="https://help.calendly.com/hc/en-us/articles/223195488"
-                                                                    target="_blank">Premium and Pro accounts</a></p>
+                <p class="lead">Direct Calendly integration for Slack*. <br> Receive event notifications directly in
+                    your workspace with no need for unnecessary third-party services.</p>
                 <p>
                     <a href="/install/"
                        role="button" class="btn btn-lg btn-outline-light">
@@ -34,13 +31,19 @@
                         </span>
                     </a>
                 </p>
+                <p class="font-italic font-weight-bold">
+                    *For Calendly <a class="font-weight-bold no-hover"
+                                     href="https://help.calendly.com/hc/en-us/articles/223195488"
+                                     target="_blank">Premium and Pro accounts</a>
+                </p>
             </div>
-            <div class="col-md-7 col-12">
+            <div class="col-12">
                 <img src="{% static 'web/img/hero.png' %}" alt="Hero image for notifications" class="pt-md-5 w-100">
             </div>
         </div>
     </div>
 </main>
+
 <section id="how-it-works">
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
@@ -136,44 +139,47 @@
             </p>
         </div>
     </div>
-    <div class="row mb-5 text-center justify-content-center">
-        <div class="col-8 col-md-4 my-2">
-            <div>
-                <p class="lead font-weight-bold mb-0 cbot-link">Standard</p>
-                <div class="cbot-link">
-                    <span class="h3 font-weight-bold">$</span>
-                    <span class="display-4 mb-0">4<span class="cbot-display-sm">/month</span></span>
+    <div class="container">
+        <div class="row mb-5 text-center justify-content-center">
+            <div class="col-8 col-md-4 my-2">
+                <div>
+                    <p class="lead font-weight-bold mb-0 cbot-link">Standard</p>
+                    <div class="cbot-link">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">4<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">up to 8 users</span>
                 </div>
-                <span class="text-small text-muted pb-md-4">up to 8 users</span>
             </div>
-        </div>
-        <div class="col-8 col-md-4 my-2">
-            <div>
-                <p class="lead font-weight-bold mb-0 cbot-link">Business</p>
-                <div class="cbot-link">
-                    <span class="h3 font-weight-bold">$</span>
-                    <span class="display-4 mb-0">19<span class="cbot-display-sm">/month</span></span>
+            <div class="col-8 col-md-4 my-2">
+                <div>
+                    <p class="lead font-weight-bold mb-0 cbot-link">Business</p>
+                    <div class="cbot-link">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">19<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">up to 20 users</span>
                 </div>
-                <span class="text-small text-muted pb-md-4">up to 20 users</span>
             </div>
-        </div>
-        <div class="col-8 col-md-4 my-2">
-            <div>
-                <p class="lead font-weight-bold mb-0 cbot-link">Enterprise</p>
-                <div class="cbot-link">
-                    <span class="h3 font-weight-bold">$</span>
-                    <span class="display-4 mb-0">49<span class="cbot-display-sm">/month</span></span>
+            <div class="col-8 col-md-4 my-2">
+                <div>
+                    <p class="lead font-weight-bold mb-0 cbot-link">Enterprise</p>
+                    <div class="cbot-link">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">49<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">more than 20 users</span>
                 </div>
-                <span class="text-small text-muted pb-md-4">more than 20 users</span>
             </div>
         </div>
     </div>
     <div class="text-center">
         <p class="lead">
             Need a custom plan? Want an extra feature?<br> <a href="mailto:support@calenduck.co?subject=Feature Request"
-                                                          class="cbot-link font-weight-bold">Get in touch</a> or give us a shout
-                on twitter <a href="https://twitter.com/calenduckapp" target="_blank"
-                              class="cbot-link font-weight-bold">@calenduckapp</a>
+                                                              class="cbot-link font-weight-bold">Get in touch</a> or
+            give us a shout
+            on twitter <a href="https://twitter.com/calenduckapp" target="_blank"
+                          class="cbot-link font-weight-bold">@calenduckapp</a>
         </p>
     </div>
 </section>
@@ -193,6 +199,7 @@
         </div>
     </div>
 </section>
+
 <!--<div class="alert alert-info alert-dismissible fade show rounded-0 cbot-alert" role="alert">-->
 <!--    <div class="text-center">-->
 <!--        <span class="font-weight-bold">Join the early access!</span> 30 day trial and early access to new features for-->

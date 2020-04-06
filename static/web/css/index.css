@@ -29,3 +29,12 @@ html {
     z-index: 999;
     bottom: -16px;
 }
+
+.no-hover {
+    color: #17a2b8;
+}
+
+.no-hover:hover {
+    color: #17a2b8;
+    text-decoration: none;
+}
