@@ -1,9 +1,13 @@
 aiohttp==3.6.2
+amqp==1.4.9
+anyjson==0.3.3
 asgiref==3.2.3
 async-timeout==3.0.1
 attrs==19.3.0
 backcall==0.1.0
+billiard==3.3.0.23
 calendly==1.1.1
+celery==3.1.26.post2
 certifi==2019.11.28
 chardet==3.0.4
 decorator==4.4.1
@@ -17,6 +21,7 @@ ipython==7.11.1
 ipython-genutils==0.2.0
 jedi==0.15.2
 jsonfield2==3.1.0
+kombu==3.0.37
 multidict==4.7.4
 parso==0.5.2
 pexpect==4.7.0

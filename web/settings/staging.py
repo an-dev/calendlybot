@@ -11,7 +11,9 @@ SITE_URL = 'https://calendlybot.herokuapp.com'
 
 
 def skip_static_requests(record):
-    if record.args[0].startswith('GET path="/static/') or record.args[0].startswith('GET /static/'):  # filter whatever you want
+    filtered_record = record.args[0]
+    if filtered_record.startswith('GET path="/static/') or\
+            filtered_record.startswith('GET /static/'):  # filter whatever you want
         return False
     return True
 
@@ -42,9 +44,9 @@ LOGGING = {
         "null": {"level": "DEBUG", "class": "logging.NullHandler"},
         "console": {
             "level": "DEBUG",
-            "filters": [],
             "class": "logging.StreamHandler",
             "formatter": "console",
+            'filters': ['skip_static_requests'],
         },
         "django.server": {
             "level": "INFO",
@@ -66,3 +68,9 @@ LOGGING = {
         "celery.redirected": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.sendinblue.com'
+EMAIL_HOST_USER = 'support@calenduck.co'
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
