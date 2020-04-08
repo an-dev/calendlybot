@@ -258,10 +258,16 @@ class SlackMarkdownNotificationDestinationChannelMessage:
                     "text": "Where should I send notifications to?"
                 },
                 "accessory": {
-                    "type": "channels_select",
+                    "type": "conversations_select",
                     "placeholder": {
                         "type": "plain_text",
                         "text": "Select channel",
+                    },
+                    "filter": {
+                        "include": [
+                            "public",
+                            "private"
+                        ],
                     },
                     "action_id": SELECT_HOOK_DEST_CHANNEL
                 }
