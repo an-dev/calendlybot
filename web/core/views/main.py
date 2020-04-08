@@ -102,7 +102,7 @@ def interactions(request):
                 blocks=msg.get_blocks()
             )
         elif action == SELECT_HOOK_DEST_CHANNEL:
-            channel = data['actions'][0]['selected_channel']
+            channel = data['actions'][0]['selected_conversation']
             logger.info(f"{channel} channel selected")
             return setup_handle_destination(response_url, su, channel)
         else:
