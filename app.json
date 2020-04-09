@@ -1,0 +1,64 @@
+{
+  "name": "zd-web",
+  "env": {
+    "DJANGO_SETTINGS_MODULE": {
+      "required": true
+    },
+    "SLACK_BOT_SCOPE": {
+      "required": true
+    },
+    "SLACK_CLIENT_ID": {
+      "required": true
+    },
+    "SLACK_CLIENT_SECRET": {
+      "required": true
+    },
+    "SLACK_SIGNING_SECRET": {
+      "required": true
+    },
+    "STRIPE_PLAN_ID_LG": {
+      "required": true
+    },
+    "STRIPE_PLAN_ID_MD": {
+      "required": true
+    },
+    "STRIPE_PLAN_ID_SM": {
+      "required": true
+    },
+    "STRIPE_PUBLIC_KEY": {
+      "required": true
+    },
+    "STRIPE_SECRET_KEY": {
+      "required": true
+    },
+    "SITE_URL": {
+      "required": true
+    },
+    "EMAIL_BACKEND": {
+      "required": true
+    },
+    "EMAIL_PORT":{
+      "required": true
+    },
+    "EMAIL_HOST_PASSWORD": {
+      "required": true
+    },
+    "DJANGO_SECRET_KEY": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+    "cloudamqp",
+    "heroku-postgresql"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}

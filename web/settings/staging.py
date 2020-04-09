@@ -70,7 +70,11 @@ LOGGING = {
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 EMAIL_HOST = 'smtp-relay.sendinblue.com'
-EMAIL_HOST_USER = 'support@calenduck.co'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
+
+EMAIL_HOST_USER = 'support@calenduck.co'
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
+
+CELERY_BROKER_URL = os.environ["CLOUDAMQP_URL"]
