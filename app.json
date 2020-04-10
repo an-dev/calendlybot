@@ -1,5 +1,5 @@
 {
-  "name": "zd-web",
+  "name": "calendlybot",
   "env": {
     "DJANGO_SETTINGS_MODULE": {
       "required": true
@@ -34,10 +34,7 @@
     "SITE_URL": {
       "required": true
     },
-    "EMAIL_BACKEND": {
-      "required": true
-    },
-    "EMAIL_PORT":{
+    "EMAIL_HOST_USER": {
       "required": true
     },
     "EMAIL_HOST_PASSWORD": {
