@@ -19,3 +19,5 @@ tmp/
 /*.iml
 
 ./mailhog
+web/staticfiles/
+!/mailhog
