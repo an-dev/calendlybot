@@ -13,7 +13,7 @@ from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
 from web.core.actions import *
-from web.utils import setup_handle_destination, get_user_count
+from web.utils import setup_handle_destination, get_user_count, mail
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -64,6 +64,7 @@ def auth(request):
                 client.chat_postMessage(
                     channel=su.slack_id,
                     text=f"Hi {su.slack_name}, I'm Calenduck. {STATIC_START_MSG}")
+                mail.send_welcome_email(user_id)
             else:
                 client.chat_postMessage(
                     channel=su.slack_id,

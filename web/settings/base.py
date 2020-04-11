@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'web.core',
+    'djcelery_email'
 ]
 
 MIDDLEWARE = [
@@ -109,6 +110,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", 'django.core.mail.backends.console.EmailBackend')
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
+EMAIL_PORT = os.getenv("EMAIL_PORT", 25)
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+
+EMAIL_TIMEOUT = 10
+FROM_EMAIL = "support@calenduck.co"
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
@@ -134,6 +146,7 @@ CALENDLY_BOT_SUBSCRIBE_HASH = 'web.core.views.signed_id'
 
 STRIPE_PUBLIC_KEY = os.environ["STRIPE_PUBLIC_KEY"]
 STRIPE_SECRET_KEY = os.environ["STRIPE_SECRET_KEY"]
+
 STRIPE_PLAN_ID_SM = os.environ["STRIPE_PLAN_ID_SM"]
 STRIPE_PLAN_ID_MD = os.environ["STRIPE_PLAN_ID_MD"]
 STRIPE_PLAN_ID_LG = os.environ["STRIPE_PLAN_ID_LG"]
@@ -141,3 +154,5 @@ STRIPE_PLAN_ID_LG = os.environ["STRIPE_PLAN_ID_LG"]
 GTAG_ID = ''
 
 TRIAL_DAYS = 14
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
