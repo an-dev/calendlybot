@@ -46,7 +46,6 @@ LOGGING = {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "console",
-            'filters': ['skip_static_requests'],
         },
         "django.server": {
             "level": "INFO",
