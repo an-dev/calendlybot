@@ -9,7 +9,7 @@ from django.core import signing
 from django.http import HttpResponse
 from slack.errors import SlackApiError
 
-from web.core.models import Webhook
+from web.core.models import Webhook, Workspace
 from web.core.services import SlackMessageService
 
 from web.core.messages import STATIC_HELP_MSG
@@ -25,13 +25,17 @@ def eligible_user(user):
 
 
 @shared_task(autoretry_for=(SlackApiError,))
-def get_user_count(workspace):
-    client = slack.WebClient(token=workspace.bot_token)
-    response_users_list = client.users_list()
+def get_user_count(workspace_slack_id):
+    try:
+        workspace = Workspace.objects.get(slack_id=workspace_slack_id)
+        client = slack.WebClient(token=workspace.bot_token)
+        response_users_list = client.users_list()
 
-    count = len([u for u in response_users_list['members'] if eligible_user(u)])
-    workspace.user_count = count
-    workspace.save()
+        count = len([u for u in response_users_list['members'] if eligible_user(u)])
+        workspace.user_count = count
+        workspace.save()
+    except Exception:
+        logger.exception('Could not get workspace size')
 
 
 def has_active_hooks(calendly_client):
