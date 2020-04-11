@@ -24,7 +24,7 @@ def eligible_user(user):
     return user['is_bot'] is False and user['id'] != 'USLACKBOT'
 
 
-@shared_task(autoretry_for=SlackApiError)
+@shared_task(autoretry_for=(SlackApiError,))
 def get_user_count(workspace):
     client = slack.WebClient(token=workspace.bot_token)
     response_users_list = client.users_list()
