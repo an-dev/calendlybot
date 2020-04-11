@@ -1,9 +1,12 @@
+import logging
 from smtplib import SMTPServerDisconnected
 
 from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template import loader
+
+logger = logging.getLogger(__name__)
 
 
 class SendEmail:
@@ -23,7 +26,6 @@ class SendEmail:
             from_email=settings.FROM_EMAIL,
             recipient_list=[self.to_email],
             html_message=html,
-            fail_silently=True
         )
 
 
@@ -36,5 +38,8 @@ class SendWelcomeEmail(SendEmail):
 def send_welcome_email(user_id):
     from web.core.models import SlackUser
 
-    email = SlackUser.objects.get(slack_id=user_id).slack_email
-    SendWelcomeEmail(email).run()
+    try:
+        email = SlackUser.objects.get(slack_id=user_id).slack_email
+        SendWelcomeEmail(email).run()
+    except Exception:
+        logger.exception("Could not send email")

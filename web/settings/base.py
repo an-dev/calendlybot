@@ -115,7 +115,7 @@ EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", 'django.core.mail.backends.console.Em
 EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 25)
 
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST", "")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
 EMAIL_TIMEOUT = 10
