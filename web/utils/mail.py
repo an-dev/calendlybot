@@ -23,6 +23,7 @@ class SendEmail:
             from_email=settings.FROM_EMAIL,
             recipient_list=[self.to_email],
             html_message=html,
+            fail_silently=True
         )
 
 
