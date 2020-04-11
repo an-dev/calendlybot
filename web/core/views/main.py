@@ -39,17 +39,18 @@ def auth(request):
         )
         token = response['access_token']
         user_id = response['authed_user']['id']
+        team_id = response['team']['id']
         logger.info(f"Authed user is {response['authed_user']}")
 
         # Save the bot token to an environmental variable or to your data store
         # for later use
         # response doesn't have a bot object
-        workspace, new_workspace = Workspace.objects.get_or_create(slack_id=response['team']['id'])
+        workspace, new_workspace = Workspace.objects.get_or_create(slack_id=team_id)
         workspace.bot_token = token
         workspace.name = response['team'].get('name')
         workspace.save()
 
-        get_user_count.delay(workspace)
+        get_user_count.delay(response['team']['id'])
 
         client = slack.WebClient(token=token)
         user_info = client.users_info(user=user_id)
