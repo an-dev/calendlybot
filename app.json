@@ -42,6 +42,9 @@
     },
     "DJANGO_SECRET_KEY": {
       "required": true
+    },
+    "CLOUDAMQP_URL": {
+      "required": true
     }
   },
   "formation": {
