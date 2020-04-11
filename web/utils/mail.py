@@ -20,6 +20,8 @@ class SendEmail:
         body = loader.render_to_string('emails/welcome.txt')
         html = loader.render_to_string('emails/welcome.html')
 
+        logger.info(f"Sending welcome email to {self.to_email}")
+
         return send_mail(
             subject=self.subject(),
             message=body,
@@ -42,4 +44,4 @@ def send_welcome_email(user_id):
         email = SlackUser.objects.get(slack_id=user_id).slack_email
         SendWelcomeEmail(email).run()
     except Exception:
-        logger.exception("Could not send email")
+        logger.exception("Could not send welcome email")
