@@ -62,7 +62,7 @@ LOGGING = {
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO"},
         "django.server": {"handlers": ["django.server"], "level": "INFO", "propagate": False},
-        "web": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
+        "web": {"handlers": ["console"], "level": "INFO", "propagate": True},
         "celery": {"handlers": ["console"], "level": "INFO", "propagate": True},
         "celery.redirected": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
