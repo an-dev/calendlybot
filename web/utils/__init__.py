@@ -1,11 +1,13 @@
 import logging
 
 import slack
+from celery import shared_task
 from django.conf import settings
 
 from calendly import Calendly
 from django.core import signing
 from django.http import HttpResponse
+from slack.errors import SlackApiError
 
 from web.core.models import Webhook
 from web.core.services import SlackMessageService
@@ -22,6 +24,7 @@ def eligible_user(user):
     return user['is_bot'] is False and user['id'] != 'USLACKBOT'
 
 
+@shared_task(autoretry_for=SlackApiError)
 def get_user_count(workspace):
     client = slack.WebClient(token=workspace.bot_token)
     response_users_list = client.users_list()
