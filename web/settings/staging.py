@@ -11,7 +11,9 @@ SITE_URL = 'https://calendlybot.herokuapp.com'
 
 
 def skip_static_requests(record):
-    if record.args[0].startswith('GET path="/static/') or record.args[0].startswith('GET /static/'):  # filter whatever you want
+    filtered_record = record.args[0]
+    if filtered_record.startswith('GET path="/static/') or\
+            filtered_record.startswith('GET /static/'):  # filter whatever you want
         return False
     return True
 
@@ -42,7 +44,6 @@ LOGGING = {
         "null": {"level": "DEBUG", "class": "logging.NullHandler"},
         "console": {
             "level": "DEBUG",
-            "filters": [],
             "class": "logging.StreamHandler",
             "formatter": "console",
         },
@@ -61,8 +62,10 @@ LOGGING = {
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO"},
         "django.server": {"handlers": ["django.server"], "level": "INFO", "propagate": False},
-        "web": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
+        "web": {"handlers": ["console"], "level": "INFO", "propagate": True},
         "celery": {"handlers": ["console"], "level": "INFO", "propagate": True},
         "celery.redirected": {"handlers": ["console"], "level": "DEBUG", "propagate": True},
     },
 }
+
+CELERY_BROKER_URL = os.environ["CLOUDAMQP_URL"]
