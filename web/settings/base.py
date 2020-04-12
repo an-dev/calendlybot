@@ -156,8 +156,7 @@ GTAG_ID = ''
 
 TRIAL_DAYS = 14
 
-# CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
-CELERY_BROKER_URL = 'amqp://nocxxovp:nB79Z_yTIF-e4XFAbF7FYKQx__yBMgHL@fox.rmq.cloudamqp.com/nocxxovp'
+CELERY_BROKER_URL = os.getenv('CLOUDAMQP_URL', 'amqp://guest:guest@localhost:5672/')
 
 CELERY_BROKER_POOL_LIMIT = 1  # Will decrease connection usage
 CELERY_BROKER_HEARTBEAT = None  # We're using TCP keep-alive instead
