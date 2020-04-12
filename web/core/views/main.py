@@ -50,7 +50,7 @@ def auth(request):
         workspace.name = response['team'].get('name')
         workspace.save()
 
-        # get_user_count.delay(response['team']['id'])
+        get_user_count.delay(response['team']['id'])
 
         client = slack.WebClient(token=token)
         user_info = client.users_info(user=user_id)
@@ -65,7 +65,7 @@ def auth(request):
                 client.chat_postMessage(
                     channel=su.slack_id,
                     text=f"Hi {su.slack_name}, I'm Calenduck. {STATIC_START_MSG}")
-                # mail.send_welcome_email.delay(user_id)
+                mail.send_welcome_email.delay(user_id)
             else:
                 client.chat_postMessage(
                     channel=su.slack_id,
