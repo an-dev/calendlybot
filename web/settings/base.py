@@ -110,7 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", 'django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+CELERY_EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", 'django.core.mail.backends.console.EmailBackend')
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "localhost")
 EMAIL_PORT = os.getenv("EMAIL_PORT", 25)
@@ -155,4 +156,15 @@ GTAG_ID = ''
 
 TRIAL_DAYS = 14
 
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+# CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_BROKER_URL = 'amqp://nocxxovp:nB79Z_yTIF-e4XFAbF7FYKQx__yBMgHL@fox.rmq.cloudamqp.com/nocxxovp'
+
+CELERY_BROKER_POOL_LIMIT = 1  # Will decrease connection usage
+CELERY_BROKER_HEARTBEAT = None  # We're using TCP keep-alive instead
+CELERY_BROKER_CONNECTION_TIMEOUT = 90  # May require a long timeout due to Linux DNS timeouts etc
+CELERY_SEND_EVENTS = True  # create celeryev.* queues for flower to consume
+CELERY_EVENT_QUEUE_EXPIRES = (
+    60  # Will delete all celeryev. queues without consumers after 1 minute.
+)
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+
