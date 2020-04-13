@@ -27,3 +27,8 @@ def faq(request):
 @require_http_methods(["GET"])
 def privacy(request):
     return TemplateResponse(request, 'web/privacy.html')
+
+
+@require_http_methods(["GET"])
+def terms(request):
+    return TemplateResponse(request, 'web/terms.html')
