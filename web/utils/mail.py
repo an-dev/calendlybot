@@ -24,10 +24,10 @@ class SendEmail:
         return ""
 
     def run(self):
-        body = loader.render_to_string(f'emails/{self.template_slug}.txt')
-        html = loader.render_to_string(f'emails/{self.template_slug}.html')
+        body = loader.render_to_string(f'emails/{self.template_slug()}.txt')
+        html = loader.render_to_string(f'emails/{self.template_slug()}.html')
 
-        logger.info(f"Sending {self.template_slug} email to {self.to_email}")
+        logger.info(f"Sending {self.template_slug()} email to {self.to_email}")
 
         return send_mail(
             subject=self.subject(),
