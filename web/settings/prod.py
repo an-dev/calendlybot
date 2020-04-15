@@ -9,11 +9,11 @@ DEBUG = False
 SITE_URL = 'https://www.calenduck.co'
 GTAG_ID = ***REMOVED***
 
-SENTRY_KEY = '9a126a4412b74ed4b6f3b4483353b3dd'
-SENTRY_PROJECT = '5124922'
+SENTRY_KEY = ***REMOVED***
+SENTRY_PROJECT = ***REMOVED***
 
 sentry_sdk.init(
-    dsn=f"https://{SENTRY_KEY}@sentry.io/{SENTRY_PROJECT}",
+    dsn=f"https://{SENTRY_KEY}@o378137.ingest.sentry.io/{SENTRY_PROJECT}",
     integrations=[DjangoIntegration()],
 
     # If you wish to associate users to errors (assuming you are using
