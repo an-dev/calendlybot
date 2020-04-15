@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
 
-from web.core.models import Workspace, SlackUser
+from web.core.models import SlackUser
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +56,6 @@ class SendTrialEndEmail(SendEmail):
 
 @shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_welcome_email(user_id):
-    from web.core.models import SlackUser
-
     try:
         email = SlackUser.objects.get(slack_id=user_id).slack_email
         SendWelcomeEmail(email).run()
