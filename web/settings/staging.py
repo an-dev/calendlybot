@@ -8,8 +8,6 @@ logger = logging.getLogger(__name__)
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-django_heroku.settings(locals())
-
 SITE_URL = 'https://calendlybot.herokuapp.com'
 
 
@@ -73,3 +71,5 @@ LOGGING = {
 }
 
 CELERY_BROKER_URL = os.environ["CLOUDAMQP_URL"]
+
+django_heroku.settings(locals())
