@@ -12,8 +12,7 @@ SITE_URL = 'https://calendlybot.herokuapp.com'
 
 def skip_static_requests(record):
     filtered_record = record.args[0]
-    if filtered_record.startswith('GET path="/static/') or\
-            filtered_record.startswith('GET /static/'):  # filter whatever you want
+    if any(['GET path="/static/', 'GET /static/']) in filtered_record:  # filter whatever you want
         return False
     return True
 
