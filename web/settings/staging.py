@@ -1,5 +1,8 @@
 import django_heroku
 from .base import *
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
@@ -12,8 +15,8 @@ SITE_URL = 'https://calendlybot.herokuapp.com'
 
 def skip_static_requests(record):
     filtered_record = record.args[0]
-    print('===============================')
-    print(filtered_record)
+    logger.info('===============================')
+    logger.info(filtered_record)
     if any(['GET path="/static/' in filtered_record, 'GET /static/' in filtered_record]):  # filter whatever you want
         return False
     return True
