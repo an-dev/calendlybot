@@ -1,8 +1,5 @@
 import django_heroku
 from .base import *
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
@@ -11,10 +8,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 SITE_URL = 'https://calendlybot.herokuapp.com'
 
 
+django_heroku.settings(locals())
+
+
 def skip_static_requests(record):
     filtered_record = record.args[0]
-    logger.info('===============================')
-    logger.info(filtered_record)
     if any(['GET path="/static/' in filtered_record, 'GET /static/' in filtered_record]):  # filter whatever you want
         return False
     return True
@@ -62,7 +60,7 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {"handlers": ["django.server"], "level": "INFO"},
+        "django": {"handlers": ["console"], "level": "INFO"},
         "django.server": {"handlers": ["django.server"], "level": "INFO", "propagate": False},
         "web": {"handlers": ["console"], "level": "INFO", "propagate": True},
         "celery": {"handlers": ["console"], "level": "INFO", "propagate": True},
@@ -71,5 +69,3 @@ LOGGING = {
 }
 
 CELERY_BROKER_URL = os.environ["CLOUDAMQP_URL"]
-
-django_heroku.settings(locals())
