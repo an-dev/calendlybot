@@ -5,18 +5,10 @@ from .base import *
 MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-django_heroku.settings(locals())
-
 SITE_URL = 'https://calendlybot.herokuapp.com'
 
 
-def skip_static_requests(record):
-    filtered_record = record.args[0]
-    if filtered_record.startswith('GET path="/static/') or\
-            filtered_record.startswith('GET /static/'):  # filter whatever you want
-        return False
-    return True
-
+django_heroku.settings(locals())
 
 LOGGING = {
     "version": 1,
@@ -24,11 +16,6 @@ LOGGING = {
     "filters": {
         "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
         "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
-        # use Django's built in CallbackFilter to point to your filter
-        'skip_static_requests': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': skip_static_requests
-        }
     },
     "formatters": {
         "django.server": {
@@ -43,7 +30,7 @@ LOGGING = {
     "handlers": {
         "null": {"level": "DEBUG", "class": "logging.NullHandler"},
         "console": {
-            "level": "DEBUG",
+            "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "console",
         },
@@ -51,7 +38,6 @@ LOGGING = {
             "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "django.server",
-            'filters': ['skip_static_requests'],
         },
         "mail_admins": {
             "level": "ERROR",
