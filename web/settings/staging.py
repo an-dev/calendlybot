@@ -10,25 +10,12 @@ SITE_URL = 'https://calendlybot.herokuapp.com'
 
 django_heroku.settings(locals())
 
-
-def skip_static_requests(record):
-    filtered_record = record.args[0]
-    if any(['GET path="/static/' in filtered_record, 'GET /static/' in filtered_record]):  # filter whatever you want
-        return False
-    return True
-
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "filters": {
         "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
         "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
-        # use Django's built in CallbackFilter to point to your filter
-        'skip_static_requests': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': skip_static_requests
-        }
     },
     "formatters": {
         "django.server": {
@@ -51,7 +38,6 @@ LOGGING = {
             "level": "INFO",
             "class": "logging.StreamHandler",
             "formatter": "django.server",
-            'filters': ['skip_static_requests'],
         },
         "mail_admins": {
             "level": "ERROR",
