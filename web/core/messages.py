@@ -288,3 +288,218 @@ class SlackMarkdownNotificationDestinationChannelMessage:
                 }
             }
         ]
+
+
+class SlackHomeViewMessage:
+
+    def __init__(self, slack_user):
+        self.slack_user = slack_user
+
+    def get_connect_button(self):
+        if self.slack_user.calendly_authtoken and self.slack_user.webhooks.exists():
+            return {
+                "type": "button",
+                "style": "danger",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Disconnect"
+                },
+                "action_id": BTN_DISCONNECT
+            }
+        else:
+            return {
+                "type": "button",
+                "style": "primary",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Connect"
+                },
+                "action_id": BTN_CONNECT
+            }
+
+    def get_masked_token(self):
+        if self.slack_user.calendly_authtoken:
+            return f"{'*' * 24}{self.slack_user.calendly_authtoken[-8:]}"
+        return ''
+
+    def get_view(self):
+        return {
+            "type": "home",
+            "blocks": [
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Calenduck*"
+                    }
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "text": "Hello Andy! Here you can manage Calenduck's settings and behaviour",
+                            "type": "mrkdwn"
+                        }
+                    ]
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Edit settings"
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Help"
+                            }
+                        },
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Feedback"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Calendly account*"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Email*: <https://calendly.com/event_types/user/me|{self.slack_user.calendly_email}>"
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Token*: {self.get_masked_token()}"
+                    }
+                },
+                {
+                    "type": "actions",
+                    "elements": [self.get_connect_button()]
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Current configuration*\nYour configuration is determined by your notification preferences below"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Sending *all* events to *#general*"
+                    }
+                },
+                {
+                    "type": "divider"
+                },
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Notifications preferences*"
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Where should I send event notifications?*:"
+                    },
+                    "accessory": {
+                        "type": "overflow",
+                        "options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Send to me",
+                                },
+                                "value": "value-0"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Send to channel",
+                                },
+                                "value": "value-1"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Which events should be sent?*"
+                    },
+                    "accessory": {
+                        "type": "multi_static_select",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Set Calendly events",
+                        },
+                        "initial_options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Choice 1",
+                                },
+                                "value": "value-0"
+                            }
+                        ],
+                        "options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Choice 1",
+                                },
+                                "value": "value-0"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Choice 2",
+                                },
+                                "value": "value-1"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Choice 3",
+                                },
+                                "value": "value-2"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }

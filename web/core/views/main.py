@@ -9,7 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
-from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG
+from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG, \
+    SlackHomeViewMessage
 from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
 from web.core.actions import *
@@ -73,6 +74,9 @@ def auth(request):
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
+
+        client.views_publish(user_id=user_id, view=SlackHomeViewMessage(su).get_view())
+
     except Exception:
         logger.exception(f"Could not complete auth setup: {request.GET}")
         msg = "Uh oh. Could not setup auth."
@@ -85,37 +89,52 @@ def auth(request):
 @require_http_methods(["POST"])
 def interactions(request):
     try:
+        import pdb;
+        pdb.set_trace()
         data = json.loads(request.POST['payload'])
+        container_type = data['container']['type']
         action = data['actions'][0]['action_id']
-        response_url = data['response_url']
         user_id, workspace_id = data['user']['id'], data['user']['team_id']
         su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
         slack_msg_service = SlackMessageService(su.workspace.bot_token)
 
         logger.info(f"User {user_id} is interacting with {action}")
 
-        if action == BTN_HOOK_DEST_SELF:
-            return setup_handle_destination(response_url, su)
-        elif action == BTN_HOOK_DEST_CHANNEL:
-            msg = SlackMarkdownNotificationDestinationChannelMessage()
-            slack_msg_service.update_interaction(
-                response_url,
-                blocks=msg.get_blocks()
-            )
-        elif action == SELECT_HOOK_DEST_CHANNEL:
-            channel = data['actions'][0]['selected_conversation']
-            logger.info(f"{channel} channel selected")
-            return setup_handle_destination(response_url, su, channel)
-        else:
-            if action == BTN_CANCEL:
+        if container_type == 'message_attachment':
+            try:
+                response_url = data['response_url']
+                if action == BTN_HOOK_DEST_SELF:
+                    return setup_handle_destination(response_url, su)
+                elif action == BTN_HOOK_DEST_CHANNEL:
+                    msg = SlackMarkdownNotificationDestinationChannelMessage()
+                    slack_msg_service.update_interaction(
+                        response_url,
+                        blocks=msg.get_blocks()
+                    )
+                elif action == SELECT_HOOK_DEST_CHANNEL:
+                    channel = data['actions'][0]['selected_conversation']
+                    logger.info(f"{channel} channel selected")
+                    return setup_handle_destination(response_url, su, channel)
+                else:
+                    if action == BTN_CANCEL:
+                        slack_msg_service.update_interaction(
+                            response_url,
+                            text="You can pick things up later by typing `/duck connect your-calendly-token`.")
+                    else:
+                        slack_msg_service.send(su.slack_id, f"I don\'t think I understand. {STATIC_HELP_MSG}")
+            except Exception as e:
                 slack_msg_service.update_interaction(
                     response_url,
-                    text="You can pick things up later by typing `/duck connect your-calendly-token`.")
-            else:
-                slack_msg_service.send(su.slack_id, f"I don\'t think I understand. {STATIC_HELP_MSG}")
+                    text=f"Could not parse interaction. {STATIC_HELP_MSG}")
+                raise e
+        else:
+            if action == BTN_CONNECT:
+                import pdb;
+                pdb.set_trace()
+
+            if action == BTN_DISCONNECT:
+                import pdb;
+                pdb.set_trace()
     except Exception:
         logger.exception("Could not parse interaction")
-        slack_msg_service.update_interaction(
-            response_url,
-            text=f"Could not parse interaction. {STATIC_HELP_MSG}")
     return HttpResponse(status=200)
