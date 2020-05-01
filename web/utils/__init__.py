@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from slack.errors import SlackApiError
 
 from web.core.models import Webhook, Workspace
-from web.core.services import SlackMessageService
+# from web.core.services import SlackMessageService
 
 from web.core.messages import STATIC_HELP_MSG
 from web.utils.errors import InvalidTokenError
@@ -41,7 +41,7 @@ def get_user_count(workspace_slack_id):
 def has_active_hooks(calendly_client):
     hooks = calendly_client.list_webhooks()
     if hooks.get('type') == 'authentication_error':
-        raise InvalidTokenError('')
+        raise InvalidTokenError()
 
     active_hooks = len([h for h in hooks['data'] if h['attributes']['state'] == 'active'])
     if active_hooks > 1:
@@ -52,7 +52,7 @@ def has_active_hooks(calendly_client):
 def has_hooks(calendly_client):
     hooks = calendly_client.list_webhooks()
     if hooks.get('type') == 'authentication_error':
-        raise InvalidTokenError('')
+        raise InvalidTokenError()
 
     return len(hooks['data'])
 
@@ -62,7 +62,7 @@ def remove_hooks(calendly_client):
     hooks = calendly_client.list_webhooks()
     for hook in hooks['data']:
         response = calendly_client.remove_webhook(hook['id'])
-        if response.get('success') in [False, None]:
+        if not response.get('success'):
             logger.error(f"Could not delete Calendly webhook for {hook['id']}")
             res = False
     return res

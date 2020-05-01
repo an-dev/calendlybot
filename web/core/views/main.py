@@ -12,7 +12,7 @@ from web.core.decorators import verify_request
 from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG, \
     SlackHomeViewMessage
 from web.core.models import SlackUser, Workspace
-from web.core.services import SlackMessageService
+from web.core.services import SlackMessageService, DisconnectService, UpdateHomeViewService, OpenModalService
 from web.core.actions import *
 from web.utils import setup_handle_destination, get_user_count, mail
 
@@ -75,7 +75,7 @@ def auth(request):
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
 
-        client.views_publish(user_id=user_id, view=SlackHomeViewMessage(su).get_view())
+        UpdateHomeViewService(user_id, team_id)
 
     except Exception:
         logger.exception(f"Could not complete auth setup: {request.GET}")
@@ -89,8 +89,6 @@ def auth(request):
 @require_http_methods(["POST"])
 def interactions(request):
     try:
-        import pdb;
-        pdb.set_trace()
         data = json.loads(request.POST['payload'])
         container_type = data['container']['type']
         action = data['actions'][0]['action_id']
@@ -128,6 +126,7 @@ def interactions(request):
                     text=f"Could not parse interaction. {STATIC_HELP_MSG}")
                 raise e
         else:
+            trigger_id = data['trigger_id']
             if action == BTN_CONNECT:
                 import pdb;
                 pdb.set_trace()
@@ -135,6 +134,34 @@ def interactions(request):
             if action == BTN_DISCONNECT:
                 import pdb;
                 pdb.set_trace()
+                # result = DisconnectService(user_id, workspace_id).run()
+                # if result.success:
+                #     UpdateHomeViewService(user_id, workspace_id)
+                # else:
+                    # display dialog/modal?
+                    # msg = result.error
+                    # add message from the error to the msg to display in the modal
+                test_msg = {
+                    "type": "modal",
+                    "title": {
+                        "type": "plain_text",
+                        "text": "Notification settings",
+                    },
+                    "close": {
+                        "type": "plain_text",
+                        "text": "Cancel",
+                    },
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "Could not disconnect Calendly account. Please try again or contact support."
+                            }
+                        }
+                    ]
+                }
+                OpenModalService(workspace_id).run(trigger_id, test_msg)
     except Exception:
         logger.exception("Could not parse interaction")
     return HttpResponse(status=200)
