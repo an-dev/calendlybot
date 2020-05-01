@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from web.core.messages import SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage, \
     SlackMarkdownNotificationDestinationMessage, STATIC_HELP_MSG, STATIC_START_MSG, STATIC_FREE_ACCT_MSG
 from web.core.models import Workspace, SlackUser, Webhook
-from web.core.services import SlackMessageService
+from web.core.services import SlackMessageService, DisconnectService
 from web.payments.services import WorkspaceUpgradeService
 import logging
 
@@ -116,37 +116,13 @@ def connect(request):
 
 
 def disconnect(request):
-    try:
-        user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
-        logger.info(f'User {user_id} is trying to disconnect from Calendly')
-        workspace = Workspace.objects.get(slack_id=workspace_id)
-        slack_msg_service = SlackMessageService(workspace.bot_token)
-        # check if active webtokens are present
-        # delete them
-        # delete the webhook object as well
-        su = SlackUser.objects.get(slack_id=user_id)
-        calendly = Calendly(su.calendly_authtoken)
-        if has_hooks(calendly) and remove_hooks(calendly):
-            Webhook.objects.filter(user=su).delete()
-            su.calendly_authtoken = None
-            su.save()
-            slack_msg_service.send(user_id,
-                                   "Account successfully disconnected.\n"
-                                   "Type `/duck connect your-calendly-token` to associate another Calendly account.")
-        else:
-            logger.warning(f'Trying to delete non existent webhooks for user {user_id}')
-            slack_msg_service.send(user_id,
-                                   f"Doesn't seem like this account is connected. {STATIC_START_MSG}")
-
-        if Webhook.objects.filter(user__slack_id=user_id).exists():
-            Webhook.objects.filter(user__slack_id=user_id).first().delete()
-    except InvalidTokenError:
-        logger.warning('User does not have a valid token')
-        slack_msg_service.send(user_id, STATIC_FREE_ACCT_MSG)
-    except Workspace.DoesNotExist:
-        logger.exception(f'Missing workspace: {request.POST}')
-    except Exception:
-        logger.exception('Could not disconnect account from calendly.')
-        slack_msg_service.send(user_id,
-                               f"Could not disconnect account. {STATIC_HELP_MSG}")
+    user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
+    logger.info(f'User {user_id} is trying to disconnect from Calendly')
+    result = DisconnectService(user_id, workspace_id).run()
+    if result.success:
+        msg = result.value
+    else:
+        msg = result.error
+    workspace = Workspace.objects.get(slack_id=workspace_id)
+    SlackMessageService(workspace.bot_token).send(user_id, msg)
     return HttpResponse(status=200)
