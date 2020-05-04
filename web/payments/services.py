@@ -3,7 +3,7 @@ import stripe
 from django.conf import settings
 from django.core import signing
 
-from web.utils import eligible_user
+from web.utils import user_eligible
 
 
 class WorkspaceUpgradeService:
