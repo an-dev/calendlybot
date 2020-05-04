@@ -1,5 +1,7 @@
 import slack
 from calendly import Calendly
+from django.conf import settings
+from django.core import signing
 
 from web.core.messages import STATIC_START_MSG, STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage
 from web.core.models import Workspace, SlackUser, Webhook
@@ -47,7 +49,7 @@ class DisconnectService:
             calendly = Calendly(su.calendly_authtoken)
 
             if not has_calendly_hooks(calendly):
-                logger.warning(f'Deleting non existent webhooks for user {self.user_id}')
+                logger.warning(f'No remote webhooks for user {self.user_id}')
             else:
                 if remove_calendly_hooks(calendly):
                     Webhook.objects.filter(user=su).delete()
@@ -58,9 +60,6 @@ class DisconnectService:
             su.save()
             value = "Account successfully disconnected. Type `/duck start` to associate another Calendly account."
             return Result.from_success(value)
-        except InvalidTokenError:
-            logger.warning(f'User {self.user_id} does not have a valid token')
-            return Result.from_success(STATIC_FREE_ACCT_MSG)
         except Exception:
             logger.exception('Could not disconnect account from calendly.')
             err = f"Could not disconnect account. {STATIC_HELP_MSG}"
@@ -145,3 +144,57 @@ class OpenModalService:
         except Exception:
             logger.exception('Could not update or create home view')
             return Result.from_failure('')
+
+
+class DestinationService:
+    def __init__(self, workspace_id):
+        workspace = Workspace.objects.get(slack_id=workspace_id)
+        self.client = slack.WebClient(token=workspace.bot_token)
+
+    def run(self, user_id, channel=None):
+        destination_id = channel if channel else user_id
+        try:
+            su = SlackUser.objects.get(slack_id=user_id)
+            calendly = Calendly(su.calendly_authtoken)
+
+            if has_active_hooks(calendly):
+                if remove_calendly_hooks(calendly):
+                    Webhook.objects.filter(user=su).delete()
+                else:
+                    logger.warning(f'Could not delete webhooks for user {user_id}. Do this manually!')
+
+            signed_value = signing.dumps((su.workspace.slack_id, destination_id))
+
+            webhook_create_response = calendly.create_webhook(
+                f"{settings.SITE_URL}/handle/{signed_value}/")
+
+            if 'id' not in webhook_create_response:
+                errors = ''
+                if 'message' in webhook_create_response:
+                    errors = webhook_create_response.get('errors', webhook_create_response.get('message'))
+                logger.error(f'Could not setup Calendly webhook. {errors}')
+
+                if errors:
+                    errors_detail = errors
+                else:
+                    errors_detail = STATIC_HELP_MSG
+                result = Result.from_failure(f"Could not connect with Calendly API. {errors_detail}")
+            else:
+                Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'],
+                                       destination_id=destination_id)
+                msg = "Setup complete. You will now receive notifications on created and canceled events!"
+                if channel:
+                    # if private channel the bot needs to be invited
+                    if channel.startswith('G'):
+                        msg = "Almost there! Type `/invite calenduck` in the selected private channel to receive notifications on created and canceled events!"
+                    else:
+                        # join channel if not already there
+                        self.client.conversations_join(channel=destination_id)
+                result = Result.from_success(msg)
+        except InvalidTokenError:
+            logger.warning(f'User {user_id} does not have a valid token')
+            result = Result.from_failure(STATIC_FREE_ACCT_MSG)
+        except Exception:
+            logger.exception('Could not connect to calendly')
+            result = Result.from_failure(f"Could not connect to Calendly. {STATIC_HELP_MSG}")
+        return result

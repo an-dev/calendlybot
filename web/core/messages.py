@@ -325,10 +325,18 @@ class SlackHomeViewMessage:
 
     def get_email(self):
         if self.slack_user.calendly_email:
-            return f'<https://calendly.com/event_types/user/me|{self.slack_user.calendly_email}>'
+            return f'{self.slack_user.calendly_email} (<https://calendly.com/event_types/user/me|Go to Calendly account>)'
         return 'Use the button below to connect your Calendly account'
 
     def get_current_configuration(self):
+        webhook = self.slack_user.webhooks.first()
+        if webhook:
+            workspace = self.slack_user.workspace
+            destination = f"<slack://user?team={workspace.slack_id}&id={webhook.destination_id}|*you*>"
+            if not webhook.destination_id.startswith('U'):
+                destination = \
+                    f"<slack://channel?team={workspace.slack_id}&id={webhook.destination_id}|*channel*>"
+            return f"Sending *all events* notifications to {destination}"
         return "You haven't setup any notification preferences."
 
     def get_view(self):
@@ -470,20 +478,21 @@ class SlackHomeViewMessage:
                     },
                     "accessory": {
                         "type": "overflow",
+                        "action_id": CHOICE_DEST,
                         "options": [
                             {
                                 "text": {
                                     "type": "plain_text",
                                     "text": "Send to me"
                                 },
-                                "value": "self"
+                                "value": BTN_HOOK_DEST_SELF
                             },
                             {
                                 "text": {
                                     "type": "plain_text",
                                     "text": "Send to channel"
                                 },
-                                "value": "channel"
+                                "value": BTN_HOOK_DEST_CHANNEL
                             }
                         ]
                     }
