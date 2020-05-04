@@ -328,6 +328,9 @@ class SlackHomeViewMessage:
             return f'<https://calendly.com/event_types/user/me|{self.slack_user.calendly_email}>'
         return 'Use the button below to connect your Calendly account'
 
+    def get_current_configuration(self):
+        return "You haven't setup any notification preferences."
+
     def get_view(self):
         return {
             "type": "home",
@@ -434,7 +437,7 @@ class SlackHomeViewMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "Sending *all* events to *#general*"
+                        "text": self.get_current_configuration()
                     }
                 },
                 {
@@ -463,7 +466,7 @@ class SlackHomeViewMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "*Where should I send event notifications?*:"
+                        "text": "*Where should I send event notifications?*"
                     },
                     "accessory": {
                         "type": "overflow",
@@ -471,16 +474,53 @@ class SlackHomeViewMessage:
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "Send to me",
+                                    "text": "Send to me"
+                                },
+                                "value": "self"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Send to channel"
+                                },
+                                "value": "channel"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "*Which events should Calenduck notify you about?*"
+                    },
+                    "accessory": {
+                        "type": "multi_static_select",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select items",
+                        },
+                        "options": [
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Choice 1",
                                 },
                                 "value": "value-0"
                             },
                             {
                                 "text": {
                                     "type": "plain_text",
-                                    "text": "Send to channel",
+                                    "text": "Choice 2",
                                 },
                                 "value": "value-1"
+                            },
+                            {
+                                "text": {
+                                    "type": "plain_text",
+                                    "text": "Choice 3",
+                                },
+                                "value": "value-2"
                             }
                         ]
                     }
@@ -494,6 +534,6 @@ class SlackHomeViewMessage:
                             "alt_text": "placeholder"
                         }
                     ]
-                },
+                }
             ]
         }
