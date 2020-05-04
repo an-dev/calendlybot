@@ -9,10 +9,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
-from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG, \
-    SlackHomeViewMessage
+from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG
+from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
+    SlackConnectModalWithError
 from web.core.models import SlackUser, Workspace
-from web.core.services import SlackMessageService, DisconnectService, UpdateHomeViewService, OpenModalService
+from web.core.services import SlackMessageService, DisconnectService, UpdateHomeViewService, OpenModalService, \
+    ConnectService
 from web.core.actions import *
 from web.utils import setup_handle_destination, get_user_count, mail
 
@@ -90,78 +92,57 @@ def auth(request):
 def interactions(request):
     try:
         data = json.loads(request.POST['payload'])
-        container_type = data['container']['type']
-        action = data['actions'][0]['action_id']
+        trigger_id = data.get('trigger_id')
         user_id, workspace_id = data['user']['id'], data['user']['team_id']
         su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
         slack_msg_service = SlackMessageService(su.workspace.bot_token)
 
-        logger.info(f"User {user_id} is interacting with {action}")
-
-        if container_type == 'message_attachment':
-            try:
-                response_url = data['response_url']
-                if action == BTN_HOOK_DEST_SELF:
-                    return setup_handle_destination(response_url, su)
-                elif action == BTN_HOOK_DEST_CHANNEL:
-                    msg = SlackMarkdownNotificationDestinationChannelMessage()
-                    slack_msg_service.update_interaction(
-                        response_url,
-                        blocks=msg.get_blocks()
-                    )
-                elif action == SELECT_HOOK_DEST_CHANNEL:
-                    channel = data['actions'][0]['selected_conversation']
-                    logger.info(f"{channel} channel selected")
-                    return setup_handle_destination(response_url, su, channel)
-                else:
-                    if action == BTN_CANCEL:
+        if data['type'] == 'block_actions':
+            action = data['actions'][0]['action_id']
+            logger.info(f"User {user_id} is interacting with {action}")
+            container_type = data['container']['type']
+            if container_type == 'message_attachment':
+                try:
+                    response_url = data['response_url']
+                    if action == BTN_HOOK_DEST_SELF:
+                        return setup_handle_destination(response_url, su)
+                    elif action == BTN_HOOK_DEST_CHANNEL:
+                        msg = SlackMarkdownNotificationDestinationChannelMessage()
                         slack_msg_service.update_interaction(
                             response_url,
-                            text="You can pick things up later by typing `/duck connect your-calendly-token`.")
-                    else:
-                        slack_msg_service.send(su.slack_id, f"I don\'t think I understand. {STATIC_HELP_MSG}")
-            except Exception as e:
-                slack_msg_service.update_interaction(
-                    response_url,
-                    text=f"Could not parse interaction. {STATIC_HELP_MSG}")
-                raise e
-        else:
-            trigger_id = data['trigger_id']
-            if action == BTN_CONNECT:
-                import pdb;
-                pdb.set_trace()
+                            blocks=msg.get_blocks()
+                        )
+                    elif action == SELECT_HOOK_DEST_CHANNEL:
+                        channel = data['actions'][0]['selected_conversation']
+                        logger.info(f"{channel} channel selected")
+                        return setup_handle_destination(response_url, su, channel)
+                except Exception as e:
+                    slack_msg_service.update_interaction(
+                        response_url,
+                        text=f"Could not parse interaction. {STATIC_HELP_MSG}")
+                    raise e
+            else:
+                if action == BTN_CONNECT:
+                    OpenModalService(workspace_id).run(trigger_id, SlackConnectModal().get_view())
+                if action == BTN_DISCONNECT:
+                    result = DisconnectService(user_id, workspace_id).run()
+                    UpdateHomeViewService(user_id, workspace_id).run()
+                    if result.failure:
+                        OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
 
-            if action == BTN_DISCONNECT:
-                import pdb;
-                pdb.set_trace()
-                # result = DisconnectService(user_id, workspace_id).run()
-                # if result.success:
-                #     UpdateHomeViewService(user_id, workspace_id)
-                # else:
-                    # display dialog/modal?
-                    # msg = result.error
-                    # add message from the error to the msg to display in the modal
-                test_msg = {
-                    "type": "modal",
-                    "title": {
-                        "type": "plain_text",
-                        "text": "Notification settings",
-                    },
-                    "close": {
-                        "type": "plain_text",
-                        "text": "Cancel",
-                    },
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "Could not disconnect Calendly account. Please try again or contact support."
-                            }
-                        }
-                    ]
-                }
-                OpenModalService(workspace_id).run(trigger_id, test_msg)
+        if data['type'] == 'view_submission':
+            block_data = dict(data['view']['state']['values'])
+
+            if block_data.get('block_connect'):
+                value = block_data['block_connect']['input_connect']['value']
+                workspace = Workspace.objects.get(slack_id=workspace_id)
+                result = ConnectService(user_id, workspace, value).run()
+                if result.failure:
+                    return HttpResponse(status=200,
+                                        content=json.dumps(SlackConnectModalWithError(result.error).get_view()),
+                                        content_type='application/json')
+                else:
+                    UpdateHomeViewService(user_id, workspace_id).run()
     except Exception:
         logger.exception("Could not parse interaction")
     return HttpResponse(status=200)

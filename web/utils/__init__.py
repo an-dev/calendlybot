@@ -49,7 +49,7 @@ def has_active_hooks(calendly_client):
     return active_hooks > 0
 
 
-def has_hooks(calendly_client):
+def has_calendly_hooks(calendly_client):
     hooks = calendly_client.list_webhooks()
     if hooks.get('type') == 'authentication_error':
         raise InvalidTokenError()
@@ -57,7 +57,7 @@ def has_hooks(calendly_client):
     return len(hooks['data'])
 
 
-def remove_hooks(calendly_client):
+def remove_calendly_hooks(calendly_client):
     res = True
     hooks = calendly_client.list_webhooks()
     for hook in hooks['data']:
