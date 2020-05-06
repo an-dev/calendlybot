@@ -3,7 +3,7 @@ from calendly import Calendly
 from django.conf import settings
 from django.core import signing
 
-from web.core.messages import STATIC_START_MSG, STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage
+from web.core.messages import STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage, SlackHomeMessage
 from web.core.models import Workspace, SlackUser, Webhook
 from web.utils import has_calendly_hooks, remove_calendly_hooks, InvalidTokenError, has_active_hooks
 
@@ -35,7 +35,7 @@ class SlackMessageService:
         return self.client.api_call(response_url, json=kwargs)
 
 
-class DisconnectService:
+class DisconnectUserService:
     def __init__(self, user_id, workspace_id):
         self.user_id = user_id
         self.workspace_id = workspace_id
@@ -66,7 +66,7 @@ class DisconnectService:
         return Result.from_failure(err)
 
 
-class ConnectService:
+class ConnectUserService:
     def __init__(self, user_id, workspace, api_key):
         self.user_id = user_id
         self.workspace = workspace
@@ -74,15 +74,7 @@ class ConnectService:
 
     def run(self):
         try:
-            su, new_user = SlackUser.objects.get_or_create(slack_id=self.user_id, workspace=self.workspace)
-            if new_user:
-                logger.info(f'New user from existing workspace: {self.user_id}')
-                client = slack.WebClient(token=self.workspace.bot_token)
-                user_info = client.users_info(user=self.user_id)['user']['profile']
-                su.slack_name = user_info.get('first_name', user_info['real_name'])
-                su.slack_email = user_info['email']
-                su.save()
-
+            su = SlackUser.objects.get(slack_id=self.user_id, workspace=self.workspace)
             # atm, we support just one authtoken per user.
             # Calling this service on the same user effectively overwrites
             calendly = Calendly(self.api_key)
@@ -110,6 +102,21 @@ class ConnectService:
             logger.exception('Could not connect to calendly')
             msg = f"Could not connect to Calendly. {STATIC_HELP_MSG}"
         return Result.from_failure(msg)
+
+
+class UpdateHomeMessageService:
+    def __init__(self, user_id, workspace_id):
+        self.user_id = user_id
+        self.workspace_id = workspace_id
+
+    def run(self, response_url):
+        try:
+            workspace = Workspace.objects.get(slack_id=self.workspace_id)
+            su = SlackUser.objects.get(slack_id=self.user_id, workspace=workspace)
+            SlackMessageService(workspace.bot_token).update_interaction(response_url, '', SlackHomeMessage(su).get_blocks())
+        except Exception:
+            logger.exception('Could not update onboarding msg')
+            return Result.from_failure('')
 
 
 class UpdateHomeViewService:
@@ -146,7 +153,7 @@ class OpenModalService:
             return Result.from_failure('')
 
 
-class DestinationService:
+class SetDestinationService:
     def __init__(self, workspace_id):
         workspace = Workspace.objects.get(slack_id=workspace_id)
         self.client = slack.WebClient(token=workspace.bot_token)

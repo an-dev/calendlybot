@@ -1,3 +1,4 @@
+from calendly import Calendly
 from django.conf import settings
 
 from web.core.actions import *
@@ -175,9 +176,8 @@ class SlackMarkdownHelpMessage:
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "• `/duck connect your-calendly-token`: Connect your Slack account to Calendly\n"
-                                "• `/duck disconnect`: Disconnect your Slack account from Calendly\n"
-                                "• `/duck upgrade`: Upgrade to a new plan based on your workspace size\n"
+                        "text": "• `/duck`: View and manage your Calenduck settings\n"
+                                "• `/duck upgrade`: Upgrade to a new plan based on your workspace size and usage\n"
                                 "• `/duck help`: See this message\n"
                     }
                 },
@@ -199,100 +199,7 @@ class SlackMarkdownHelpMessage:
             ]
         }]
 
-
-class SlackMarkdownNotificationDestinationMessage:
-
-    def get_blocks(self):
-        return [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "Where do you want me to send event notifications?"
-                }
-            }
-        ]
-
-    def get_attachments(self):
-        return [{
-            "color": INFO_MSG_COLOR,
-            "blocks": [{
-                "type": "actions",
-                "elements": [
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Send to me"
-                        },
-                        "action_id": BTN_HOOK_DEST_SELF
-                    },
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Send to channel"
-                        },
-                        "action_id": BTN_HOOK_DEST_CHANNEL
-                    },
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Maybe later"
-                        },
-                        "action_id": BTN_CANCEL
-                    }
-                ]
-            }]
-        }]
-
-
-class SlackMarkdownNotificationDestinationChannelMessage:
-
-    def get_blocks(self):
-        return [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "Where should I send notifications to?"
-                },
-                "accessory": {
-                    "type": "conversations_select",
-                    "placeholder": {
-                        "type": "plain_text",
-                        "text": "Select channel",
-                    },
-                    "filter": {
-                        "include": [
-                            "public",
-                            "private"
-                        ],
-                    },
-                    "action_id": SELECT_HOOK_DEST_CHANNEL
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "Not sure yet? No worries."
-                },
-                "accessory": {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "Maybe later",
-                    },
-                    "action_id": BTN_CANCEL
-                }
-            }
-        ]
-
-
-class SlackHomeViewMessage:
-
+class SlackHomeMessage:
     def __init__(self, slack_user):
         self.slack_user = slack_user
 
@@ -339,6 +246,184 @@ class SlackHomeViewMessage:
             return f"Sending *all events* notifications to {destination}"
         return "You haven't setup any notification preferences."
 
+    def get_space_template(self):
+        return {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "image",
+                    "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
+                    "alt_text": "placeholder"
+                }
+            ]
+        }
+
+    def get_divider_template(self):
+        return {
+            "type": "divider"
+        }
+
+    def get_calendly_template_head(self):
+        return {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "*Calendly account*"
+                }
+            ]
+        }
+
+    def get_calendly_template_email(self):
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*Email*: {self.get_email()}"
+            }
+        }
+
+    def get_calendly_template_token(self):
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*Token*: {self.get_masked_token()}"
+            }
+        }
+
+    def get_calendly_template_btn(self):
+        return {
+            "type": "actions",
+            "elements": [self.get_connect_button()]
+        }
+
+    def get_conf_template_head(self):
+        return {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "*Current configuration*\n"
+                            "Your configuration is determined by your notification preferences below"
+                }
+            ]
+        }
+
+    def get_conf_template_value(self):
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": self.get_current_configuration()
+            }
+        }
+
+    def get_notification_template_head(self):
+        return {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "*Notifications preferences*"
+                }
+            ]
+        }
+
+    def get_notification_template_choice(self):
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Where should I send event notifications?*"
+            },
+            "accessory": {
+                "type": "overflow",
+                "action_id": CHOICE_DEST,
+                "options": [
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Send to me"
+                        },
+                        "value": BTN_HOOK_DEST_SELF
+                    },
+                    {
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Send to channel"
+                        },
+                        "value": BTN_HOOK_DEST_CHANNEL
+                    }
+                ]
+            }
+        }
+
+    def get_event_filters_template(self):
+
+        try:
+            calendly = Calendly(self.slack_user.calendly_authtoken)
+            events = calendly.event_types()
+            active_events = [{'id': e['id'], 'name': e['attributes']['name']} for e in events['data'] if
+                             e['attributes']['active']]
+            options = [{'text': {'type': 'plain_text', 'text': e['name']}, 'value': e['id']} for e in active_events]
+        except Exception:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f'Could not retrieve events for api_key {self.slack_user.calendly_authtoken}')
+            options = [{
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Could not retrieve events. Make sure your account is connected!"
+                        },
+                        "value": "None"
+                    }]
+
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Which events should I notify you about?*"
+            },
+            "accessory": {
+                "type": "multi_static_select",
+                "placeholder": {
+                    "type": "plain_text",
+                    "text": "Select events",
+                },
+                'action_id': EVENT_SELECT,
+                "options": options
+            }
+        }
+
+    def get_blocks(self):
+        return [
+            {
+                "type": "section",
+                "text": {
+                    "text": f"Hello {self.slack_user.slack_name}!\nManage Calenduck's settings and notification preferences below",
+                    "type": "mrkdwn"
+                }
+            },
+            self.get_space_template(),
+            self.get_calendly_template_head(),
+            self.get_divider_template(),
+            self.get_calendly_template_email(),
+            self.get_calendly_template_token(),
+            self.get_calendly_template_btn(),
+            self.get_space_template(),
+            self.get_conf_template_head(),
+            self.get_divider_template(),
+            self.get_conf_template_value(),
+            self.get_notification_template_head(),
+            self.get_divider_template(),
+            self.get_event_filters_template(),
+            self.get_notification_template_choice(),
+            self.get_space_template()
+        ]
+
+
+class SlackHomeViewMessage(SlackHomeMessage):
     def get_view(self):
         return {
             "type": "home",
@@ -354,7 +439,7 @@ class SlackHomeViewMessage:
                     "type": "context",
                     "elements": [
                         {
-                            "text": "Hello Andy! Here's what you can do Calenduck:",
+                            "text": f"Hello {self.slack_user.slack_name}! Here's what you can do with Calenduck",
                             "type": "mrkdwn"
                         }
                     ]
@@ -378,171 +463,21 @@ class SlackHomeViewMessage:
                         }
                     ]
                 },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "image",
-                            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
-                            "alt_text": "placeholder"
-                        }
-                    ]
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Calendly account*"
-                        }
-                    ]
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*Email*: {self.get_email()}"
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*Token*: {self.get_masked_token()}"
-                    }
-                },
-                {
-                    "type": "actions",
-                    "elements": [self.get_connect_button()]
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "image",
-                            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
-                            "alt_text": "placeholder"
-                        }
-                    ]
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Current configuration*\n"
-                                    "Your configuration is determined by your notification preferences below"
-                        }
-                    ]
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": self.get_current_configuration()
-                    }
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "image",
-                            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
-                            "alt_text": "placeholder"
-                        }
-                    ]
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": "*Notifications preferences*"
-                        }
-                    ]
-                },
-                {
-                    "type": "divider"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Where should I send event notifications?*"
-                    },
-                    "accessory": {
-                        "type": "overflow",
-                        "action_id": CHOICE_DEST,
-                        "options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Send to me"
-                                },
-                                "value": BTN_HOOK_DEST_SELF
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Send to channel"
-                                },
-                                "value": BTN_HOOK_DEST_CHANNEL
-                            }
-                        ]
-                    }
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Which events should Calenduck notify you about?*"
-                    },
-                    "accessory": {
-                        "type": "multi_static_select",
-                        "placeholder": {
-                            "type": "plain_text",
-                            "text": "Select items",
-                        },
-                        "options": [
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Choice 1",
-                                },
-                                "value": "value-0"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Choice 2",
-                                },
-                                "value": "value-1"
-                            },
-                            {
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": "Choice 3",
-                                },
-                                "value": "value-2"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "image",
-                            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
-                            "alt_text": "placeholder"
-                        }
-                    ]
-                }
+                self.get_space_template(),
+                self.get_calendly_template_head(),
+                self.get_divider_template(),
+                self.get_calendly_template_email(),
+                self.get_calendly_template_token(),
+                self.get_calendly_template_btn(),
+                self.get_space_template(),
+                self.get_conf_template_head(),
+                self.get_divider_template(),
+                self.get_conf_template_value(),
+                self.get_space_template(),
+                self.get_notification_template_head(),
+                self.get_divider_template(),
+                self.get_event_filters_template(),
+                self.get_notification_template_choice(),
+                self.get_space_template()
             ]
         }

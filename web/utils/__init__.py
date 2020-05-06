@@ -9,7 +9,7 @@ from web.utils.errors import InvalidTokenError
 
 logger = logging.getLogger(__name__)
 
-COMMAND_LIST = ['connect', 'disconnect', 'upgrade', 'help']
+COMMAND_LIST = ['reset', 'upgrade', 'help']
 
 
 def user_eligible(user):

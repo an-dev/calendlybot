@@ -1,6 +1,3 @@
-from web.core.actions import SELECT_HOOK_DEST_CHANNEL
-
-
 class SlackErrorModal:
     def get_view(self):
         return {
@@ -44,6 +41,9 @@ class SlackDestinationErrorModal(SlackErrorModal):
 
 
 class SlackConnectModal:
+    def __init__(self, private_metadata=None):
+        self.private_metadata = private_metadata
+
     def get_view(self):
         return {
             "type": "modal",
@@ -59,6 +59,7 @@ class SlackConnectModal:
                 "type": "plain_text",
                 "text": "Cancel",
             },
+            "private_metadata": self.private_metadata,
             "blocks": [
                 {
                     "type": "section",
@@ -118,7 +119,6 @@ class SlackConnectModal:
                     ]
                 }
             ]
-
         }
 
 
@@ -137,6 +137,9 @@ class SlackConnectModalWithError:
 
 
 class SlackDestinationChannelModal:
+    def __init__(self, private_metadata=None):
+        self.private_metadata = private_metadata
+
     def get_view(self):
         return {
             "type": "modal",
@@ -152,6 +155,7 @@ class SlackDestinationChannelModal:
                 "type": "plain_text",
                 "text": "Cancel"
             },
+            "private_metadata": self.private_metadata,
             "blocks": [
                 {
                     "type": "input",

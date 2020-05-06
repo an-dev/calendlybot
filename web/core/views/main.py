@@ -9,12 +9,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
-from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG
+from web.core.messages import STATIC_START_MSG
 from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
     SlackConnectModalWithError, SlackDestinationErrorModal, SlackDestinationChannelModal
 from web.core.models import SlackUser, Workspace
-from web.core.services import SlackMessageService, DisconnectService, UpdateHomeViewService, OpenModalService, \
-    ConnectService, DestinationService
+from web.core.services import SlackMessageService, DisconnectUserService, UpdateHomeViewService, OpenModalService, \
+    ConnectUserService, SetDestinationService, UpdateHomeMessageService
 from web.core.actions import *
 from web.utils import get_user_count, mail
 
@@ -94,52 +94,39 @@ def interactions(request):
         data = json.loads(request.POST['payload'])
         trigger_id = data.get('trigger_id')
         user_id, workspace_id = data['user']['id'], data['user']['team_id']
-        su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
-        slack_msg_service = SlackMessageService(su.workspace.bot_token)
 
         if data['type'] == 'block_actions':
             action = data['actions'][0]['action_id']
             logger.info(f"User {user_id} is interacting with {action}")
-            container_type = data['container']['type']
-            if container_type == 'message_attachment':
-                try:
-                    response_url = data['response_url']
-                    if action == BTN_HOOK_DEST_SELF:
-                        # return setup_handle_destination(response_url, su)
-                        return 'lol'
-                    elif action == BTN_HOOK_DEST_CHANNEL:
-                        msg = SlackMarkdownNotificationDestinationChannelMessage()
-                        slack_msg_service.update_interaction(
-                            response_url,
-                            blocks=msg.get_blocks()
-                        )
-                    elif action == SELECT_HOOK_DEST_CHANNEL:
-                        channel = data['actions'][0]['selected_conversation']
-                        logger.info(f"{channel} channel selected")
-                        # return setup_handle_destination(response_url, su, channel)
-                        return 'lol'
-                except Exception as e:
-                    slack_msg_service.update_interaction(
-                        response_url,
-                        text=f"Could not parse interaction. {STATIC_HELP_MSG}")
-                    raise e
-            else:
-                if action == BTN_CONNECT:
-                    OpenModalService(workspace_id).run(trigger_id, SlackConnectModal().get_view())
-                if action == BTN_DISCONNECT:
-                    result = DisconnectService(user_id, workspace_id).run()
-                    UpdateHomeViewService(user_id, workspace_id).run()
+
+            response_url = data['response_url']
+
+            if action == BTN_CONNECT:
+                OpenModalService(workspace_id).run(trigger_id,
+                                                   SlackConnectModal(private_metadata=response_url).get_view())
+            if action == BTN_DISCONNECT:
+                result = DisconnectUserService(user_id, workspace_id).run()
+                UpdateHomeMessageService(user_id, workspace_id).run(response_url)
+                UpdateHomeViewService(user_id, workspace_id).run()
+                if result.failure:
+                    OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
+
+            if action == CHOICE_DEST:
+                selected_option = data['actions'][0]['selected_option']['value']
+                if selected_option == BTN_HOOK_DEST_SELF:
+                    result = SetDestinationService(workspace_id).run(user_id)
                     if result.failure:
-                        OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
-                if action == CHOICE_DEST:
-                    selected_option = data['actions'][0]['selected_option']['value']
-                    if selected_option == BTN_HOOK_DEST_SELF:
-                        result = DestinationService(workspace_id).run(user_id)
-                        if result.failure:
-                            OpenModalService(workspace_id).run(trigger_id, SlackDestinationErrorModal().get_view())
-                        UpdateHomeViewService(user_id, workspace_id).run()
-                    if selected_option == BTN_HOOK_DEST_CHANNEL:
-                        OpenModalService(workspace_id).run(trigger_id, SlackDestinationChannelModal().get_view())
+                        OpenModalService(workspace_id).run(trigger_id, SlackDestinationErrorModal().get_view())
+                    UpdateHomeMessageService(user_id, workspace_id).run(response_url)
+                    UpdateHomeViewService(user_id, workspace_id).run()
+                if selected_option == BTN_HOOK_DEST_CHANNEL:
+                    OpenModalService(workspace_id).run(trigger_id, SlackDestinationChannelModal(
+                        private_metadata=response_url).get_view())
+
+            if action == EVENT_SELECT:
+                import pdb;
+                pdb.set_trace()
+
 
         if data['type'] == 'view_submission':
             block_data = dict(data['view']['state']['values'])
@@ -147,21 +134,29 @@ def interactions(request):
             if block_data.get('block_connect'):
                 value = block_data['block_connect']['input_connect']['value']
                 workspace = Workspace.objects.get(slack_id=workspace_id)
-                result = ConnectService(user_id, workspace, value).run()
+                result = ConnectUserService(user_id, workspace, value).run()
                 if result.failure:
                     return HttpResponse(status=200,
-                                        content=json.dumps(SlackConnectModalWithError('block_connect', result.error).get_view()),
+                                        content=json.dumps(
+                                            SlackConnectModalWithError('block_connect', result.error).get_view()),
                                         content_type='application/json')
                 else:
+                    if data['view'].get('private_metadata'):
+                        UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
                     UpdateHomeViewService(user_id, workspace_id).run()
 
             if block_data.get('block_channel'):
                 value = block_data['block_channel']['select_channel']['selected_conversation']
-                result = DestinationService(workspace_id).run(user_id, channel=value)
+                result = SetDestinationService(workspace_id).run(user_id, channel=value)
                 if result.failure:
                     return HttpResponse(status=200,
-                                        content=json.dumps(SlackConnectModalWithError('block_channel', result.value).get_view()),
+                                        content=json.dumps(
+                                            SlackConnectModalWithError('block_channel', result.error).get_view()),
                                         content_type='application/json')
+                else:
+                    import pdb; pdb.set_trace()
+                    if data['view'].get('private_metadata'):
+                        UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
                 UpdateHomeViewService(user_id, workspace_id).run()
 
     except Exception:
