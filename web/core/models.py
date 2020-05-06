@@ -44,6 +44,7 @@ class Webhook(TimeStampedModel):
     user = models.ForeignKey('SlackUser', related_name='webhooks', null=True, on_delete=models.SET_NULL)
     calendly_id = models.PositiveIntegerField()
     destination_id = models.CharField(max_length=32, null=True, blank=True)
+    event_id = models.CharField(max_length=64, null=True, blank=True)
 
     def __str__(self):
         return "{}".format(self.calendly_id)

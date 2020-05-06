@@ -1,10 +1,11 @@
 from django.http import HttpResponse
 
-from web.core.messages import SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage
+from web.core.messages import SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage, SlackHomeMessage
 from web.core.models import Workspace, SlackUser
-from web.core.services import SlackMessageService, DisconnectService, ConnectService, UpdateHomeViewService
+from web.core.services import SlackMessageService
 from web.payments.services import WorkspaceUpgradeService
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,28 +49,33 @@ def help(request):
     return HttpResponse(status=200)
 
 
-def connect(request):
+def duck(request):
     user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
-    import pdb; pdb.set_trace()
-    result = ConnectService(user_id, workspace_id, None).run()
-    if result.success:
-        msg = result.value
-    else:
-        msg = result.error
     workspace = Workspace.objects.get(slack_id=workspace_id)
-    SlackMessageService(workspace.bot_token).send(user_id, msg)
+    slack_msg_service = SlackMessageService(workspace.bot_token)
+    su, new_user = SlackUser.objects.get_or_create(slack_id=user_id, workspace=workspace)
+    if new_user:
+        logger.info(f'New user from existing workspace: {user_id}')
+        user_info = slack_msg_service.client.users_info(user=user_id)['user']['profile']
+        su.slack_name = user_info.get('first_name', user_info['real_name'])
+        su.slack_email = user_info['email']
+        su.save()
+
+    msg = SlackHomeMessage(su)
+    slack_msg_service.send(user_id, "Hello Andy! Manage Calenduck's settings and notification preferences below",
+                           msg.get_blocks())
     return HttpResponse(status=200)
 
 
-def disconnect(request):
-    user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
-    logger.info(f'User {user_id} is trying to disconnect from Calendly')
-    result = DisconnectService(user_id, workspace_id).run()
-    if result.success:
-        UpdateHomeViewService(user_id, workspace_id).run()
-        msg = result.value
-    else:
-        msg = result.error
-    workspace = Workspace.objects.get(slack_id=workspace_id)
-    SlackMessageService(workspace.bot_token).send(user_id, msg)
-    return HttpResponse(status=200)
+# def reset(request):
+#     user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
+#     logger.info(f'User {user_id} is trying to disconnect from Calendly')
+#     result = DisconnectUserService(user_id, workspace_id).run()
+#     if result.success:
+#         UpdateHomeViewService(user_id, workspace_id).run()
+#         msg = result.value
+#     else:
+#         msg = result.error
+#     workspace = Workspace.objects.get(slack_id=workspace_id)
+#     SlackMessageService(workspace.bot_token).send(user_id, msg)
+#     return HttpResponse(status=200)
