@@ -199,6 +199,7 @@ class SlackMarkdownHelpMessage:
             ]
         }]
 
+
 class SlackHomeMessage:
     def __init__(self, slack_user):
         self.slack_user = slack_user
@@ -298,28 +299,7 @@ class SlackHomeMessage:
             "elements": [self.get_connect_button()]
         }
 
-    def get_conf_template_head(self):
-        return {
-            "type": "context",
-            "elements": [
-                {
-                    "type": "mrkdwn",
-                    "text": "*Current configuration*\n"
-                            "Your configuration is determined by your notification preferences below"
-                }
-            ]
-        }
-
-    def get_conf_template_value(self):
-        return {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": self.get_current_configuration()
-            }
-        }
-
-    def get_notification_template_head(self):
+    def get_notification_template_title(self):
         return {
             "type": "context",
             "elements": [
@@ -330,56 +310,30 @@ class SlackHomeMessage:
             ]
         }
 
-    def get_notification_template_choice(self):
-        return {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "*Where should I send event notifications?*"
-            },
-            "accessory": {
-                "type": "overflow",
-                "action_id": CHOICE_DEST,
-                "options": [
-                    {
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Send to me"
-                        },
-                        "value": BTN_HOOK_DEST_SELF
-                    },
-                    {
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Send to channel"
-                        },
-                        "value": BTN_HOOK_DEST_CHANNEL
-                    }
-                ]
-            }
-        }
-
     def get_event_filters_template(self):
-
+        initial_options = []
         try:
+            # get existing selected events, if available, else load new ones
             calendly = Calendly(self.slack_user.calendly_authtoken)
             events = calendly.event_types()
-            active_events = [{'id': e['id'], 'name': e['attributes']['name']} for e in events['data'] if
-                             e['attributes']['active']]
-            options = [{'text': {'type': 'plain_text', 'text': e['name']}, 'value': e['id']} for e in active_events]
+            options = [{'text': {'type': 'plain_text', 'text': e['attributes']['name']}, 'value': e['id']} for e in
+                       events['data'] if e['attributes']['active']]
+            if self.slack_user.webhooks:
+                existing_hooks = self.slack_user.webhooks.all().values_list('event_id', flat=True)
+                initial_options = [hook for hook in options if hook['value'] in existing_hooks]
         except Exception:
             import logging
             logger = logging.getLogger(__name__)
             logger.exception(f'Could not retrieve events for api_key {self.slack_user.calendly_authtoken}')
             options = [{
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Could not retrieve events. Make sure your account is connected!"
-                        },
-                        "value": "None"
-                    }]
+                "text": {
+                    "type": "plain_text",
+                    "text": "Could not retrieve events. Make sure your account is connected!"
+                },
+                "value": "None"
+            }]
 
-        return {
+        template = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
@@ -396,8 +350,42 @@ class SlackHomeMessage:
             }
         }
 
+        if initial_options:
+            template['accessory']["initial_options"] = initial_options
+
+        return template
+
+    def get_event_destination_title_template(self):
+        return {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Where should I send event notifications?*"
+            },
+            "accessory": {
+                "type": "button",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Configure",
+                },
+                "action_id": BTN_HOOK_DEST
+            }
+        }
+
+    def get_event_destination_context_template(self):
+        return {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "Before configuring, you'll have to invite Calenduck to *private channels* to receive notifications there\n"
+                            "(you can do this by typing `/invite @Calenduck` from the private group)"
+                }
+            ]
+        }
+
     def get_blocks(self):
-        return [
+        base_template = [
             {
                 "type": "section",
                 "text": {
@@ -412,72 +400,68 @@ class SlackHomeMessage:
             self.get_calendly_template_token(),
             self.get_calendly_template_btn(),
             self.get_space_template(),
-            self.get_conf_template_head(),
-            self.get_divider_template(),
-            self.get_conf_template_value(),
-            self.get_notification_template_head(),
+            self.get_notification_template_title(),
             self.get_divider_template(),
             self.get_event_filters_template(),
-            self.get_notification_template_choice(),
+            self.get_event_destination_title_template(),
+            self.get_event_destination_context_template(),
             self.get_space_template()
         ]
+
+        return base_template
 
 
 class SlackHomeViewMessage(SlackHomeMessage):
     def get_view(self):
-        return {
-            "type": "home",
-            "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "*Calenduck*"
+        base_template = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "*Calenduck*"
+                }
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "text": f"Hello {self.slack_user.slack_name}! Here's what you can do with Calenduck",
+                        "type": "mrkdwn"
                     }
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "text": f"Hello {self.slack_user.slack_name}! Here's what you can do with Calenduck",
-                            "type": "mrkdwn"
+                ]
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Help"
                         }
-                    ]
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Help"
-                            }
-                        },
-                        {
-                            "type": "button",
-                            "text": {
-                                "type": "plain_text",
-                                "text": "Feedback"
-                            }
+                    },
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Feedback"
                         }
-                    ]
-                },
-                self.get_space_template(),
-                self.get_calendly_template_head(),
-                self.get_divider_template(),
-                self.get_calendly_template_email(),
-                self.get_calendly_template_token(),
-                self.get_calendly_template_btn(),
-                self.get_space_template(),
-                self.get_conf_template_head(),
-                self.get_divider_template(),
-                self.get_conf_template_value(),
-                self.get_space_template(),
-                self.get_notification_template_head(),
-                self.get_divider_template(),
-                self.get_event_filters_template(),
-                self.get_notification_template_choice(),
-                self.get_space_template()
-            ]
-        }
+                    }
+                ]
+            },
+            self.get_space_template(),
+            self.get_calendly_template_head(),
+            self.get_divider_template(),
+            self.get_calendly_template_email(),
+            self.get_calendly_template_token(),
+            self.get_calendly_template_btn(),
+            self.get_space_template(),
+            self.get_notification_template_title(),
+            self.get_divider_template(),
+            self.get_event_filters_template(),
+            self.get_event_destination_title_template(),
+            self.get_event_destination_context_template(),
+            self.get_space_template()
+        ]
+
+        return {'type': 'home', 'blocks': base_template}
