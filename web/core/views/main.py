@@ -99,7 +99,7 @@ def interactions(request):
             action = data['actions'][0]['action_id']
             logger.info(f"User {user_id} is interacting with {action}")
 
-            response_url = data['response_url']
+            response_url = data.get('response_url')
 
             if action == BTN_CONNECT:
                 OpenModalService(workspace_id).run(trigger_id,
@@ -111,22 +111,19 @@ def interactions(request):
                 if result.failure:
                     OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
 
-            if action == CHOICE_DEST:
-                selected_option = data['actions'][0]['selected_option']['value']
-                if selected_option == BTN_HOOK_DEST_SELF:
-                    result = SetDestinationService(workspace_id).run(user_id)
-                    if result.failure:
-                        OpenModalService(workspace_id).run(trigger_id, SlackDestinationErrorModal().get_view())
-                    UpdateHomeMessageService(user_id, workspace_id).run(response_url)
-                    UpdateHomeViewService(user_id, workspace_id).run()
-                if selected_option == BTN_HOOK_DEST_CHANNEL:
-                    OpenModalService(workspace_id).run(trigger_id, SlackDestinationChannelModal(
-                        private_metadata=response_url).get_view())
+            if action == BTN_HOOK_DEST:
+                su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
+                OpenModalService(workspace_id).run(trigger_id,
+                                                   SlackDestinationChannelModal(
+                                                       su,
+                                                       private_metadata=response_url).get_view()
+                                                   )
 
-            if action == EVENT_SELECT:
-                import pdb;
-                pdb.set_trace()
-
+            if action.startswith('hook_'):
+                # get event id from action
+                # call service and set destination
+                # update og message
+                import pdb; pdb.set_trace()
 
         if data['type'] == 'view_submission':
             block_data = dict(data['view']['state']['values'])
@@ -144,20 +141,6 @@ def interactions(request):
                     if data['view'].get('private_metadata'):
                         UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
                     UpdateHomeViewService(user_id, workspace_id).run()
-
-            if block_data.get('block_channel'):
-                value = block_data['block_channel']['select_channel']['selected_conversation']
-                result = SetDestinationService(workspace_id).run(user_id, channel=value)
-                if result.failure:
-                    return HttpResponse(status=200,
-                                        content=json.dumps(
-                                            SlackConnectModalWithError('block_channel', result.error).get_view()),
-                                        content_type='application/json')
-                else:
-                    import pdb; pdb.set_trace()
-                    if data['view'].get('private_metadata'):
-                        UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
-                UpdateHomeViewService(user_id, workspace_id).run()
 
     except Exception:
         logger.exception("Could not parse interaction")
