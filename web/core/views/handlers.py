@@ -8,7 +8,7 @@ from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCancelledMessage, STATIC_HELP_MSG
-from web.core.models import Workspace, Webhook
+from web.core.models import Workspace, Webhook, Filter
 from web.core.services import SlackMessageService
 from web.core.views.commands import duck
 from web.utils import COMMAND_LIST
@@ -52,7 +52,10 @@ def get_cancelled_event_message_data(data):
 def handle(request, signed_value):
     try:
         workspace_slack_id, user_slack_id = signing.loads(signed_value)
-        workspace = Workspace.objects.get(slack_id=workspace_slack_id)
+
+        if not Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).exists():
+            logger.info(f'Disabled webhook for user {user_slack_id}')
+            return HttpResponse(status=200)
 
         data = json.loads(request.body)
         event = data.get('event')
@@ -63,19 +66,19 @@ def handle(request, signed_value):
             return HttpResponse(status=200)
 
         payload = data['payload']
-
         event_id = payload['event_type']['uuid']
-        destination_id = Webhook.objects.get(user__slack_id=user_slack_id, event_id=event_id)
+        destination_id = Filter.objects.get(user__slack_id=user_slack_id, event_id=event_id).destination_id
 
         if event == 'invitee.created':
-            txt, message_values = get_created_event_message_data(data)
+            txt, message_values = get_created_event_message_data(payload)
             msg = SlackMarkdownEventCreatedMessage(**message_values)
             logger.info(f'Received created event: {message_values}')
         else:
-            txt, message_values = get_cancelled_event_message_data(data)
+            txt, message_values = get_cancelled_event_message_data(payload)
             msg = SlackMarkdownEventCancelledMessage(**message_values)
             logger.info(f'Received cancelled event: {message_values}')
 
+        workspace = Workspace.objects.get(slack_id=workspace_slack_id)
         SlackMessageService(workspace.bot_token).send(
             destination_id,
             txt,

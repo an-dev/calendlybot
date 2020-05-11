@@ -2,6 +2,10 @@ from calendly import Calendly
 from django.conf import settings
 
 from web.core.actions import *
+from web.utils import user_eligible
+
+import logging
+logger = logging.getLogger(__name__)
 
 STATIC_START_MSG = 'Type `/duck connect your-calendly-token` to start!'
 STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
@@ -237,6 +241,7 @@ class SlackHomeMessage:
         return 'Use the button below to connect your Calendly account'
 
     def get_current_configuration(self):
+        # TODO: this needs to be redone with Filters instead
         webhook = self.slack_user.webhooks.first()
         if webhook:
             workspace = self.slack_user.workspace
@@ -312,26 +317,27 @@ class SlackHomeMessage:
 
     def get_event_filters_template(self):
         initial_options = []
+        options = [{
+            "text": {
+                "type": "plain_text",
+                "text": "Could not retrieve events. Make sure your account is connected!"
+            },
+            "value": "None"
+        }]
         try:
             # get existing selected events, if available, else load new ones
             calendly = Calendly(self.slack_user.calendly_authtoken)
             events = calendly.event_types()
-            options = [{'text': {'type': 'plain_text', 'text': e['attributes']['name']}, 'value': e['id']} for e in
-                       events['data'] if e['attributes']['active']]
-            if self.slack_user.webhooks:
-                existing_hooks = self.slack_user.webhooks.all().values_list('event_id', flat=True)
-                initial_options = [hook for hook in options if hook['value'] in existing_hooks]
+            if 'data' in events:
+                options = [{'text': {'type': 'plain_text', 'text': e['attributes']['name']}, 'value': e['id']} for e in
+                           events['data'] if e['attributes']['active']]
+                if self.slack_user.filters:
+                    existing_filters = self.slack_user.filters.all().values_list('event_id', flat=True)
+                    initial_options = [f for f in options if f['value'] in existing_filters]
         except Exception:
             import logging
             logger = logging.getLogger(__name__)
             logger.exception(f'Could not retrieve events for api_key {self.slack_user.calendly_authtoken}')
-            options = [{
-                "text": {
-                    "type": "plain_text",
-                    "text": "Could not retrieve events. Make sure your account is connected!"
-                },
-                "value": "None"
-            }]
 
         template = {
             "type": "section",
@@ -361,14 +367,6 @@ class SlackHomeMessage:
             "text": {
                 "type": "mrkdwn",
                 "text": "*Where should I send event notifications?*"
-            },
-            "accessory": {
-                "type": "button",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Configure",
-                },
-                "action_id": BTN_HOOK_DEST
             }
         }
 
@@ -383,6 +381,111 @@ class SlackHomeMessage:
                 }
             ]
         }
+
+    def get_event_destinations(self):
+        filters = self.slack_user.filters
+        if filters:
+
+            initial_option = None
+            destination_name = 'Could not retrieve event name'
+
+            import slack
+            client = slack.WebClient(token=self.slack_user.workspace.bot_token)
+            # get users
+            users = [{'id': u['id'], 'name': u['profile'].get('first_name', u['profile']['real_name'])} for u in
+                     client.users_list().data['members'] if user_eligible(u)]
+            user_list = [{'text': {'type': 'plain_text', 'text': u['name']}, 'value': u['id']} for u in users]
+            # get channels
+            channels = [{'id': c['id'], 'name': c['name']} for c in client.channels_list().data['channels']]
+            channel_list = [{'text': {'type': 'plain_text', 'text': c['name']}, 'value': c['id']} for c in channels]
+            # get private channels
+            groups = [{'id': g['id'], 'name': g['name']} for g in client.groups_list().data['groups']]
+            group_list = [{'text': {'type': 'plain_text', 'text': g['name']}, 'value': g['id']} for g in groups]
+
+            for f in filters.all():
+                section = {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "",
+                    },
+                    "accessory": {
+                        "type": "static_select",
+                        "action_id": f"filter_{f.event_id}",
+                        "placeholder": {
+                            "type": "plain_text",
+                            "text": "Select destination"
+                        },
+                        "option_groups": [
+                            {
+                                "label": {
+                                    "type": "plain_text",
+                                    "text": "Users"
+                                },
+                                "options": user_list
+                            },
+                            {
+                                "label": {
+                                    "type": "plain_text",
+                                    "text": "Channels"
+                                },
+                                "options": channel_list
+                            },
+                            {
+                                "label": {
+                                    "type": "plain_text",
+                                    "text": "Private Channels"
+                                },
+                                "options": group_list
+                            }
+                        ]
+                    },
+                }
+
+                if f.destination_id:
+                    destination_id = f.destination_id
+                    destination_obj = None
+                    if destination_id.startswith('U'):
+                        destination_obj = \
+                        [a for a in filter(lambda x: x['name'] if x['id'] == destination_id else None, users)][0]
+
+                    if destination_id.startswith('C'):
+                        destination_obj = \
+                            [a for a in filter(lambda x: x['name'] if x['id'] == destination_id else None, channels)][0]
+
+                    if destination_id.startswith('G'):
+                        destination_obj = \
+                            [a for a in filter(lambda x: x['name'] if x['id'] == destination_id else None, groups)][0]
+
+                    if destination_obj:
+                        initial_option = {
+                            'text': {'type': 'plain_text', 'text': destination_obj['name']}, 'value': destination_id}
+                    else:
+                        logger.warning(f'Could not load initial option for {destination_id} for {f}')
+
+                    try:
+                        calendly = Calendly(self.slack_user.calendly_authtoken)
+                        destination_name = [a['attributes']['name'] for a in
+                                            filter(lambda x: x['id'] == f.event_id,
+                                                   calendly.event_types()['data'])][0]
+                    except Exception:
+                        logger.exception(f'{destination_name}')
+
+                section['text']['text'] = destination_name
+
+                if initial_option:
+                    section['accessory']['initial_option'] = initial_option
+                yield section
+        else:
+            yield {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Select at least 1 event first."
+                    }
+                ]
+            }
 
     def get_blocks(self):
         base_template = [
@@ -408,6 +511,9 @@ class SlackHomeMessage:
             self.get_space_template()
         ]
 
+        gen = self.get_event_destinations()
+        [base_template.append(d) for d in gen]
+        base_template.append(self.get_space_template())
         return base_template
 
 
@@ -461,7 +567,9 @@ class SlackHomeViewMessage(SlackHomeMessage):
             self.get_event_filters_template(),
             self.get_event_destination_title_template(),
             self.get_event_destination_context_template(),
-            self.get_space_template()
         ]
 
+        gen = self.get_event_destinations()
+        [base_template.append(d) for d in gen]
+        base_template.append(self.get_space_template())
         return {'type': 'home', 'blocks': base_template}

@@ -1,10 +1,11 @@
 import slack
 from calendly import Calendly
+from celery import shared_task
 from django.conf import settings
 from django.core import signing
 
 from web.core.messages import STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage, SlackHomeMessage
-from web.core.models import Workspace, SlackUser, Webhook
+from web.core.models import Workspace, SlackUser, Webhook, Filter
 from web.utils import has_calendly_hooks, remove_calendly_hooks, InvalidTokenError, has_active_hooks
 
 from logging import getLogger
@@ -45,19 +46,12 @@ class DisconnectUserService:
         # delete them
         # delete the webhook object as well
         try:
+            DeleteWebhookService(self.user_id).run()
             su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
-            calendly = Calendly(su.calendly_authtoken)
-
-            if not has_calendly_hooks(calendly):
-                logger.warning(f'No remote webhooks for user {self.user_id}')
-            else:
-                if remove_calendly_hooks(calendly):
-                    Webhook.objects.filter(user=su).delete()
-                else:
-                    logger.warning(f'Could not delete webhooks for user {self.user_id}. Do this manually!')
             su.calendly_authtoken = None
             su.calendly_email = None
             su.save()
+            su.filters.all().delete()
             value = "Account successfully disconnected. Type `/duck start` to associate another Calendly account."
             return Result.from_success(value)
         except Exception:
@@ -67,14 +61,13 @@ class DisconnectUserService:
 
 
 class ConnectUserService:
-    def __init__(self, user_id, workspace, api_key):
+    def __init__(self, user_id, workspace_id, api_key):
         self.user_id = user_id
-        self.workspace = workspace
+        self.workspace_id = workspace_id
         self.api_key = api_key
 
     def run(self):
         try:
-            su = SlackUser.objects.get(slack_id=self.user_id, workspace=self.workspace)
             # atm, we support just one authtoken per user.
             # Calling this service on the same user effectively overwrites
             calendly = Calendly(self.api_key)
@@ -91,6 +84,7 @@ class ConnectUserService:
                 logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
                 return Result.from_failure("Your account is already setup to receive event notifications.")
 
+            su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
             su.calendly_authtoken = self.api_key
             su.calendly_email = response_from_echo['email']
             su.save()
@@ -113,7 +107,8 @@ class UpdateHomeMessageService:
         try:
             workspace = Workspace.objects.get(slack_id=self.workspace_id)
             su = SlackUser.objects.get(slack_id=self.user_id, workspace=workspace)
-            SlackMessageService(workspace.bot_token).update_interaction(response_url, '', SlackHomeMessage(su).get_blocks())
+            SlackMessageService(workspace.bot_token).update_interaction(response_url, '',
+                                                                        SlackHomeMessage(su).get_blocks())
         except Exception:
             logger.exception('Could not update onboarding msg')
             return Result.from_failure('')
@@ -153,25 +148,42 @@ class OpenModalService:
             return Result.from_failure('')
 
 
-class SetDestinationService:
-    def __init__(self, workspace_id):
-        workspace = Workspace.objects.get(slack_id=workspace_id)
-        self.client = slack.WebClient(token=workspace.bot_token)
+class DeleteWebhookService:
+    def __init__(self, user_id):
+        self.user_id = user_id
 
-    def run(self, user_id, channel=None):
-        destination_id = channel if channel else user_id
+    def run(self):
         try:
-            su = SlackUser.objects.get(slack_id=user_id)
-            calendly = Calendly(su.calendly_authtoken)
+            user = SlackUser.objects.get(slack_id=self.user_id)
+            calendly = Calendly(user.calendly_authtoken)
 
             if has_active_hooks(calendly):
                 if remove_calendly_hooks(calendly):
-                    Webhook.objects.filter(user=su).delete()
+                    Webhook.objects.get(user=user).delete()
                 else:
-                    logger.warning(f'Could not delete webhooks for user {user_id}. Do this manually!')
+                    logger.warning(f'Could not delete webhooks for user {self.user_id}. Do this manually!')
+            else:
+                logger.info(f'No Webhook to delete')
+            return Result.from_success()
+        except Exception:
+            msg = 'Could not delete Webhook'
+            logger.exception(msg)
+            return Result.from_failure(msg)
 
-            signed_value = signing.dumps((su.workspace.slack_id, destination_id))
 
+class CreateWebhookService:
+    def __init__(self, workspace_id, user_id):
+        self.workspace_id = workspace_id
+        self.user_id = user_id
+
+    def run(self):
+        try:
+            user = SlackUser.objects.get(slack_id=self.user_id)
+            DeleteWebhookService(self.user_id).run()
+
+            signed_value = signing.dumps((self.workspace_id, self.user_id))
+
+            calendly = Calendly(user.calendly_authtoken)
             webhook_create_response = calendly.create_webhook(
                 f"{settings.SITE_URL}/handle/{signed_value}/")
 
@@ -187,20 +199,59 @@ class SetDestinationService:
                     errors_detail = STATIC_HELP_MSG
                 result = Result.from_failure(f"Could not connect with Calendly API. {errors_detail}")
             else:
-                Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'],
-                                       destination_id=destination_id)
-                msg = "Setup complete. You will now receive notifications on created and canceled events!"
-                if channel:
-                    # if private channel the bot needs to be invited
-                    if channel.startswith('G'):
-                        msg = "Almost there! Type `/invite calenduck` in the selected private channel to receive notifications on created and canceled events!"
-                    else:
-                        # join channel if not already there
-                        self.client.conversations_join(channel=destination_id)
-                result = Result.from_success(msg)
+                Webhook.objects.create(user=user, calendly_id=webhook_create_response['id'])
+                result = Result.from_success(
+                    "Setup complete. You will now receive notifications on created and canceled events!")
         except InvalidTokenError:
-            logger.warning(f'User {user_id} does not have a valid token')
+            logger.warning(f'User {self.user_id} does not have a valid token')
             result = Result.from_failure(STATIC_FREE_ACCT_MSG)
+        except Exception:
+            logger.exception('Could not connect to calendly')
+            result = Result.from_failure(f"Could not connect to Calendly. {STATIC_HELP_MSG}")
+        return result
+
+
+@shared_task(autoretry_for=(Exception,))
+def create_webhook(workspace_id, user_id):
+    CreateWebhookService(workspace_id, user_id).run()
+
+
+class CreateFiltersService:
+    def __init__(self, user_id):
+        self.user_id = user_id
+
+    def run(self, selected_events):
+        try:
+            su = SlackUser.objects.get(slack_id=self.user_id)
+            qs_filter = Filter.objects.filter(user=su)
+            qs_filter.exclude(event_id__in=selected_events).delete()
+            all_user_hooks = qs_filter.values_list('event_id', flat=True)
+
+            for event_id in selected_events:
+                if event_id not in all_user_hooks:
+                    Filter.objects.create(event_id=event_id, user=su, destination_id=self.user_id)
+            return Result.from_success()
+        except Exception:
+            logger.exception('Could not setup filters')
+            return Result.from_failure('')
+
+
+class SetDestinationService:
+    def __init__(self, workspace_id):
+        workspace = Workspace.objects.get(slack_id=workspace_id)
+        self.client = slack.WebClient(token=workspace.bot_token)
+
+    def run(self, user_id, event_id, destination_id):
+        try:
+            su = SlackUser.objects.get(slack_id=user_id)
+
+            ffilter, _ = Filter.objects.get_or_create(user=su, event_id=event_id)
+            ffilter.destination_id = destination_id
+            ffilter.save()
+            msg = "Setup complete. You will now receive notifications on created and canceled events!"
+            if destination_id.startswith('C'):
+                self.client.conversations_join(channel=destination_id)
+            result = Result.from_success(msg)
         except Exception:
             logger.exception('Could not connect to calendly')
             result = Result.from_failure(f"Could not connect to Calendly. {STATIC_HELP_MSG}")
