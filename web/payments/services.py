@@ -14,9 +14,7 @@ class WorkspaceUpgradeService:
     def run(self):
         user_count = self.workspace.slackusers.count()
 
-        if user_count == 1:
-            plan_id = settings.STRIPE_PLAN_ID_SM
-        elif 1 < user_count <= 5:
+        if user_count <= 5:
             plan_id = settings.STRIPE_PLAN_ID_MD
         else:
             plan_id = settings.STRIPE_PLAN_ID_LG
