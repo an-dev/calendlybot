@@ -5,6 +5,7 @@ from web.core.actions import *
 from web.utils import user_eligible
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 STATIC_START_MSG = 'Type `/duck connect your-calendly-token` to start!'
@@ -431,23 +432,25 @@ class SlackHomeMessage:
                                 },
                                 "options": channel_list
                             },
-                            {
-                                "label": {
-                                    "type": "plain_text",
-                                    "text": "Private Channels"
-                                },
-                                "options": group_list
-                            }
                         ]
                     },
                 }
+
+                if group_list:
+                    section['accessory']['option_groups'].append({
+                        "label": {
+                            "type": "plain_text",
+                            "text": "Private Channels"
+                        },
+                        "options": group_list
+                    })
 
                 if f.destination_id:
                     destination_id = f.destination_id
                     destination_obj = None
                     if destination_id.startswith('U'):
                         destination_obj = \
-                        [a for a in filter(lambda x: x['name'] if x['id'] == destination_id else None, users)][0]
+                            [a for a in filter(lambda x: x['name'] if x['id'] == destination_id else None, users)][0]
 
                     if destination_id.startswith('C'):
                         destination_obj = \
