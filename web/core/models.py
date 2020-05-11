@@ -41,12 +41,21 @@ class SlackUser(TimeStampedModel):
 
 
 class Webhook(TimeStampedModel):
-    user = models.ForeignKey('SlackUser', related_name='webhooks', null=True, on_delete=models.SET_NULL)
+    user = models.OneToOneField('SlackUser', related_name='webhook', null=True, on_delete=models.SET_NULL)
     calendly_id = models.PositiveIntegerField()
-    destination_id = models.CharField(max_length=32, null=True, blank=True)
+    enabled = models.BooleanField(default=True)
 
     def __str__(self):
         return "{}".format(self.calendly_id)
+
+
+class Filter(TimeStampedModel):
+    user = models.ForeignKey('SlackUser', related_name='filters', null=True, on_delete=models.CASCADE)
+    destination_id = models.CharField(max_length=32, null=True, blank=True)
+    event_id = models.CharField(max_length=64)
+
+    def __str__(self):
+        return "{}".format(self.event_id)
 
 
 class Subscription(TimeStampedModel):

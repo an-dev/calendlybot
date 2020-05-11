@@ -8,8 +8,9 @@ from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCancelledMessage, STATIC_HELP_MSG
-from web.core.models import SlackUser, Workspace
+from web.core.models import Workspace, Webhook, Filter
 from web.core.services import SlackMessageService
+from web.core.views.commands import duck
 from web.utils import COMMAND_LIST
 from web.core.views import commands as slack_commands
 
@@ -50,34 +51,40 @@ def get_cancelled_event_message_data(data):
 @require_http_methods(["POST"])
 def handle(request, signed_value):
     try:
-        workspace_slack_id, destination_slack_id = signing.loads(signed_value)
-        workspace = Workspace.objects.get(slack_id=workspace_slack_id)
+        workspace_slack_id, user_slack_id = signing.loads(signed_value)
+
+        if not Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).exists():
+            logger.info(f'Disabled webhook for user {user_slack_id}')
+            return HttpResponse(status=200)
 
         data = json.loads(request.body)
-        event_type = data.get('event')
+        event = data.get('event')
 
-        if event_type not in ['invitee.created', 'invitee.canceled']:
+        if event not in ['invitee.created', 'invitee.canceled']:
             logger.exception(
                 "Something went wrong. Could not handle event type:\n{}".format(request.body))
+            return HttpResponse(status=200)
+
+        payload = data['payload']
+        event_id = payload['event_type']['uuid']
+        destination_id = Filter.objects.get(user__slack_id=user_slack_id, event_id=event_id).destination_id
+
+        if event == 'invitee.created':
+            txt, message_values = get_created_event_message_data(payload)
+            msg = SlackMarkdownEventCreatedMessage(**message_values)
+            logger.info(f'Received created event: {message_values}')
         else:
-            data = data['payload']
-            if event_type == 'invitee.created':
-                txt, message_values = get_created_event_message_data(data)
-                msg = SlackMarkdownEventCreatedMessage(**message_values)
-                logger.info(f'Received created event: {message_values}')
+            txt, message_values = get_cancelled_event_message_data(payload)
+            msg = SlackMarkdownEventCancelledMessage(**message_values)
+            logger.info(f'Received cancelled event: {message_values}')
 
-            if event_type == 'invitee.canceled':
-                txt, message_values = get_cancelled_event_message_data(data)
-                msg = SlackMarkdownEventCancelledMessage(**message_values)
-                logger.info(f'Received cancelled event: {message_values}')
-
-            if event_type in ['invitee.created', 'invitee.canceled']:
-                SlackMessageService(workspace.bot_token).send(
-                    destination_slack_id,
-                    txt,
-                    msg.get_blocks(),
-                    msg.get_attachments()
-                )
+        workspace = Workspace.objects.get(slack_id=workspace_slack_id)
+        SlackMessageService(workspace.bot_token).send(
+            destination_id,
+            txt,
+            msg.get_blocks(),
+            msg.get_attachments()
+        )
     except Exception:
         logger.exception("Could not handle hook event")
     return HttpResponse(status=200)
@@ -89,16 +96,11 @@ def handle(request, signed_value):
 def commands(request):
     try:
         command = request.POST['text'].split(' ')[0]
-        if command not in COMMAND_LIST:
-            workspace = Workspace.objects.get(slack_id=request.POST['team_id'])
-            su, created = SlackUser.objects.get_or_create(slack_id=request.POST['user_id'],
-                                                          workspace=workspace)
-            slack_msg_service = SlackMessageService(workspace.bot_token)
-            slack_msg_service.send(su.slack_id,
-                                   f"Could not find command. {STATIC_HELP_MSG}")
-        else:
+        if command in COMMAND_LIST:
             method_to_call = getattr(slack_commands, command)
-            return method_to_call(request)
+            method_to_call(request)
+        else:
+            duck(request)
     except Exception:
         logger.exception(f"Error executing command: {request.POST}")
     return HttpResponse(status=200)

@@ -9,11 +9,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from web.core.decorators import verify_request
-from web.core.messages import SlackMarkdownNotificationDestinationChannelMessage, STATIC_START_MSG, STATIC_HELP_MSG
+from web.core.messages import STATIC_START_MSG
+from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
+    SlackConnectModalWithError
 from web.core.models import SlackUser, Workspace
-from web.core.services import SlackMessageService
+from web.core.services import DisconnectUserService, UpdateHomeViewService, OpenModalService, \
+    ConnectUserService, UpdateHomeMessageService, SetDestinationService, CreateFiltersService, create_webhook
 from web.core.actions import *
-from web.utils import setup_handle_destination, get_user_count, mail
+from web.utils import get_user_count, mail
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -73,6 +76,9 @@ def auth(request):
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
+
+        UpdateHomeViewService(user_id, team_id)
+
     except Exception:
         logger.exception(f"Could not complete auth setup: {request.GET}")
         msg = "Uh oh. Could not setup auth."
@@ -86,36 +92,67 @@ def auth(request):
 def interactions(request):
     try:
         data = json.loads(request.POST['payload'])
-        action = data['actions'][0]['action_id']
-        response_url = data['response_url']
+        trigger_id = data.get('trigger_id')
         user_id, workspace_id = data['user']['id'], data['user']['team_id']
-        su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
-        slack_msg_service = SlackMessageService(su.workspace.bot_token)
 
-        logger.info(f"User {user_id} is interacting with {action}")
+        if data['type'] == 'block_actions':
+            action_id = data['actions'][0]['action_id']
+            logger.info(f"User {user_id} is interacting with {action_id}")
 
-        if action == BTN_HOOK_DEST_SELF:
-            return setup_handle_destination(response_url, su)
-        elif action == BTN_HOOK_DEST_CHANNEL:
-            msg = SlackMarkdownNotificationDestinationChannelMessage()
-            slack_msg_service.update_interaction(
-                response_url,
-                blocks=msg.get_blocks()
-            )
-        elif action == SELECT_HOOK_DEST_CHANNEL:
-            channel = data['actions'][0]['selected_conversation']
-            logger.info(f"{channel} channel selected")
-            return setup_handle_destination(response_url, su, channel)
-        else:
-            if action == BTN_CANCEL:
-                slack_msg_service.update_interaction(
-                    response_url,
-                    text="You can pick things up later by typing `/duck connect your-calendly-token`.")
-            else:
-                slack_msg_service.send(su.slack_id, f"I don\'t think I understand. {STATIC_HELP_MSG}")
+            response_url = data.get('response_url')
+
+            if action_id == BTN_CONNECT:
+                OpenModalService(workspace_id).run(trigger_id,
+                                                   SlackConnectModal(private_metadata=response_url).get_view())
+            if action_id == BTN_DISCONNECT:
+                result = DisconnectUserService(user_id, workspace_id).run()
+                UpdateHomeMessageService(user_id, workspace_id).run(response_url)
+                UpdateHomeViewService(user_id, workspace_id).run()
+                if result.failure:
+                    OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
+
+            if action_id == EVENT_SELECT:
+                # get existing hooks
+                # compare to hooks from request
+                # delete missing hooks
+                # create new hooks
+                selected_events = [e['value'] for e in data['actions'][0]['selected_options']]
+                if 'None' in selected_events:
+                    selected_events.remove('None')
+
+                if selected_events:
+                    CreateFiltersService(user_id).run(selected_events)
+                UpdateHomeMessageService(user_id, workspace_id).run(response_url)
+                UpdateHomeViewService(user_id, workspace_id).run()
+
+            if action_id.startswith('filter_'):
+                # get event id from action
+                # call service and set destination
+                # update og messageworkspace
+
+                event_id = action_id.split('filter_')[1]
+                destination_id = data['actions'][0]['selected_option']['value']
+                SetDestinationService(workspace_id).run(user_id, event_id, destination_id)
+                UpdateHomeMessageService(user_id, workspace_id).run(response_url)
+                UpdateHomeViewService(user_id, workspace_id).run()
+
+        if data['type'] == 'view_submission':
+            block_data = dict(data['view']['state']['values'])
+
+            if block_data.get('block_connect'):
+                value = block_data['block_connect']['input_connect']['value'].strip('')
+                result = ConnectUserService(user_id, workspace_id, value).run()
+                if result.failure:
+                    return HttpResponse(status=200,
+                                        content=json.dumps(
+                                            SlackConnectModalWithError('block_connect', result.error).get_view()),
+                                        content_type='application/json')
+                else:
+                    create_webhook.delay(workspace_id, user_id)
+                    if data['view'].get('private_metadata'):
+                        UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
+                    UpdateHomeViewService(user_id, workspace_id).run()
+                    return HttpResponse(status=200)
     except Exception:
         logger.exception("Could not parse interaction")
-        slack_msg_service.update_interaction(
-            response_url,
-            text=f"Could not parse interaction. {STATIC_HELP_MSG}")
     return HttpResponse(status=200)
