@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def create_event_destination(apps, schema_editor):
-    Webhook = apps.get_model('Webhook')
+    Webhook = apps.get_model('core', 'Webhook')
 
     for w in Webhook.objects.all():
         print(w.calendly_id, w.destination_id, w.event_id)

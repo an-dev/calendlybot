@@ -1,7 +1,7 @@
 # Register your models here.
 from django.contrib import admin
 
-from web.core.models import SlackUser, Subscription, Workspace, Webhook
+from web.core.models import SlackUser, Subscription, Workspace, Webhook, Filter
 
 
 class SubscriptionInline(admin.StackedInline):
@@ -21,14 +21,19 @@ class WebhooksInline(admin.StackedInline):
     model = Webhook
 
 
+class FiltersInline(admin.StackedInline):
+    model = Filter
+    extra = 2
+
+
 class SlackUserAdmin(admin.ModelAdmin):
-    inlines = (WebhooksInline,)
+    inlines = (WebhooksInline, FiltersInline)
     fields = (
         'slack_id', 'slack_name', 'slack_email', 'calendly_email', 'calendly_authtoken', 'created',
         'modified', 'workspace')
     readonly_fields = ('slack_id', 'slack_name', 'slack_email', 'created', 'modified')
     raw_id_fields = ('workspace',)
-    list_display = ('slack_email', 'calendly_authtoken', 'workspace', 'created')
+    list_display = ('slack_email', 'slack_id', 'calendly_authtoken', 'workspace', 'created')
 
 
 admin.site.register(Workspace, WorkspaceAdmin)
