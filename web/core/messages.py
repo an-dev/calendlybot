@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-STATIC_START_MSG = 'Type `/duck connect your-calendly-token` to start!'
+STATIC_START_MSG = 'Type `/duck` to start!'
 STATIC_HELP_MSG = 'Please try again or type `/duck help`.'
 STATIC_FREE_ACCT_MSG = "Calenduck works only with Calendly Premium and Pro accounts. " \
                        "<https://help.calendly.com/hc/en-us/articles/223195488|Learn more>."
