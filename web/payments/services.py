@@ -3,8 +3,6 @@ import stripe
 from django.conf import settings
 from django.core import signing
 
-from web.utils import eligible_user
-
 
 class WorkspaceUpgradeService:
     stripe.api_key = settings.STRIPE_SECRET_KEY
