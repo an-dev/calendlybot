@@ -53,10 +53,6 @@ def handle(request, signed_value):
     try:
         workspace_slack_id, user_slack_id = signing.loads(signed_value)
 
-        if not Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).exists():
-            logger.info(f'Disabled webhook for user {user_slack_id}')
-            return HttpResponse(status=200)
-
         data = json.loads(request.body)
         event = data.get('event')
 
@@ -66,8 +62,17 @@ def handle(request, signed_value):
             return HttpResponse(status=200)
 
         payload = data['payload']
-        event_id = payload['event_type']['uuid']
-        destination_id = Filter.objects.get(user__slack_id=user_slack_id, event_id=event_id).destination_id
+
+        # compatibility for old hooks
+        if user_slack_id.startswith('C') or user_slack_id.startswith('G'):
+            destination_id = user_slack_id
+        else:
+            if not Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).exists():
+                logger.info(f'Disabled webhook for user {user_slack_id}')
+                return HttpResponse(status=200)
+
+            event_id = payload['event_type']['uuid']
+            destination_id = Filter.objects.get(user__slack_id=user_slack_id, event_id=event_id).destination_id
 
         if event == 'invitee.created':
             txt, message_values = get_created_event_message_data(payload)

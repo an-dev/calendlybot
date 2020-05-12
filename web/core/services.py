@@ -6,7 +6,7 @@ from django.core import signing
 
 from web.core.messages import STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage, SlackHomeMessage
 from web.core.models import Workspace, SlackUser, Webhook, Filter
-from web.utils import has_calendly_hooks, remove_calendly_hooks, InvalidTokenError, has_active_hooks
+from web.utils import remove_calendly_hooks, InvalidTokenError, has_active_hooks
 
 from logging import getLogger
 
