@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.templatetags.static import static
 
 logger = logging.getLogger(__name__)
@@ -68,12 +69,12 @@ class SlackConnectModal:
                                 "*3.* Paste in the field down below"
                     }
                 },
-                # {
-                #     "type": "image",
-                #     "block_id": "image",
-                #     "image_url": static('web/img/tutorial.png'),
-                #     "alt_text": "Calendly Instructions"
-                # },
+                {
+                    "type": "image",
+                    "block_id": "image",
+                    "image_url": f"{settings.SITE_URL}{static('web/img/tutorial.png')}",
+                    "alt_text": "Calendly Instructions"
+                },
                 {
                     "type": "context",
                     "elements": [
@@ -89,7 +90,7 @@ class SlackConnectModal:
                     "elements": [
                         {
                             "type": "image",
-                            "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
+                            "image_url": f"{settings.SITE_URL}{static('web/img/placeholder.png')}",
                             "alt_text": "placeholder"
                         }
                     ]

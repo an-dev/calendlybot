@@ -1,5 +1,6 @@
 from calendly import Calendly
 from django.conf import settings
+from django.templatetags.static import static
 
 from web.core.actions import *
 from web.utils import user_eligible
@@ -259,7 +260,7 @@ class SlackHomeMessage:
             "elements": [
                 {
                     "type": "image",
-                    "image_url": "https://api.slack.com/img/blocks/bkb_template_images/placeholder.png",
+                    "image_url": f"{settings.SITE_URL}{static('web/img/placeholder.png')}",
                     "alt_text": "placeholder"
                 }
             ]
