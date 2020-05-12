@@ -71,7 +71,7 @@ class SlackConnectModal:
                 {
                     "type": "image",
                     "block_id": "image",
-                    "image_url": static('web/tutorial.png'),
+                    "image_url": static('web/img/tutorial.png'),
                     "alt_text": "Calendly Instructions"
                 },
                 {
