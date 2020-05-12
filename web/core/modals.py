@@ -1,5 +1,7 @@
 import logging
 
+from django.templatetags.static import static
+
 logger = logging.getLogger(__name__)
 
 
@@ -69,7 +71,7 @@ class SlackConnectModal:
                 {
                     "type": "image",
                     "block_id": "image",
-                    "image_url": "https://help.calendly.com/hc/article_attachments/360059408434/Screen_Shot_2020-03-04_at_9.23.54_AM.png",
+                    "image_url": static('web/tutorial.png'),
                     "alt_text": "Calendly Instructions"
                 },
                 {
