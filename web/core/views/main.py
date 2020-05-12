@@ -77,7 +77,7 @@ def auth(request):
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
 
-        UpdateHomeViewService(user_id, team_id)
+        # UpdateHomeViewService(user_id, team_id)
 
     except Exception:
         logger.exception(f"Could not complete auth setup: {request.GET}")
@@ -107,7 +107,7 @@ def interactions(request):
             if action_id == BTN_DISCONNECT:
                 result = DisconnectUserService(user_id, workspace_id).run()
                 UpdateHomeMessageService(user_id, workspace_id).run(response_url)
-                UpdateHomeViewService(user_id, workspace_id).run()
+                # UpdateHomeViewService(user_id, workspace_id).run()
                 if result.failure:
                     OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
 
@@ -123,7 +123,7 @@ def interactions(request):
                 if selected_events:
                     CreateFiltersService(user_id).run(selected_events)
                 UpdateHomeMessageService(user_id, workspace_id).run(response_url)
-                UpdateHomeViewService(user_id, workspace_id).run()
+                # UpdateHomeViewService(user_id, workspace_id).run()
 
             if action_id.startswith('filter_'):
                 # get event id from action
@@ -134,7 +134,7 @@ def interactions(request):
                 destination_id = data['actions'][0]['selected_option']['value']
                 SetDestinationService(workspace_id).run(user_id, event_id, destination_id)
                 UpdateHomeMessageService(user_id, workspace_id).run(response_url)
-                UpdateHomeViewService(user_id, workspace_id).run()
+                # UpdateHomeViewService(user_id, workspace_id).run()
 
         if data['type'] == 'view_submission':
             block_data = dict(data['view']['state']['values'])
@@ -151,7 +151,7 @@ def interactions(request):
                     create_webhook.delay(workspace_id, user_id)
                     if data['view'].get('private_metadata'):
                         UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
-                    UpdateHomeViewService(user_id, workspace_id).run()
+                    # UpdateHomeViewService(user_id, workspace_id).run()
                     return HttpResponse(status=200)
     except Exception:
         logger.exception("Could not parse interaction")
