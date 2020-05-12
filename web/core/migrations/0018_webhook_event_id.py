@@ -14,11 +14,12 @@ def create_event_destination(apps, schema_editor):
                 active_event_ids = [e['id'] for e in events['data'] if e['attributes']['active']]
                 if active_event_ids:
                     w.event_id = active_event_ids[0]
-                    w.save()
                     for new_hook in active_event_ids[1:]:
                         Webhook.objects.create(user=w.user, calendly_id=w.calendly_id, destination_id=w.destination_id, event_id=new_hook)
                 else:
                     print(f'Somethings not right events {events}')
+                    w.event_id = ''
+                w.save()
             else:
                 print(f'Somethings not right for user {w.user}')
         else:
