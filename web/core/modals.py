@@ -68,12 +68,12 @@ class SlackConnectModal:
                                 "*3.* Paste in the field down below"
                     }
                 },
-                {
-                    "type": "image",
-                    "block_id": "image",
-                    "image_url": static('web/img/tutorial.png'),
-                    "alt_text": "Calendly Instructions"
-                },
+                # {
+                #     "type": "image",
+                #     "block_id": "image",
+                #     "image_url": static('web/img/tutorial.png'),
+                #     "alt_text": "Calendly Instructions"
+                # },
                 {
                     "type": "context",
                     "elements": [
