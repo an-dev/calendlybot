@@ -3,6 +3,15 @@
 from django.db import migrations, models
 
 
+def make_event_ids_not_null(apps, schema_editor):
+    Webhook = apps.get_model('core', 'Webhook')
+
+    for w in Webhook.objects.all():
+        if w.event_id is None:
+            w.event_id = ''
+            w.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,6 +19,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(make_event_ids_not_null, migrations.RunPython.noop),
         migrations.AlterField(
             model_name='webhook',
             name='event_id',
