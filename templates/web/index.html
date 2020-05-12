@@ -16,12 +16,12 @@
 {% block content %}
 {% load static %}
 <main class="text-light text-center text-center cbot-bg">
-    <div class="container my-5 py-5">
+    <div class="container my-5 py-3">
         <div class="row justify-content-center">
             <div class="col-12">
-                <h1 class="h1 font-weight-bold">Calendly events for Slack</h1>
-                <p class="lead">Direct Calendly integration for Slack*. <br> Receive event notifications directly in
-                    your workspace with no need for unnecessary third-party services.</p>
+                <h1 class="h1 font-weight-bold">Calendly notifications in Slack</h1>
+                <p class="lead">Receive event notifications directly in
+                    your workspace*.<br>No need for unnecessary and complicated third-party services.</p>
                 <p>
                     <a href="/install/"
                        role="button" class="btn btn-lg btn-outline-light">
@@ -37,8 +37,52 @@
                                      target="_blank">Premium and Pro accounts</a>
                 </p>
             </div>
-            <div class="col-12 col-md-10">
+            <div class="col-12 col-md-9">
                 <img src="{% static 'web/img/hero.png' %}" alt="Hero image for notifications" class="pt-md-5 w-100">
+            </div>
+        </div>
+        <div class="row justify-content-center mt-5">
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://geekbears.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/geekbears.png' %}" alt="Geekbears">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.startchurch.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/startchurch.png' %}" alt="Startchurch">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://bolt.eu/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/bolt.svg' %}" alt="Bolt">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.fool.co.uk/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/fool.svg' %}" alt="Motley Fool">
+                </a>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-2">
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.callfire.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/callfire.png' %}" alt="Callfire">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.98point6.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/98point6.png' %}" alt="98point6">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.eztexting.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/ez.png' %}" alt="EZTexting">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.proliant.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/proliant.png' %}" alt="Proliant">
+                </a>
             </div>
         </div>
     </div>
@@ -47,20 +91,14 @@
 <section id="how-it-works">
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
-            <div class="col-lg-4 order-lg-2">
-                <h2 class="h1 font-weight-bold">Connect</h2>
-                <p class="lead">Type <code>/duck connect</code>, followed by your <a
-                        href="https://developer.calendly.com/v1/docs/getting-your-authentication-token" target="_blank"
-                        class="font-weight-bold cbot-link">Calendly authentication token</a> to authenticate your Slack
-                    profile with Calendly<span class="font-weight-bold">*</span></p>
+            <div class="col-lg-5 order-lg-2">
+                <h2 class="h1 font-weight-bold">Get started</h2>
+                <p class="lead">Type <code>/duck</code> to start. Follow the instructions to authenticate your
+                    Premium or Pro Calendly account to Slack</p>
             </div>
-            <div class="col-lg-6 order-lg-1">
+            <div class="col-lg-5 order-lg-1">
                 <div>
-                    <img src="{% static 'web/img/start.png' %}" alt="Image on how to connect from Slack to calendly"
-                         class="rounded shadow-3d w-100">
-                </div>
-                <div class="mt-3">
-                    <img src="{% static 'web/img/connect.gif' %}" alt="Animated on how to connect from Slack"
+                    <img src="{% static 'web/img/connect.png' %}" alt="Image on how to connect from Slack to calendly"
                          class="rounded shadow-3d w-100">
                 </div>
             </div>
@@ -71,16 +109,16 @@
 <section class="bg-white">
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
-            <div class="col-lg-4">
-                <h2 class="h1 font-weight-bold">Choose</h2>
-                <p class="lead">Receive notifications privately or share
-                    events with your team in a public or private channel!
+            <div class="col-lg-5">
+                <h2 class="h1 font-weight-bold">Filter incoming events</h2>
+                <p class="lead">Sift through your Calendly events and select which ones you want Calenduck to notify you
+                    or your team about!
                 </p>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-5">
                 <div>
-                    <img src="{% static 'web/img/setup.png' %}"
-                         alt="Image on how to choose destination for Calendly notifications"
+                    <img src="{% static 'web/img/filter.png' %}"
+                         alt="Image on how to choose which Calendly events to be notified of"
                          class="rounded shadow-3d w-100">
                 </div>
             </div>
@@ -91,15 +129,15 @@
 <section>
     <div class="container my-5 py-5">
         <div class="row align-items-center justify-content-center">
-            <div class="col-lg-4 order-lg-2">
-                <h2 class="h1 font-weight-bold">That's it!</h2>
-                <p class="lead">Sit down, relax and let us do the magic. Event invites and cancellations will now be
-                    sent directly to you by Calenduck</p>
+            <div class="col-lg-5 order-lg-2">
+                <h2 class="h1 font-weight-bold">Customize your notifications</h2>
+                <p class="lead">Calenduck sends notifications to you but you can refine your workflow by selecting a
+                    specific destination for scheduled or cancelled event. </p>
             </div>
-            <div class="col-lg-6 order-lg-1">
+            <div class="col-lg-5 order-lg-1">
                 <div>
-                    <img src="{% static 'web/img/complete.png' %}"
-                         alt="Image of a completed connection between Slack and Calendly"
+                    <img src="{% static 'web/img/select.gif' %}"
+                         alt="Animated Image of how to choose destination for notificatoins in Slack from Calendly"
                          class="rounded shadow-3d w-100">
                 </div>
             </div>
@@ -142,16 +180,6 @@
         <div class="row mb-5 text-center justify-content-center">
             <div class="col-8 col-md-4 my-2">
                 <div>
-                    <p class="lead font-weight-bold mb-0 cbot-link">Personal</p>
-                    <div class="cbot-link">
-                        <span class="h3 font-weight-bold">$</span>
-                        <span class="display-4 mb-0">2<span class="cbot-display-sm">/month</span></span>
-                    </div>
-                    <span class="text-small text-muted pb-md-4">Single user</span>
-                </div>
-            </div>
-            <div class="col-8 col-md-4 my-2">
-                <div>
                     <p class="lead font-weight-bold mb-0 cbot-link">Standard</p>
                     <div class="cbot-link">
                         <span class="h3 font-weight-bold">$</span>
@@ -167,7 +195,7 @@
                         <span class="h3 font-weight-bold">$</span>
                         <span class="display-4 mb-0">10<span class="cbot-display-sm">/month</span></span>
                     </div>
-                    <span class="text-small text-muted pb-md-4">5+ users</span>
+                    <span class="text-small text-muted pb-md-4">Unlimited users</span>
                 </div>
             </div>
         </div>
