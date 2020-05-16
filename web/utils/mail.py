@@ -65,8 +65,9 @@ def send_welcome_email(user_id):
 
 def send_trial_end_email():
     try:
-        emails = SlackUser.objects\
-            .filter(workspace__trial_end=timezone.now().date() + timedelta(days=3))\
+        emails = SlackUser.objects \
+            .filter(workspace__trial_end=timezone.now().date() + timedelta(days=3),
+                    workspace__subscription__isnull=True) \
             .values_list('slack_email', flat=True)
         [SendTrialEndEmail(email).run() for email in emails]
     except Exception:
