@@ -14,7 +14,8 @@ from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
     SlackConnectModalWithError
 from web.core.models import SlackUser, Workspace
 from web.core.services import DisconnectUserService, UpdateHomeViewService, OpenModalService, \
-    ConnectUserService, UpdateHomeMessageService, SetDestinationService, CreateFiltersService, create_webhook
+    ConnectUserService, UpdateHomeMessageService, SetDestinationService, CreateFiltersService, create_webhook, \
+    CreateWebhookService
 from web.core.actions import *
 from web.utils import get_user_count, mail
 
@@ -141,18 +142,24 @@ def interactions(request):
 
             if block_data.get('block_connect'):
                 value = block_data['block_connect']['input_connect']['value'].strip('')
-                result = ConnectUserService(user_id, workspace_id, value).run()
-                if result.failure:
-                    return HttpResponse(status=200,
-                                        content=json.dumps(
-                                            SlackConnectModalWithError('block_connect', result.error).get_view()),
-                                        content_type='application/json')
+                hook_setup_result = CreateWebhookService(workspace_id, user_id).run()
+                error = "Uh oh. Something didn't work. Please contact support."
+                if hook_setup_result.success:
+                    connect_result = ConnectUserService(user_id, workspace_id, value).run()
+                    if connect_result.success:
+                        if data['view'].get('private_metadata'):
+                            UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
+                            # UpdateHomeViewService(user_id, workspace_id).run()
+                            return HttpResponse(status=200)
+                    else:
+                        error = connect_result.error
                 else:
-                    create_webhook.delay(workspace_id, user_id)
-                    if data['view'].get('private_metadata'):
-                        UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
-                    # UpdateHomeViewService(user_id, workspace_id).run()
-                    return HttpResponse(status=200)
+                    error = hook_setup_result.error
+
+                return HttpResponse(status=200,
+                                    content=json.dumps(
+                                        SlackConnectModalWithError('block_connect', error).get_view()),
+                                    content_type='application/json')
     except Exception:
         logger.exception("Could not parse interaction")
     return HttpResponse(status=200)

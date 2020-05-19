@@ -5,6 +5,7 @@ from django.core import signing
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from slack.errors import SlackApiError
 
 from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCancelledMessage, STATIC_HELP_MSG
@@ -86,6 +87,15 @@ def handle(request, signed_value):
         workspace = Workspace.objects.get(slack_id=workspace_slack_id)
         SlackMessageService(workspace.bot_token).send(
             destination_id,
+            txt,
+            msg.get_blocks(),
+            msg.get_attachments()
+        )
+    except SlackApiError:
+        logger.exception("Slack error")
+        # try and send to original user
+        SlackMessageService(workspace.bot_token).send(
+            user_slack_id,
             txt,
             msg.get_blocks(),
             msg.get_attachments()

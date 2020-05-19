@@ -84,17 +84,15 @@ class ConnectUserService:
             if active_hooks > 1:
                 logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
                 return Result.from_failure("Your account is already setup to receive event notifications.")
-
-            if active_hooks == 1:
+            # elif active_hooks == 0:
+            #     logger.warning(f'User {self.user_id} does not have a paid account')
+            #     return Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
+            else:
                 su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
                 su.calendly_authtoken = self.api_key
                 su.calendly_email = response_from_echo['email']
                 su.save()
                 return Result.from_success()
-
-            if active_hooks == 0:
-                logger.warning(f'User {self.user_id} does not have a paid account')
-                return Result.from_failure(STATIC_FREE_ACCT_MSG)
         except InvalidTokenError:
             logger.warning(f'User {self.user_id} does not have a valid account')
             msg = STATIC_FREE_ACCT_MSG
@@ -113,7 +111,7 @@ class UpdateHomeMessageService:
         try:
             workspace = Workspace.objects.get(slack_id=self.workspace_id)
             su = SlackUser.objects.get(slack_id=self.user_id, workspace=workspace)
-            SlackMessageService(workspace.bot_token).update_interaction(response_url, '',
+            SlackMessageService(workspace.bot_token).update_interaction(response_url, 'Calenduck settings updated.',
                                                                         SlackHomeMessage(su).get_blocks())
         except Exception:
             logger.exception('Could not update onboarding msg')
@@ -210,7 +208,7 @@ class CreateWebhookService:
                     "Setup complete. You will now receive notifications on created and canceled events!")
         except InvalidTokenError:
             logger.warning(f'User {self.user_id} does not have a valid token')
-            result = Result.from_failure(STATIC_FREE_ACCT_MSG)
+            result = Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
         except Exception:
             logger.exception('Could not connect to calendly')
             result = Result.from_failure(f"Could not connect to Calendly. {STATIC_HELP_MSG}")
