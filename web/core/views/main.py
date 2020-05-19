@@ -142,7 +142,7 @@ def interactions(request):
 
             if block_data.get('block_connect'):
                 value = block_data['block_connect']['input_connect']['value'].strip('')
-                hook_setup_result = CreateWebhookService(workspace_id, user_id).run()
+                hook_setup_result = CreateWebhookService(workspace_id, user_id, value).run()
                 error = "Uh oh. Something didn't work. Please contact support."
                 if hook_setup_result.success:
                     connect_result = ConnectUserService(user_id, workspace_id, value).run()
