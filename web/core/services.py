@@ -175,6 +175,11 @@ class DeleteWebhookService:
             return Result.from_failure(msg)
 
 
+@shared_task(autoretry_for=(Exception,))
+def delete_webhook(user_id):
+    DeleteWebhookService(user_id).run()
+
+
 class CreateWebhookService:
     def __init__(self, workspace_id, user_id):
         self.workspace_id = workspace_id
@@ -183,7 +188,7 @@ class CreateWebhookService:
     def run(self):
         try:
             user = SlackUser.objects.get(slack_id=self.user_id)
-            DeleteWebhookService(self.user_id).run()
+            delete_webhook.delay(self.user_id)
 
             signed_value = signing.dumps((self.workspace_id, self.user_id))
 
@@ -213,11 +218,6 @@ class CreateWebhookService:
             logger.exception('Could not connect to calendly')
             result = Result.from_failure(f"Could not connect to Calendly. {STATIC_HELP_MSG}")
         return result
-
-
-@shared_task(autoretry_for=(Exception,))
-def create_webhook(workspace_id, user_id):
-    CreateWebhookService(workspace_id, user_id).run()
 
 
 class CreateFiltersService:
