@@ -6,7 +6,7 @@ from django.core import signing
 
 from web.core.messages import STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage, SlackHomeMessage
 from web.core.models import Workspace, SlackUser, Webhook, Filter
-from web.utils import remove_calendly_hooks, InvalidTokenError, has_active_hooks
+from web.utils import remove_calendly_hooks, InvalidTokenError, count_active_hooks
 
 from logging import getLogger
 
@@ -80,17 +80,23 @@ class ConnectUserService:
             # check if there's an existing working hook for this user
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
-            if has_active_hooks(calendly):
+            active_hooks = count_active_hooks(calendly)
+            if active_hooks > 1:
                 logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
                 return Result.from_failure("Your account is already setup to receive event notifications.")
 
-            su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
-            su.calendly_authtoken = self.api_key
-            su.calendly_email = response_from_echo['email']
-            su.save()
-            return Result.from_success()
+            if active_hooks == 1:
+                su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
+                su.calendly_authtoken = self.api_key
+                su.calendly_email = response_from_echo['email']
+                su.save()
+                return Result.from_success()
+
+            if active_hooks == 0:
+                logger.warning(f'User {self.user_id} does not have a paid account')
+                msg = STATIC_FREE_ACCT_MSG
         except InvalidTokenError:
-            logger.warning(f'User {self.user_id} does not have paid account')
+            logger.warning(f'User {self.user_id} does not have a valid account')
             msg = STATIC_FREE_ACCT_MSG
         except Exception:
             logger.exception('Could not connect to calendly')
@@ -157,7 +163,7 @@ class DeleteWebhookService:
             user = SlackUser.objects.get(slack_id=self.user_id)
             calendly = Calendly(user.calendly_authtoken)
 
-            if has_active_hooks(calendly):
+            if count_active_hooks(calendly) > 0:
                 if remove_calendly_hooks(calendly):
                     Webhook.objects.get(user=user).delete()
                 else:
