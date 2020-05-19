@@ -13,8 +13,8 @@ from web.core.messages import STATIC_START_MSG
 from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
     SlackConnectModalWithError
 from web.core.models import SlackUser, Workspace
-from web.core.services import DisconnectUserService, UpdateHomeViewService, OpenModalService, \
-    ConnectUserService, UpdateHomeMessageService, SetDestinationService, CreateFiltersService, create_webhook, \
+from web.core.services import DisconnectUserService, OpenModalService, \
+    ConnectUserService, UpdateHomeMessageService, SetDestinationService, CreateFiltersService, \
     CreateWebhookService
 from web.core.actions import *
 from web.utils import get_user_count, mail
