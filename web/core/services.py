@@ -181,9 +181,10 @@ def delete_webhook(user_id):
 
 
 class CreateWebhookService:
-    def __init__(self, workspace_id, user_id):
+    def __init__(self, workspace_id, user_id, value):
         self.workspace_id = workspace_id
         self.user_id = user_id
+        self.value = value
 
     def run(self):
         try:
@@ -192,7 +193,7 @@ class CreateWebhookService:
 
             signed_value = signing.dumps((self.workspace_id, self.user_id))
 
-            calendly = Calendly(user.calendly_authtoken)
+            calendly = Calendly(self.value)
             webhook_create_response = calendly.create_webhook(
                 f"{settings.SITE_URL}/handle/{signed_value}/")
 
