@@ -94,7 +94,7 @@ class ConnectUserService:
 
             if active_hooks == 0:
                 logger.warning(f'User {self.user_id} does not have a paid account')
-                msg = STATIC_FREE_ACCT_MSG
+                return Result.from_failure(STATIC_FREE_ACCT_MSG)
         except InvalidTokenError:
             logger.warning(f'User {self.user_id} does not have a valid account')
             msg = STATIC_FREE_ACCT_MSG
