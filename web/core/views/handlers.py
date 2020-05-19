@@ -9,7 +9,7 @@ from slack.errors import SlackApiError
 
 from web.core.decorators import requires_subscription, verify_request
 from web.core.messages import SlackMarkdownEventCreatedMessage, SlackMarkdownEventCancelledMessage, STATIC_HELP_MSG
-from web.core.models import Workspace, Webhook, Filter
+from web.core.models import Workspace, Webhook, Filter, SlackUser
 from web.core.services import SlackMessageService
 from web.core.views.commands import duck
 from web.utils import COMMAND_LIST
@@ -94,12 +94,15 @@ def handle(request, signed_value):
     except SlackApiError:
         logger.exception("Slack error")
         # try and send to original user
-        SlackMessageService(workspace.bot_token).send(
-            user_slack_id,
-            txt,
-            msg.get_blocks(),
-            msg.get_attachments()
-        )
+        if user_slack_id.startswith('U') and SlackUser.objects.filter(
+                slack_id=user_slack_id,
+                workspace__slack_id=workspace_slack_id).exists():
+            SlackMessageService(workspace.bot_token).send(
+                user_slack_id,
+                'Could not deliver notification to private channel',
+                msg.get_blocks(),
+                msg.get_attachments()
+            )
     except Exception:
         logger.exception("Could not handle hook event")
     return HttpResponse(status=200)
