@@ -34,7 +34,7 @@ def get_user_count(workspace_slack_id):
         logger.exception('Could not get workspace size')
 
 
-def has_active_hooks(calendly_client):
+def count_active_hooks(calendly_client):
     hooks = calendly_client.list_webhooks()
     if hooks.get('type') == 'authentication_error':
         raise InvalidTokenError()
@@ -42,7 +42,7 @@ def has_active_hooks(calendly_client):
     active_hooks = len([h for h in hooks['data'] if h['attributes']['state'] == 'active'])
     if active_hooks > 1:
         logger.error('There should be 1 active hook per user. Please check this.')
-    return active_hooks > 0
+    return active_hooks
 
 
 def has_calendly_hooks(calendly_client):
