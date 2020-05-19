@@ -91,8 +91,8 @@ def handle(request, signed_value):
             msg.get_blocks(),
             msg.get_attachments()
         )
-    except SlackApiError:
-        logger.exception("Slack error")
+    except SlackApiError as sae:
+        logger.error(f"Slack error: {sae}")
         # try and send to original user
         if user_slack_id.startswith('U') and SlackUser.objects.filter(
                 slack_id=user_slack_id,
