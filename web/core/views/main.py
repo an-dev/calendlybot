@@ -17,7 +17,7 @@ from web.core.services import DisconnectUserService, OpenModalService, \
     ConnectUserService, UpdateHomeMessageService, SetDestinationService, CreateFiltersService, \
     CreateWebhookService
 from web.core.actions import *
-from web.utils import get_user_count, mail
+from web.utils import get_user_count, mail, get_calendly_email
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -149,6 +149,7 @@ def interactions(request):
                     if connect_result.success:
                         if data['view'].get('private_metadata'):
                             UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
+                            get_calendly_email.delay(user_id)
                             # UpdateHomeViewService(user_id, workspace_id).run()
                             return HttpResponse(status=200)
                     else:

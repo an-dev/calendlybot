@@ -1,6 +1,7 @@
 import logging
 
 import slack
+from calendly import Calendly
 from celery import shared_task
 from slack.errors import SlackApiError
 
@@ -32,6 +33,19 @@ def get_user_count(workspace_slack_id):
         workspace.save()
     except Exception:
         logger.exception('Could not get workspace size')
+
+
+@shared_task(autoretry_for=(Exception,), max_retries=3)
+def get_calendly_email(user_id):
+    su = SlackUser.objects.get(slack_id=user_id)
+    calendly = Calendly(su.calendly_authtoken)
+    response_from_echo = calendly.echo()
+
+    if 'email' not in response_from_echo:
+        logger.warning(f'Could not find user for api key {su.calendly_authtoken}')
+
+    su.calendly_email = response_from_echo['email']
+    su.save()
 
 
 def count_active_hooks(calendly_client):
