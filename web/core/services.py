@@ -122,7 +122,6 @@ class CreateWebhookService:
 
     def run(self):
         try:
-            delete_webhook.delay(self.user_id)
             # atm, we support just one authtoken per user.
             # Calling this service on the same user effectively overwrites
             calendly = Calendly(self.api_key)
@@ -132,7 +131,7 @@ class CreateWebhookService:
             active_hooks = count_active_hooks(calendly)
             if active_hooks > 1:
                 logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
-                result = Result.from_failure("Your account is already setup to receive event notifications.")
+                result = Result.from_failure("This API Key is already used on another account.")
             # elif active_hooks == 0:
             #     logger.warning(f'User {self.user_id} does not have a paid account')
             #     return Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
