@@ -4,7 +4,7 @@ from celery import shared_task
 from django.conf import settings
 from django.core import signing
 
-from web.core.messages import STATIC_FREE_ACCT_MSG, STATIC_HELP_MSG, SlackHomeViewMessage, SlackHomeMessage
+from web.core.messages import STATIC_HELP_MSG, SlackHomeViewMessage, SlackHomeMessage
 from web.core.models import Workspace, SlackUser, Webhook, Filter
 from web.utils import remove_calendly_hooks, InvalidTokenError, count_active_hooks
 
@@ -34,36 +34,6 @@ class SlackMessageService:
         if text:
             kwargs['text'] = text
         return self.client.api_call(response_url, json=kwargs)
-
-
-class ConnectUserService:
-    def run(self):
-        try:
-            # atm, we support just one authtoken per user.
-            # Calling this service on the same user effectively overwrites
-            calendly = Calendly(self.api_key)
-            # check if there's an existing working hook for this user
-            # this effectively means that if someone uses another's apiKey
-            # if all its hooks are active they won't be able to setup
-            active_hooks = count_active_hooks(calendly)
-            if active_hooks > 1:
-                logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
-                return Result.from_failure("Your account is already setup to receive event notifications.")
-            # elif active_hooks == 0:
-            #     logger.warning(f'User {self.user_id} does not have a paid account')
-            #     return Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
-            else:
-                su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
-                su.calendly_authtoken = self.api_key
-                su.save()
-                return Result.from_success()
-        except InvalidTokenError:
-            logger.warning(f'User {self.user_id} does not have a valid account')
-            msg = STATIC_FREE_ACCT_MSG
-        except Exception:
-            logger.exception('Could not connect to calendly')
-            msg = f"Could not connect to Calendly. {STATIC_HELP_MSG}"
-        return Result.from_failure(msg)
 
 
 class UpdateHomeMessageService:
