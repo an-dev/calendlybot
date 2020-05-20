@@ -36,47 +36,12 @@ class SlackMessageService:
         return self.client.api_call(response_url, json=kwargs)
 
 
-class DisconnectUserService:
-    def __init__(self, user_id, workspace_id):
-        self.user_id = user_id
-        self.workspace_id = workspace_id
-
-    def run(self):
-        # check if active webtokens are present
-        # delete them
-        # delete the webhook object as well
-        try:
-            DeleteWebhookService(self.user_id).run()
-            su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
-            su.calendly_authtoken = None
-            su.calendly_email = None
-            su.save()
-            su.filters.all().delete()
-            value = "Account successfully disconnected. Type `/duck start` to associate another Calendly account."
-            return Result.from_success(value)
-        except Exception:
-            logger.exception('Could not disconnect account from calendly.')
-            err = f"Could not disconnect account. {STATIC_HELP_MSG}"
-        return Result.from_failure(err)
-
-
 class ConnectUserService:
-    def __init__(self, user_id, workspace_id, api_key):
-        self.user_id = user_id
-        self.workspace_id = workspace_id
-        self.api_key = api_key
-
     def run(self):
         try:
             # atm, we support just one authtoken per user.
             # Calling this service on the same user effectively overwrites
             calendly = Calendly(self.api_key)
-            response_from_echo = calendly.echo()
-
-            if 'email' not in response_from_echo:
-                logger.warning(f'Could not find user for api key {self.api_key}')
-                return Result.from_failure("Could not find user in Calendly. Make sure the token is correct.")
-
             # check if there's an existing working hook for this user
             # this effectively means that if someone uses another's apiKey
             # if all its hooks are active they won't be able to setup
@@ -90,7 +55,6 @@ class ConnectUserService:
             else:
                 su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
                 su.calendly_authtoken = self.api_key
-                su.calendly_email = response_from_echo['email']
                 su.save()
                 return Result.from_success()
         except InvalidTokenError:
@@ -181,37 +145,52 @@ def delete_webhook(user_id):
 
 
 class CreateWebhookService:
-    def __init__(self, workspace_id, user_id, value):
+    def __init__(self, workspace_id, user_id, api_key):
         self.workspace_id = workspace_id
         self.user_id = user_id
-        self.value = value
+        self.api_key = api_key
 
     def run(self):
         try:
-            user = SlackUser.objects.get(slack_id=self.user_id)
             delete_webhook.delay(self.user_id)
-
-            signed_value = signing.dumps((self.workspace_id, self.user_id))
-
-            calendly = Calendly(self.value)
-            webhook_create_response = calendly.create_webhook(
-                f"{settings.SITE_URL}/handle/{signed_value}/")
-
-            if 'id' not in webhook_create_response:
-                errors = ''
-                if 'message' in webhook_create_response:
-                    errors = webhook_create_response.get('errors', webhook_create_response.get('message'))
-                logger.error(f'Could not setup Calendly webhook. {errors}')
-
-                if errors:
-                    errors_detail = errors
-                else:
-                    errors_detail = STATIC_HELP_MSG
-                result = Result.from_failure(f"Could not connect with Calendly API. {errors_detail}")
+            # atm, we support just one authtoken per user.
+            # Calling this service on the same user effectively overwrites
+            calendly = Calendly(self.api_key)
+            # check if there's an existing working hook for this user
+            # this effectively means that if someone uses another's apiKey
+            # if all its hooks are active they won't be able to setup
+            active_hooks = count_active_hooks(calendly)
+            if active_hooks > 1:
+                logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
+                result = Result.from_failure("Your account is already setup to receive event notifications.")
+            # elif active_hooks == 0:
+            #     logger.warning(f'User {self.user_id} does not have a paid account')
+            #     return Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
             else:
-                Webhook.objects.create(user=user, calendly_id=webhook_create_response['id'])
-                result = Result.from_success(
-                    "Setup complete. You will now receive notifications on created and canceled events!")
+                signed_value = signing.dumps((self.workspace_id, self.user_id))
+
+                webhook_create_response = calendly.create_webhook(
+                    f"{settings.SITE_URL}/handle/{signed_value}/")
+
+                if 'id' not in webhook_create_response:
+                    errors = ''
+                    if 'message' in webhook_create_response:
+                        errors = webhook_create_response.get('errors', webhook_create_response.get('message'))
+                    logger.error(f'Could not setup Calendly webhook. {errors}')
+
+                    if errors:
+                        errors_detail = errors
+                    else:
+                        errors_detail = STATIC_HELP_MSG
+                    result = Result.from_failure(f"Could not connect with Calendly API. {errors_detail}")
+                else:
+                    su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
+                    Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'])
+                    su.calendly_authtoken = self.api_key
+                    su.save()
+
+                    result = Result.from_success(
+                        "Setup complete. You will now receive notifications on created and canceled events!")
         except InvalidTokenError:
             logger.warning(f'User {self.user_id} does not have a valid token')
             result = Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
@@ -219,6 +198,30 @@ class CreateWebhookService:
             logger.exception('Could not connect to calendly')
             result = Result.from_failure(f"Could not connect to Calendly. {STATIC_HELP_MSG}")
         return result
+
+
+class DisconnectUserService:
+    def __init__(self, user_id, workspace_id):
+        self.user_id = user_id
+        self.workspace_id = workspace_id
+
+    def run(self):
+        # check if active webtokens are present
+        # delete them
+        # delete the webhook object as well
+        try:
+            delete_webhook.delay(self.user_id)
+            su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
+            su.calendly_authtoken = None
+            su.calendly_email = None
+            su.save()
+            su.filters.all().delete()
+            value = "Account successfully disconnected. Type `/duck start` to associate another Calendly account."
+            return Result.from_success(value)
+        except Exception:
+            logger.exception('Could not disconnect account from calendly.')
+            err = f"Could not disconnect account. {STATIC_HELP_MSG}"
+        return Result.from_failure(err)
 
 
 class CreateFiltersService:
