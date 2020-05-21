@@ -92,31 +92,31 @@ class OpenModalService:
 
 
 class DeleteWebhookService:
-    def __init__(self, user_id):
+    def __init__(self, user_id, api_key):
         self.user_id = user_id
+        self.api_key = api_key
 
     def run(self):
         try:
-            user = SlackUser.objects.get(slack_id=self.user_id)
-            calendly = Calendly(user.calendly_authtoken)
+            calendly = Calendly(self.api_key)
 
             if count_active_hooks(calendly) > 0:
                 if remove_calendly_hooks(calendly):
-                    Webhook.objects.get(user=user).delete()
+                    su = SlackUser.objects.get(slack_id=self.user_id)
+                    Webhook.objects.filter(user=su).delete()
                 else:
-                    logger.warning(f'Could not delete webhooks for user {self.user_id}. Do this manually!')
+                    logger.error(f'Could not delete webhook for api_key {self.api_key}. Do this manually!')
             else:
                 logger.info(f'No Webhook to delete')
             return Result.from_success()
         except Exception:
-            msg = 'Could not delete Webhook'
-            logger.exception(msg)
-            return Result.from_failure(msg)
+            logger.exception('Error while deleting webhooks')
+            return Result.from_failure(None)
 
 
 @shared_task(autoretry_for=(Exception,))
-def delete_webhook(user_id):
-    DeleteWebhookService(user_id).run()
+def delete_webhook(user_id, api_key):
+    DeleteWebhookService(user_id, api_key).run()
 
 
 class CreateWebhookService:
@@ -184,8 +184,8 @@ class DisconnectUserService:
         # delete them
         # delete the webhook object as well
         try:
-            delete_webhook.delay(self.user_id)
             su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
+            delete_webhook.delay(su.calendly_authtoken)
             su.calendly_authtoken = None
             su.calendly_email = None
             su.save()
