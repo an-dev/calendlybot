@@ -185,7 +185,7 @@ class DisconnectUserService:
         # delete the webhook object as well
         try:
             su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
-            delete_webhook.delay(su.calendly_authtoken, self.user_id)
+            delete_webhook.delay(self.user_id, su.calendly_authtoken)
             su.calendly_authtoken = None
             su.calendly_email = None
             su.save()
