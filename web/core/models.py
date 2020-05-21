@@ -41,7 +41,7 @@ class SlackUser(TimeStampedModel):
 
 
 class Webhook(TimeStampedModel):
-    user = models.OneToOneField('SlackUser', related_name='webhook', null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey('SlackUser', related_name='webhooks', null=True, on_delete=models.SET_NULL)
     calendly_id = models.PositiveIntegerField()
     enabled = models.BooleanField(default=True)
 
