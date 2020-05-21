@@ -14,7 +14,7 @@ from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
     SlackConnectModalWithError
 from web.core.models import SlackUser, Workspace
 from web.core.services import DisconnectUserService, OpenModalService, UpdateHomeMessageService, SetDestinationService, \
-    CreateFiltersService, CreateWebhookService
+    CreateFiltersService, CreateWebhookService, update_home
 from web.core.actions import *
 from web.utils import get_user_count, mail, get_calendly_email
 
@@ -110,7 +110,6 @@ def interactions(request):
                 # UpdateHomeViewService(user_id, workspace_id).run()
                 if result.failure:
                     OpenModalService(workspace_id).run(trigger_id, SlackDisconnectErrorModal().get_view())
-
             if action_id == EVENT_SELECT:
                 # get existing hooks
                 # compare to hooks from request
@@ -144,7 +143,7 @@ def interactions(request):
                 hook_setup_result = CreateWebhookService(workspace_id, user_id, value).run()
                 if hook_setup_result.success:
                     if data['view'].get('private_metadata'):
-                        UpdateHomeMessageService(user_id, workspace_id).run(data['view']['private_metadata'])
+                        update_home.delay(user_id, workspace_id, data['view']['private_metadata'])
                         get_calendly_email.delay(user_id)
                         # UpdateHomeViewService(user_id, workspace_id).run()
                         return HttpResponse(status=200)

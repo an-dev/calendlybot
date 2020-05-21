@@ -52,6 +52,11 @@ class UpdateHomeMessageService:
             return Result.from_failure('')
 
 
+@shared_task(autoretry_for=(Exception,))
+def update_home(user_id, workspace_id, response_url):
+    UpdateHomeMessageService(user_id, workspace_id).run(response_url)
+
+
 class UpdateHomeViewService:
     def __init__(self, user_id, workspace_id):
         self.user_id = user_id
