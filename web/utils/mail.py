@@ -63,6 +63,7 @@ def send_welcome_email(user_id):
         logger.exception("Could not send welcome email")
 
 
+@shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_trial_end_email():
     try:
         emails = SlackUser.objects \
@@ -71,4 +72,4 @@ def send_trial_end_email():
             .values_list('slack_email', flat=True)
         [SendTrialEndEmail(email).run() for email in emails]
     except Exception:
-        logger.exception("Could not send trial email")
+        logger.exception("Could not send trial end email")
