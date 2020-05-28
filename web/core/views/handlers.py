@@ -68,9 +68,6 @@ def handle(request, signed_value):
         if user_slack_id.startswith('C') or user_slack_id.startswith('G'):
             destination_id = user_slack_id
         else:
-
-            logger.info(f'Received event: {payload}')
-
             if not Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).exists():
                 logger.info(f'Disabled webhook for user {user_slack_id}')
                 return HttpResponse(status=200)
@@ -82,6 +79,8 @@ def handle(request, signed_value):
                 destination_id = filter_qs[0].destination_id
             else:
                 return HttpResponse(status=200)
+
+        logger.info(f'Received event: {payload}')
 
         if event == 'invitee.created':
             txt, message_values = get_created_event_message_data(payload)
