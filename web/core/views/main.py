@@ -87,6 +87,13 @@ def auth(request):
 
 
 @csrf_exempt
+def auth(request):
+    logger.info(request)
+    logger.info("Placeholder for Calendly oAuth")
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
 @verify_request
 @require_http_methods(["POST"])
 def interactions(request):
