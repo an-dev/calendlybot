@@ -76,7 +76,12 @@ def handle(request, signed_value):
                 return HttpResponse(status=200)
 
             event_id = payload['event_type']['uuid']
-            destination_id = Filter.objects.get(user__slack_id=user_slack_id, event_id=event_id).destination_id
+
+            filter_qs = Filter.objects.filter(user__slack_id=user_slack_id, event_id=event_id)
+            if filter_qs.exists():
+                destination_id = filter_qs[0].destination_id
+            else:
+                return HttpResponse(status=200)
 
         if event == 'invitee.created':
             txt, message_values = get_created_event_message_data(payload)
