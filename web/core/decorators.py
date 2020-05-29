@@ -66,6 +66,9 @@ def requires_subscription(func):
                 return HttpResponse(status=200)
             else:
                 return func(request, signed_value, *args, **kwargs)
+        except Workspace.DoesNotExist:
+            logger.exception(f"Workspace {workspace_slack_id} does not exist for user {user_slack_id}")
+            return HttpResponse(status=400)
         except Exception:
             logger.exception("Could not verify if view needs subscription")
             return HttpResponse(status=400)
