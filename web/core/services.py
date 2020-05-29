@@ -36,6 +36,13 @@ class SlackMessageService:
         return self.client.api_call(response_url, json=kwargs)
 
 
+@shared_task(autoretry_for=(Exception,))
+def notify_admin(user_id, workspace_id):
+    su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
+    msg = f"New user {su} for workspace {su.workspace}"
+    SlackMessageService(settings.NOTIFY_BOT_TOKEN).send(settings.NOTIFY_GENERAL_CHANNEL, msg)
+
+
 class UpdateHomeMessageService:
     def __init__(self, user_id, workspace_id):
         self.user_id = user_id
@@ -165,6 +172,7 @@ class CreateWebhookService:
 
                     result = Result.from_success(
                         "Setup complete. You will now receive notifications on created and canceled events!")
+                    notify_admin.delay(self.user_id, self.workspace_id)
         except InvalidTokenError:
             logger.warning(f'User {self.user_id} does not have a valid token')
             result = Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
