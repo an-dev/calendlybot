@@ -52,6 +52,7 @@ def help(request):
 def duck(request):
     user_id, workspace_id = request.POST['user_id'], request.POST['team_id']
     workspace = Workspace.objects.get(slack_id=workspace_id)
+    logger.info(f'User {user_id} is interacting with main command')
     slack_msg_service = SlackMessageService(workspace.bot_token)
     su, new_user = SlackUser.objects.get_or_create(slack_id=user_id, workspace=workspace)
     if new_user:

@@ -147,6 +147,9 @@ def interactions(request):
 
             if block_data.get('block_connect'):
                 value = block_data['block_connect']['input_connect']['value'].strip('')
+
+                logger.info(f"User {user_id} is trying to connect with api key {value}")
+
                 hook_setup_result = CreateWebhookService(workspace_id, user_id, value).run()
                 if hook_setup_result.success:
                     if data['view'].get('private_metadata'):
