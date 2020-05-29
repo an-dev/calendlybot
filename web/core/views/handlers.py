@@ -75,6 +75,7 @@ def handle(request, signed_value):
             event_id = payload['event_type']['uuid']
 
             filter_qs = Filter.objects.filter(user__slack_id=user_slack_id, event_id=event_id)
+
             if filter_qs.exists():
                 destination_id = filter_qs[0].destination_id
             else:
