@@ -1,0 +1,249 @@
+{% extends 'web/base.html' %}
+{% block privacy %}
+    <script src="https://config.metomic.io/config.js?id=prj:d56b2d1a-c216-40c2-9eee-c79238c3b463" crossorigin charset="utf-8"></script>
+    <script src="https://consent-manager.metomic.io/embed.js" crossorigin charset="utf-8"></script>
+{% endblock %}
+{% block title %}Calendly + Slack direct integration{% endblock %}
+{% block pricing %}
+<li class="nav-item">
+    <a class="nav-link" href="/#pricing">Pricing</a>
+</li>
+{% endblock %}
+{% block cta %}
+<li class="nav-item ml-lg-3">
+    <a href="/install/">
+        <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png"
+             srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+{% load static %}
+<main class="text-light text-center text-center cbot-bg">
+    <div class="container my-5 py-3">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <h1 class="h1 font-weight-bold">Calendly notifications in Slack</h1>
+                <p class="lead">Receive event notifications directly in
+                    your workspace*.<br>No need for unnecessary and complicated third-party services.</p>
+                <p>
+                    <a href="/install/"
+                       role="button" class="btn btn-lg btn-outline-light">
+                        <span class="d-flex align-items-center">
+                        <i class="fab fa-slack fa-2x"></i> &nbsp; Add to&nbsp;<span
+                                class="font-weight-bold">Slack</span>
+                        </span>
+                    </a>
+                </p>
+                <p class="font-italic font-weight-bold">
+                    *For Calendly <a class="font-weight-bold no-hover"
+                                     href="https://help.calendly.com/hc/en-us/articles/223195488"
+                                     target="_blank">Premium and Pro accounts</a>
+                </p>
+            </div>
+            <div class="col-12 col-md-9">
+                <img src="{% static 'web/img/hero.png' %}" alt="Hero image for notifications" class="pt-md-5 w-100">
+            </div>
+        </div>
+        <div class="row justify-content-center mt-5">
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://geekbears.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/geekbears.png' %}" alt="Geekbears">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.startchurch.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/startchurch.png' %}" alt="Startchurch">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://bolt.eu/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/bolt.svg' %}" alt="Bolt">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.fool.co.uk/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/fool.svg' %}" alt="Motley Fool">
+                </a>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-2">
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.callfire.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/callfire.png' %}" alt="Callfire">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.98point6.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/98point6.png' %}" alt="98point6">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.eztexting.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/ez.png' %}" alt="EZTexting">
+                </a>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <a href="https://www.proliant.com/" target="_blank">
+                    <img class="w-100" src="{% static 'web/customers/proliant.png' %}" alt="Proliant">
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<section id="how-it-works">
+    <div class="container my-5 py-5">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-5 order-lg-2">
+                <h2 class="h1 font-weight-bold">Get started</h2>
+                <p class="lead">Type <code>/duck</code> to start. Follow the instructions to authenticate your
+                    Premium or Pro Calendly account to Slack</p>
+            </div>
+            <div class="col-lg-5 order-lg-1">
+                <div>
+                    <img src="{% static 'web/img/connect.png' %}" alt="Image on how to connect from Slack to calendly"
+                         class="rounded shadow-3d w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-white">
+    <div class="container my-5 py-5">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-5">
+                <h2 class="h1 font-weight-bold">Filter incoming events</h2>
+                <p class="lead">Sift through your Calendly events and select which ones you want Calenduck to notify you
+                    or your team about!
+                </p>
+            </div>
+            <div class="col-lg-5">
+                <div>
+                    <img src="{% static 'web/img/filter.png' %}"
+                         alt="Image on how to choose which Calendly events to be notified of"
+                         class="rounded shadow-3d w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container my-5 py-5">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-5 order-lg-2">
+                <h2 class="h1 font-weight-bold">Customize your notifications</h2>
+                <p class="lead">Calenduck sends notifications to you but you can refine your workflow by selecting a
+                    specific destination for scheduled or cancelled event. </p>
+            </div>
+            <div class="col-lg-5 order-lg-1">
+                <div>
+                    <img src="{% static 'web/img/select.gif' %}"
+                         alt="Animated Image of how to choose destination for notificatoins in Slack from Calendly"
+                         class="rounded shadow-3d w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="border-bottom cbot-border bg-white">
+    <div class="container my-5 py-5">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-4">
+                <h2 class="h1 font-weight-bold">Stuck?</h2>
+                <p class="lead">Type <code>/duck help</code> for a comprehensive list of useful tips or feel free to <a
+                        href="mailto:support@calenduck.co" target="_blank"
+                        class="font-weight-bold cbot-link">drop us a message</a>
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <div>
+                    <img src="{% static 'web/img/help.png' %}" alt="Image on how to receive helpful tips from Calenduck"
+                         class="rounded shadow-3d w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="pricing" class="my-5 py-5">
+    <div class="container">
+        <div class="px-3 pb-3 py-md-4 mx-auto text-center">
+            <h2 class="h1 font-weight-bold">Simple, transparent pricing</h2>
+            <p class="lead">
+                Calenduck starts with a <span class="font-weight-bold">{{ TRIAL_DAYS }} day trial</span>, no credit
+                card required.<br>After that, you can upgrade by typing <code>/duck upgrade</code>
+                to continue receiving event notifications.
+            </p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row mb-5 text-center justify-content-center">
+            <div class="col-8 col-md-4 my-2">
+                <div>
+                    <p class="lead font-weight-bold mb-0 cbot-link">Standard</p>
+                    <div class="cbot-link">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">4<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">up to 5 users</span>
+                </div>
+            </div>
+            <div class="col-8 col-md-4 my-2">
+                <div>
+                    <p class="lead font-weight-bold mb-0 cbot-link">Team</p>
+                    <div class="cbot-link">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">10<span class="cbot-display-sm">/month</span></span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">Unlimited users</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <p class="lead">
+            Need a custom plan? Want an extra feature?<br> <a href="mailto:support@calenduck.co?subject=Feature Request"
+                                                              class="cbot-link font-weight-bold">Get in touch</a> or
+            give us a shout
+            on twitter <a href="https://twitter.com/calenduckapp" target="_blank"
+                          class="cbot-link font-weight-bold">@calenduckapp</a>
+        </p>
+    </div>
+</section>
+
+<section class="cbot-bg text-light">
+    <div class="container p-md-5 my-5">
+        <div class="d-flex align-items-center justify-content-around">
+            <p class="lead mr-3 mb-0">Receive event notifications directly in your
+                workspace. <br> No need for extra integrations.</p>
+            <a href="/install/"
+               role="button" class="btn btn-lg btn-outline-light">
+                        <span class="d-flex align-items-center">
+                            <i class="fab fa-slack fa-2x"></i> &nbsp; <span>Add to&nbsp;<span
+                                class="font-weight-bold">Slack</span></span>
+                        </span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!--<div class="alert alert-info alert-dismissible fade show rounded-0 cbot-alert" role="alert">-->
+<!--    <div class="text-center">-->
+<!--        <span class="font-weight-bold">Join the early access!</span> 30 day trial and early access to new features for-->
+<!--        beta users.-->
+<!--        <a href="https://calenduck.typeform.com/to/rpwD2R" target="_blank" role="button"-->
+<!--           class="font-weight-bold cbot-link">Learn More</a>-->
+<!--    </div>-->
+
+<!--    <button type="button" class="close" data-dismiss="alert" aria-label="Close">-->
+<!--        <span aria-hidden="true">&times;</span>-->
+<!--    </button>-->
+<!--</div>-->
+{% endblock %}
+{% block js %}
+{% load static %}
+{% endblock %}

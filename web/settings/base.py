@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sitemaps',
     'web.core',
+    'web.blog',
     'djcelery_email',
 ]
 
