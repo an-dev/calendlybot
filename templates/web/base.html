@@ -2,7 +2,8 @@
 {% load static %}
 <html class="h-100" lang="en">
 <head>
-    {% block privacy %}{% endblock %}
+    <script src="https://config.metomic.io/config.js?id=prj:d56b2d1a-c216-40c2-9eee-c79238c3b463" crossorigin charset="utf-8"></script>
+    <script src="https://consent-manager.metomic.io/embed.js" crossorigin charset="utf-8"></script>
     <meta charset="utf-8"/>
     <title>Calenduck - {% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -53,12 +54,14 @@
 <div class="navbar-container ">
     <nav class="navbar navbar-expand-lg navbar-dark font-weight-bold cbot-bg border-bottom cbot-border">
         <div class="container">
+            {% block logo-title %}
             <a class="navbar-brand" href="/">
                 <img src="{% static 'web/img/logo.png' %}" alt="logo">
                 <span class="font-weight-bold">
                     Calenduck
                 </span>
             </a>
+            {% endblock %}
             <button
                     class="navbar-toggler"
                     type="button"
@@ -71,17 +74,28 @@
             </button>
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav ml-auto text-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/#how-it-works">How it works</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/faq/">About</a>
-                    </li>
-                    {% block pricing %}
-                    {% endblock %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/blog/">Blog</a>
-                    </li>
+                    {% if not blog_nav %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/#how-it-works">How it works</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/faq/">About</a>
+                        </li>
+                        {% block pricing %}
+                        {% endblock %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/blog/">Blog</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://twitter.com/calenduckapp">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Go back Home</a>
+                        </li>
+                    {% endif %}
                     {% block cta %}
                     {% endblock %}
                 </ul>

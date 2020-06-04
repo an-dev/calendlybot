@@ -1,5 +1,14 @@
 {% extends 'web/base.html' %}
-{% block title %}{{ object.title }}{% endblock %}
+{% load static %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block logo-title %}
+<a class="navbar-brand" href="/blog/">
+    <img src="{% static 'web/img/logo.png' %}" alt="logo">
+    <span class="font-weight-bold">
+        Calenduck Tales
+    </span>
+</a>
+{% endblock %}
 {% block cta %}
 <li class="nav-item ml-lg-3">
     <a href="/install/">
@@ -9,20 +18,17 @@
 </li>
 {% endblock %}
 {% block content %}
-{% load static %}
-
-<div class="container">
-    <div class="row">
-        <div class="">
+<div class="container p-5">
+    <div class="row justify-content-center px-md-5 mx-md-5">
+        <div class="mb-4 px-lg-5">
             <h1 class="font-weight-bold">
-                {{ object.title }}
+                {{ post.title }}
             </h1>
-            <p class="text-muted">{{ object.created_on|date:"l, N d, Y"}} </p>
-            <p class="">{{object.content | safe}}</p>
+            <p class="text-muted">{{ post.created_on|date:"l, N d, Y"}} </p>
+            <p class="">{{post.content | safe}}</p>
         </div>
     </div>
 </div>
-
 {% endblock %}
 {% block js %}
 {% load static %}
