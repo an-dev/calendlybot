@@ -25,11 +25,11 @@
         {% for post in post_list %}
         <div class="mb-4 px-lg-5">
             <h1 class="font-weight-bold">
-                <a href="{% url 'post_detail' post.slug  %}" class="text-decoration-none text-body">{{ post.title }}</a>
+                <a href="{% url 'blog_post' post.slug  %}" class="text-decoration-none text-body">{{ post.title }}</a>
             </h1>
             <p class="text-muted">{{ post.created_on|date:"l, N d, Y"}} </p>
             <p class="">{{post.preview|slice:":200" }}</p>
-            <a href="{% url 'post_detail' post.slug  %}" class="font-weight-bold cbot-link">Read More &rarr;</a>
+            <a href="{% url 'blog_post' post.slug  %}" class="font-weight-bold cbot-link">Read More &rarr;</a>
         </div>
         {% endfor %}
     </div>
