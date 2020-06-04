@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'web.core',
     'web.blog',
     'djcelery_email',
+    'markdownx'
 ]
 
 MIDDLEWARE = [

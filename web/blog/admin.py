@@ -1,4 +1,6 @@
 from django.contrib import admin
+from markdownx.admin import MarkdownxModelAdmin
+
 from .models import Post
 
 
@@ -9,4 +11,4 @@ class PostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
 
 
-admin.site.register(Post, PostAdmin)
+admin.site.register(Post, MarkdownxModelAdmin)
