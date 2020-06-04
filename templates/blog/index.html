@@ -1,6 +1,8 @@
 {% extends 'web/base.html' %}
 {% load static %}
+{% load markdown_extras %}
 {% block title %}Blog{% endblock %}
+{% block description %}"A blog on all things Slack, Calendly notifications and Calendly integrations."{% endblock %}
 {% block logo-title %}
 <a class="navbar-brand" href="/blog/">
     <img src="{% static 'web/img/logo.png' %}" alt="logo">
