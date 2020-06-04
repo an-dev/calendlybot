@@ -28,7 +28,7 @@
                 <a href="{% url 'post_detail' post.slug  %}" class="text-decoration-none text-body">{{ post.title }}</a>
             </h1>
             <p class="text-muted">{{ post.created_on|date:"l, N d, Y"}} </p>
-            <p class="">{{post.content|slice:":200" }}</p>
+            <p class="">{{post.preview|slice:":200" }}</p>
             <a href="{% url 'post_detail' post.slug  %}" class="font-weight-bold cbot-link">Read More &rarr;</a>
         </div>
         {% endfor %}
