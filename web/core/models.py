@@ -29,7 +29,7 @@ class SlackUser(TimeStampedModel):
     slack_id = models.CharField(max_length=16)
     slack_name = models.CharField(max_length=64, blank=True, null=True)
     slack_email = models.EmailField(null=True)
-    calendly_email = models.EmailField(unique=True, null=True, blank=True)
+    calendly_email = models.EmailField(null=True)
     calendly_authtoken = models.CharField(max_length=64, null=True, blank=True)
     workspace = models.ForeignKey('Workspace', related_name='slackusers', on_delete=models.CASCADE)
 
