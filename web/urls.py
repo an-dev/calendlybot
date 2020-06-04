@@ -1,3 +1,4 @@
+from django.conf.urls import url
 from django.contrib import admin, sitemaps
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, include, reverse
@@ -26,6 +27,7 @@ urlpatterns = [
     path('', include('web.core.urls')),
     path('blog/', include('web.blog.urls')),
     path('subscribe/', include('web.payments.urls'), name='subscribe'),
+    url(r'^markdownx/', include('markdownx.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),),
 ]
