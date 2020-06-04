@@ -2,14 +2,15 @@
 {% load static %}
 <html class="h-100" lang="en">
 <head>
-    <script src="https://config.metomic.io/config.js?id=prj:d56b2d1a-c216-40c2-9eee-c79238c3b463" crossorigin charset="utf-8"></script>
+    <script src="https://config.metomic.io/config.js?id=prj:d56b2d1a-c216-40c2-9eee-c79238c3b463" crossorigin
+            charset="utf-8"></script>
     <script src="https://consent-manager.metomic.io/embed.js" crossorigin charset="utf-8"></script>
     <meta charset="utf-8"/>
     <title>Calenduck - {% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta
             name="description"
-            content="Native Slack integration for Calendly. Receive Slack messages for new scheduled and cancelled events. No other third party needed."
+            content={% block description %}"Native Slack integration for Calendly. Receive Slack messages for new scheduled and cancelled events. No other third party needed."{% endblock %}
     />
     <meta name="slack-app-id" content="AS7JCAATV">
     <meta name="theme-color" content="#003c5b">
@@ -75,26 +76,26 @@
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav ml-auto text-center">
                     {% if not blog_nav %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/#how-it-works">How it works</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/faq/">About</a>
-                        </li>
-                        {% block pricing %}
-                        {% endblock %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/blog/">Blog</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/#how-it-works">How it works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/faq/">About</a>
+                    </li>
+                    {% block pricing %}
+                    {% endblock %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/blog/">Blog</a>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="https://twitter.com/calenduckapp">
-                                <i class="fab fa-twitter"></i>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">Go back Home</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://twitter.com/calenduckapp">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Go back Home</a>
+                    </li>
                     {% endif %}
                     {% block cta %}
                     {% endblock %}
@@ -119,9 +120,11 @@
                     <a href="/faq/" class="text-white font-weight-bold mr-3">About</a>
                     <a href="/terms/" class="text-white font-weight-bold mr-3">Terms</a>
                     <a href="/privacy/" class="text-white font-weight-bold mr-3">Privacy</a>
-                    <a href="javascript:window.Metomic('ConsentManager:show')" class="text-white font-weight-bold mr-3">Manage Cookies</a>
+                    <a href="javascript:window.Metomic('ConsentManager:show')" class="text-white font-weight-bold mr-3">Manage
+                        Cookies</a>
                     <a href="mailto:support@calenduck.co" class="text-white font-weight-bold mr-3">Contact Us</a>
-                    <a href="https://twitter.com/calenduckapp" class="text-white font-weight-bold"><i class="fab fa-twitter"></i></a>
+                    <a href="https://twitter.com/calenduckapp" class="text-white font-weight-bold"><i
+                            class="fab fa-twitter"></i></a>
                 </small>
             </div>
         </div>
