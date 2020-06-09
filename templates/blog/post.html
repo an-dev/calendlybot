@@ -2,7 +2,7 @@
 {% load static %}
 {% load markdown_extras %}
 {% block title %}{{ post.title }}{% endblock %}
-{% block description %}{{ post.description }}{% endblock %}
+{% block description %}"{{ post.description }}"{% endblock %}
 {% block logo-title %}
 <a class="navbar-brand" href="/blog/">
     <img src="{% static 'web/img/logo.png' %}" alt="logo">
