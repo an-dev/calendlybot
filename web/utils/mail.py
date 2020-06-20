@@ -39,29 +39,7 @@ class SendEmail:
         )
 
 
-class SendWelcomeEmail(SendEmail):
-    def subject(self):
-        return "Welcome to Calenduck!"
-
-    def template_slug(self):
-        return "welcome"
-
-
-class SendTrialEndEmail(SendEmail):
-    def subject(self):
-        return "Calenduck trial ending soon!"
-
-    def template_slug(self):
-        return "trial-end"
-
-
-class SendAbandonedUpgradeEmail(SendEmail):
-    def subject(self):
-        return "Still thinking about it?"
-
-    def template_slug(self):
-        return "abandoned-upgrade"
-
+class SendUpgradeEmail(SendEmail):
     def run(self, workspace):
         checkout_session_id = WorkspaceUpgradeService(workspace).run()
         body = loader.render_to_string(f'emails/{self.template_slug()}.txt')
@@ -80,6 +58,30 @@ class SendAbandonedUpgradeEmail(SendEmail):
         )
 
 
+class SendWelcomeEmail(SendEmail):
+    def subject(self):
+        return "Welcome to Calenduck!"
+
+    def template_slug(self):
+        return "welcome"
+
+
+class SendTrialEndEmail(SendUpgradeEmail):
+    def subject(self):
+        return "Calenduck trial ending soon!"
+
+    def template_slug(self):
+        return "trial-end"
+
+
+class SendAbandonedUpgradeEmail(SendUpgradeEmail):
+    def subject(self):
+        return "Still thinking about it?"
+
+    def template_slug(self):
+        return "abandoned-upgrade"
+
+
 @shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_welcome_email(user_id):
     try:
@@ -92,11 +94,10 @@ def send_welcome_email(user_id):
 @shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_trial_end_email():
     try:
-        emails = SlackUser.objects \
+        slack_users = SlackUser.objects \
             .filter(workspace__trial_end=timezone.now().date() + timedelta(days=3),
-                    workspace__subscription__isnull=True) \
-            .values_list('slack_email', flat=True)
-        [SendTrialEndEmail(email).run() for email in emails]
+                    workspace__subscription__isnull=True)
+        [SendTrialEndEmail(su.slack_email).run(su.workspace) for su in slack_users]
     except Exception:
         logger.exception("Could not send trial end email")
 
