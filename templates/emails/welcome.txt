@@ -1,4 +1,4 @@
-Hello there,
+Hi there!
 
 I'm Andy, the developer behind Calenduck - thanks for installing the bot in your workspace!
 Just reaching out so you have my contact info. Let me know if you need assistance with anything or you'd like to share some feedback.
@@ -6,5 +6,5 @@ Just reaching out so you have my contact info. Let me know if you need assistanc
 All the best,
 Andy
 
-www.calenduck.co 
 Follow us on twitter for updates: @calenduckapp
+www.calenduck.co
