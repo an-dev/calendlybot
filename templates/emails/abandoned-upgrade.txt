@@ -1,0 +1,14 @@
+Hi there,
+
+Looks like you were trying to upgrade Calenduck but didn't complete the process...
+You can still receive notifications by typing "/duck update" from your workspace!
+
+Still not convinced? Just reply to this email if you feel like a feature is missing or if you'd like a custom plan :)
+
+All the best,
+Andy
+
+Continue with the upgrade: {{subscribe_link}}
+
+Follow us on twitter for updates: @calenduckapp
+www.calenduck.co

@@ -9,6 +9,7 @@ from django.template import loader
 from django.utils import timezone
 
 from web.core.models import SlackUser
+from web.payments.services import WorkspaceUpgradeService
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +55,31 @@ class SendTrialEndEmail(SendEmail):
         return "trial-end"
 
 
+class SendAbandonedUpgradeEmail(SendEmail):
+    def subject(self):
+        return "Still thinking about it?"
+
+    def template_slug(self):
+        return "abandoned-upgrade"
+
+    def run(self, workspace):
+        checkout_session_id = WorkspaceUpgradeService(workspace).run()
+        body = loader.render_to_string(f'emails/{self.template_slug()}.txt')
+        html = loader.render_to_string(
+            f'emails/{self.template_slug()}.html',
+            context={'subscribe_link': f'{settings.SITE_URL}/subscribe/{checkout_session_id}/'})
+
+        logger.info(f"Sending {self.template_slug()} email to {self.to_email}")
+
+        return send_mail(
+            subject=self.subject(),
+            message=body,
+            from_email=settings.FROM_EMAIL,
+            recipient_list=[self.to_email],
+            html_message=html,
+        )
+
+
 @shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_welcome_email(user_id):
     try:
@@ -73,3 +99,12 @@ def send_trial_end_email():
         [SendTrialEndEmail(email).run() for email in emails]
     except Exception:
         logger.exception("Could not send trial end email")
+
+
+@shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
+def send_abandoned_upgrade_email(user_id):
+    try:
+        su = SlackUser.objects.get(workspace__subscription__isnull=True, slack_id=user_id)
+        SendAbandonedUpgradeEmail(su.slack_email).run(su.workspace)
+    except Exception:
+        logger.exception("Could not send upgrade abandoned email")
