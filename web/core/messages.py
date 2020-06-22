@@ -330,9 +330,12 @@ class SlackHomeMessage:
             # get existing selected events, if available, else load new ones
             calendly = Calendly(self.slack_user.calendly_authtoken)
             events = calendly.event_types()
+
+            # limiting events to 100 as slack doesn't allow more than that
+
             if 'data' in events:
                 options = [{'text': {'type': 'plain_text', 'text': e['attributes']['name']}, 'value': e['id']} for e in
-                           events['data'] if e['attributes']['active']]
+                           events['data'][:99] if e['attributes']['active']]
                 if self.slack_user.filters:
                     existing_filters = self.slack_user.filters.all().values_list('event_id', flat=True)
                     initial_options = [f for f in options if f['value'] in existing_filters]
