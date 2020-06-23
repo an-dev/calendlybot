@@ -1,6 +1,7 @@
 import logging
 
 import stripe
+from celery import shared_task
 from django.conf import settings
 from django.core import signing
 from django.template.response import TemplateResponse
@@ -73,6 +74,7 @@ def success(request):
     return TemplateResponse(request, 'web/success.html')
 
 
+@shared_task()
 def check_abandoned_upgrade(user_id, workspace_id):
     su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
     if timezone.now().date() > su.workspace.trial_end and not hasattr(su.workspace, 'subscription'):
