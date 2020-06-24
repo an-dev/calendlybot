@@ -8,6 +8,7 @@ urlpatterns = [
     path('faq/', static.faq, name='faq'),
     path('privacy/', static.privacy, name='privacy'),
     path('terms/', static.terms, name='terms'),
+    path('pricing/', static.pricing, name='pricing'),
     path('auth/', main.auth, name='auth'),
     path('oauth/', main.oauth, name='oauth'),
     path('commands/', handlers.commands, name='commands'),
@@ -15,4 +16,4 @@ urlpatterns = [
     re_path(r'^handle/(?P<signed_value>[-:\w]+)/$', handlers.handle, name='handle'),
 ]
 
-core_map_paths = ('index', 'faq', 'privacy', 'terms')
+core_map_paths = ('index', 'faq', 'privacy', 'terms', 'pricing')
