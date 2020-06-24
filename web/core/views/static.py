@@ -32,3 +32,8 @@ def privacy(request):
 @require_http_methods(["GET"])
 def terms(request):
     return TemplateResponse(request, 'web/terms.html')
+
+
+@require_http_methods(["GET"])
+def pricing(request):
+    return TemplateResponse(request, 'web/pricing.html')

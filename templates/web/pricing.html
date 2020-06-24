@@ -1,0 +1,105 @@
+{% extends 'web/base.html' %}
+{% block title %}Calendly + Slack integration pricing{% endblock %}
+{% block pricing %}
+<li class="nav-item">
+    <a class="nav-link" href="/pricing/">Pricing</a>
+</li>
+{% endblock %}
+{% block cta %}
+<li class="nav-item ml-lg-3">
+    <a href="/install/">
+        <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png"
+             srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
+    </a>
+</li>
+{% endblock %}
+{% block content %}
+{% load static %}
+<section class="pt-5 pb-md-4">
+    <div class="container">
+        <div class="px-3 mx-auto text-center">
+            <h2 class="h1 font-weight-bold">Stop context switching</h2>
+            <p class="lead">
+                Tired of jumping between tasks, emails, Slack and Calendly?
+                <br>
+                Keep your focus and let Calenduck manage
+                notifications for you.
+            </p>
+        </div>
+        <div class="row text-center justify-content-center">
+            <div class="col-8 col-md-4 mt-0 mb-4">
+                <div>
+                    <div class="cbot-link">
+                        <span class="h3 font-weight-bold">$</span>
+                        <span class="display-4 mb-0">4</span>
+                    </div>
+                    <span class="text-small text-muted pb-md-4">per user/month</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <p class="lead">
+            Calenduck starts with a <span class="font-weight-bold">{{ TRIAL_DAYS }} day trial</span>, no credit
+            card required.
+            <br>
+            After that, you can upgrade by typing <code>/duck upgrade</code>
+            <br>
+            to continue receiving event notifications.
+        </p>
+    </div>
+</section>
+<section>
+    <div class="container cbot-sm-width border-top">
+        <div class="pb-5 py-md-4">
+            <h2 class="h1 font-weight-bold">Pricing Questions</h2>
+            <p class="lead font-weight-bold">
+                What happens when the trial is over? Will I be charged?
+            </p>
+            <p>
+                After your trial ends you won't be charged because we don't require a credit card to try Calenduck.
+                If you don't upgrade and your trial expires, you'll receive a prompt to upgrade everytime someone books
+                or canceles an event in Calendly.
+            </p>
+            <p class="lead font-weight-bold">
+                What if we need more than 14 days to try out Calenduck!?
+            </p>
+            <p>
+                We're more than happy to extend a trial if you need more time. Simply <a
+                    href="mailto:support@calenduck.co" class="cbot-link font-weight-bold">get in touch</a>, and we'll
+                make it happen.
+            </p>
+            <p class="lead font-weight-bold">How do I get a discount for a not-for-profit?</p>
+            <p>We're glad you're enjoying Calenduck as a for-good organization! Feel free to <a
+                    href="mailto:support@calenduck.co" class="cbot-link font-weight-bold">contact us</a> and we can
+                workout a discount
+                based on your Calendly pricing.</p>
+        </div>
+    </div>
+</section>
+<section class="cbot-bg text-light">
+    <div class="container p-md-5 my-5">
+        <div class="d-flex align-items-center justify-content-around">
+            <p class="lead mr-3 mb-0">Receive event notifications directly in your
+                workspace. <br> No need for extra integrations.</p>
+            <a href="/install/"
+               role="button" class="btn btn-lg btn-outline-light">
+                        <span class="d-flex align-items-center">
+                            <i class="fab fa-slack fa-2x"></i> &nbsp; <span>Add to&nbsp;<span
+                                class="font-weight-bold">Slack</span></span>
+                        </span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block js %}
+{% load static %}
+<script type="text/javascript">
+    window.$crisp=[];window.CRISP_WEBSITE_ID="54151894-d49e-46e1-9f56-b1ae2c252e4d";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();
+
+
+
+
+</script>
+{% endblock %}

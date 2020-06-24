@@ -38,3 +38,7 @@ html {
     color: #17a2b8;
     text-decoration: none;
 }
+
+.cbot-sm-width {
+    max-width: 580px !important;
+}
