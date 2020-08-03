@@ -137,42 +137,42 @@ class CreateWebhookService:
             # atm, we support just one authtoken per user.
             # Calling this service on the same user effectively overwrites
             calendly = Calendly(self.api_key)
-            # check if there's an existing working hook for this user
-            # this effectively means that if someone uses another's apiKey
-            # if all its hooks are active they won't be able to setup
-            active_hooks = count_active_hooks(calendly)
-            if active_hooks > 1:
-                logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
-                result = Result.from_failure("This API Key is already used on another account.")
+            # # check if there's an existing working hook for this user
+            # # this effectively means that if someone uses another's apiKey
+            # # if all its hooks are active they won't be able to setup
+            # active_hooks = count_active_hooks(calendly)
+            # if active_hooks > 1:
+            #     logger.error(f'Trying to setup apikey on already setup account for {self.user_id}')
+            #     result = Result.from_failure("This API Key is already used on another account.")
             # elif active_hooks == 0:
             #     logger.warning(f'User {self.user_id} does not have a paid account')
             #     return Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
-            else:
-                signed_value = signing.dumps((self.workspace_id, self.user_id))
+            # else:
+            signed_value = signing.dumps((self.workspace_id, self.user_id))
 
-                webhook_create_response = calendly.create_webhook(
-                    f"{settings.SITE_URL}/handle/{signed_value}/")
+            webhook_create_response = calendly.create_webhook(
+                f"{settings.SITE_URL}/handle/{signed_value}/")
 
-                if 'id' not in webhook_create_response:
-                    errors = ''
-                    if 'message' in webhook_create_response:
-                        errors = webhook_create_response.get('errors', webhook_create_response.get('message'))
-                    logger.error(f'Could not setup Calendly webhook. {errors}')
+            if 'id' not in webhook_create_response:
+                errors = ''
+                if 'message' in webhook_create_response:
+                    errors = webhook_create_response.get('errors', webhook_create_response.get('message'))
+                logger.error(f'Could not setup Calendly webhook. {errors}')
 
-                    if errors:
-                        errors_detail = errors
-                    else:
-                        errors_detail = STATIC_HELP_MSG
-                    result = Result.from_failure(f"Could not connect with Calendly API. {errors_detail}")
+                if errors:
+                    errors_detail = errors
                 else:
-                    su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
-                    Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'])
-                    su.calendly_authtoken = self.api_key
-                    su.save()
+                    errors_detail = STATIC_HELP_MSG
+                result = Result.from_failure(f"Could not connect with Calendly API. {errors_detail}")
+            else:
+                su = SlackUser.objects.get(slack_id=self.user_id, workspace__slack_id=self.workspace_id)
+                Webhook.objects.create(user=su, calendly_id=webhook_create_response['id'])
+                su.calendly_authtoken = self.api_key
+                su.save()
 
-                    result = Result.from_success(
-                        "Setup complete. You will now receive notifications on created and canceled events!")
-                    notify_admin.delay(self.user_id, self.workspace_id)
+                result = Result.from_success(
+                    "Setup complete. You will now receive notifications on created and canceled events!")
+                notify_admin.delay(self.user_id, self.workspace_id)
         except InvalidTokenError:
             logger.warning(f'User {self.user_id} does not have a valid token')
             result = Result.from_failure("Calenduck works only with Calendly Premium and Pro accounts.")
