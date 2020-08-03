@@ -8,10 +8,12 @@ import functools
 from django.core import signing
 from django.http import HttpResponse
 from django.utils import timezone
+from slack.errors import SlackApiError
 
 from web.core.messages import SlackMarkdownUpgradePromptMessage
 from web.core.models import Workspace
 from web.core.services import SlackMessageService
+from web.utils import disable_webhook
 
 slack_signing_secret = os.environ['SLACK_SIGNING_SECRET']
 
@@ -57,7 +59,7 @@ def requires_subscription(func):
             workspace_slack_id, user_slack_id = signing.loads(signed_value)
             workspace = Workspace.objects.get(slack_id=workspace_slack_id)
             if timezone.now().date() > workspace.trial_end and not hasattr(workspace, 'subscription'):
-                logger.info("Could not display event details")
+                logger.info(f"User {user_slack_id} needs to upgrade")
                 msg = SlackMarkdownUpgradePromptMessage()
                 SlackMessageService(workspace.bot_token).send(
                     user_slack_id,
@@ -69,9 +71,13 @@ def requires_subscription(func):
                 return func(request, signed_value, *args, **kwargs)
         except Workspace.DoesNotExist:
             logger.exception(f"Workspace {workspace_slack_id} does not exist for user {user_slack_id}")
-            return HttpResponse(status=400)
+        except SlackApiError as sae:
+            if "account_inactive" in sae:
+                disable_webhook.delay(user_slack_id)
+            logger.warning(f"Slack error: {sae}")
+
         except Exception:
             logger.exception("Could not verify if view needs subscription")
-            return HttpResponse(status=400)
+        return HttpResponse(status=400)
 
     return wrapper

@@ -5,7 +5,7 @@ from calendly import Calendly
 from celery import shared_task
 from slack.errors import SlackApiError
 
-from web.core.models import Workspace, SlackUser
+from web.core.models import Workspace, SlackUser, Webhook
 from web.utils.errors import InvalidTokenError
 
 logger = logging.getLogger(__name__)
@@ -76,3 +76,8 @@ def remove_calendly_hooks(calendly_client):
             logger.error(f"Could not delete Calendly webhook for {hook['id']}")
             res = False
     return res
+
+
+@shared_task(autoretry_for=(Exception,), max_retries=3)
+def disable_webhook(user_slack_id):
+    Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).update(enabled=False)
