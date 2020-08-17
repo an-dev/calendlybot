@@ -72,10 +72,9 @@ def requires_subscription(func):
         except Workspace.DoesNotExist:
             logger.exception(f"Workspace {workspace_slack_id} does not exist for user {user_slack_id}")
         except SlackApiError as sae:
-            if "account_inactive" in sae:
-                disable_webhook.delay(user_slack_id)
             logger.warning(f"Slack error: {sae}")
-
+            if sae.response['error'] == 'account_inactive':
+                disable_webhook.delay(user_slack_id)
         except Exception:
             logger.exception("Could not verify if view needs subscription")
         return HttpResponse(status=400)
