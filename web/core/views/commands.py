@@ -72,7 +72,7 @@ def duck(request):
         su.save()
 
     msg = SlackHomeMessage(su)
-    slack_msg_service.send(user_id, "Hello Andy! Manage Calenduck's settings and notification preferences below",
+    slack_msg_service.send(user_id, "Hello! Manage Calenduck's settings and notification preferences below",
                            msg.get_blocks())
     return HttpResponse(status=200)
 
