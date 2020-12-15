@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta
             name="description"
-            content={% block description %}"Native Slack integration for Calendly. Receive Slack messages for new scheduled and cancelled events. No other third party needed."{% endblock %}
+            content="Native Slack integration for Calendly. Receive Slack messages for new scheduled and cancelled events. No other third party needed."
     />
     <meta name="slack-app-id" content="AS7JCAATV">
     <meta name="theme-color" content="#003c5b">
@@ -76,7 +76,6 @@
             </button>
             <div class="navbar-collapse collapse">
                 <ul class="navbar-nav ml-auto text-center">
-                    {% if not blog_nav %}
                     <li class="nav-item">
                         <a class="nav-link" href="/#how-it-works">How it works</a>
                     </li>
@@ -85,19 +84,6 @@
                     </li>
                     {% block pricing %}
                     {% endblock %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/blog/">Blog</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="https://twitter.com/calenduckapp">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Go back Home</a>
-                    </li>
-                    {% endif %}
                     {% block cta %}
                     {% endblock %}
                 </ul>

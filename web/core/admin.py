@@ -10,6 +10,7 @@ class SubscriptionInline(admin.StackedInline):
 
 class WorkspaceAdmin(admin.ModelAdmin):
     inlines = (SubscriptionInline,)
+    search_fields = ('name', 'slack_id', 'bot_token', 'user_count', 'trial_end', 'created', 'modified')
     fields = ('name', 'slack_id', 'bot_token', 'user_count', 'trial_end', 'created', 'modified')
     readonly_fields = ('slack_id', 'bot_token', 'user_count', 'created', 'modified')
 
@@ -28,6 +29,8 @@ class FiltersInline(admin.StackedInline):
 
 class SlackUserAdmin(admin.ModelAdmin):
     inlines = (WebhooksInline, FiltersInline)
+    search_fields = ('slack_id', 'slack_name', 'slack_email', 'calendly_email', 'calendly_authtoken', 'created',
+                     'modified')
     fields = (
         'slack_id', 'slack_name', 'slack_email', 'calendly_email', 'calendly_authtoken', 'created',
         'modified', 'workspace')
