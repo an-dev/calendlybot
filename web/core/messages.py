@@ -402,7 +402,7 @@ class SlackHomeMessage:
             user_list = [{'text': {'type': 'plain_text', 'text': u['name']}, 'value': u['id']} for u in users][:99]
             # get channels/convos
             channels = [{'id': c['id'], 'name': c['name']} for c in client.conversations_list(types="public_channel").data['channels']]
-            channel_list = [{'text': {'type': 'plain_text', 'text': c.get('name', 'Unnamed Channel'), 'value': c['id']} for c in channels][:99]
+            channel_list = [{'text': {'type': 'plain_text', 'text': c.get('name', 'Unnamed Channel')}, 'value': c['id']} for c in channels][:99]
             # get private channels
             groups = [{'id': g['id'], 'name': g['name']} for g in client.conversations_list(types="private_channel").data['channels']]
             group_list = [{'text': {'type': 'plain_text', 'text': g.get('name', 'Unnamed Group')}, 'value': g['id']} for g in groups][:99]
