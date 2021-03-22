@@ -400,12 +400,12 @@ class SlackHomeMessage:
             users = [{'id': u['id'], 'name': u['profile'].get('first_name', u['profile']['real_name'])} for u in
                      client.users_list().data['members'] if user_eligible(u)]
             user_list = [{'text': {'type': 'plain_text', 'text': u['name']}, 'value': u['id']} for u in users][:99]
-            # get channels
-            channels = [{'id': c['id'], 'name': c['name']} for c in client.channels_list().data['channels']]
-            channel_list = [{'text': {'type': 'plain_text', 'text': c['name'] or 'Unnamed Channel'}, 'value': c['id']} for c in channels][:99]
+            # get channels/convos
+            channels = [{'id': c['id'], 'name': c['name']} for c in client.conversations_list(types="public_channel").data['channels']]
+            channel_list = [{'text': {'type': 'plain_text', 'text': c.get('name', 'Unnamed Channel'), 'value': c['id']} for c in channels][:99]
             # get private channels
-            groups = [{'id': g['id'], 'name': g['name']} for g in client.groups_list().data['groups']]
-            group_list = [{'text': {'type': 'plain_text', 'text': g['name'] or 'Unnamed Group'}, 'value': g['id']} for g in groups][:99]
+            groups = [{'id': g['id'], 'name': g['name']} for g in client.conversations_list(types="private_channel").data['channels']]
+            group_list = [{'text': {'type': 'plain_text', 'text': g.get('name', 'Unnamed Group')}, 'value': g['id']} for g in groups][:99]
 
             for f in filters.all():
                 section = {
