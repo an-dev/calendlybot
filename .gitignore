@@ -18,5 +18,8 @@ tmp/
 /.idea
 /*.iml
 
+# Visual Studio
+.vscode/
+
 web/staticfiles/
 mailhog
