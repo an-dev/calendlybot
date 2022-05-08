@@ -1,15 +1,14 @@
+import logging
 from datetime import timedelta
 
 from django.http import HttpResponse
 from django.utils import timezone
-
-from web.core.messages import SlackMarkdownUpgradeLinkMessage, SlackMarkdownHelpMessage, SlackHomeMessage
-from web.core.models import Workspace, SlackUser
+from web.core.messages import (SlackHomeMessage, SlackMarkdownHelpMessage,
+                               SlackMarkdownUpgradeLinkMessage)
+from web.core.models import SlackUser, Workspace
 from web.core.services import SlackMessageService
 from web.payments.services import WorkspaceUpgradeService
 from web.payments.views import check_abandoned_upgrade
-import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +29,8 @@ def upgrade(request):
         # get workspace id + current timestamp
         # if user doesn't upgrade in 1/2 days
         # send email
-        tomorrow = timezone.now() + timedelta(days=1)
-        check_abandoned_upgrade.apply_async((user_id, workspace.slack_id), eta=tomorrow)
+        # tomorrow = timezone.now() + timedelta(days=1)
+        check_abandoned_upgrade(user_id, workspace.slack_id)
     except Workspace.DoesNotExist:
         logger.exception(f'Missing workspace: {request.POST}')
     except Exception:

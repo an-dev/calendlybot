@@ -2,10 +2,7 @@ import logging
 
 import slack
 from calendly import Calendly
-from celery import shared_task
-from slack.errors import SlackApiError
-
-from web.core.models import Workspace, SlackUser, Webhook
+from web.core.models import SlackUser, Webhook, Workspace
 from web.utils.errors import InvalidTokenError
 
 logger = logging.getLogger(__name__)
@@ -21,7 +18,6 @@ def user_connected(user: SlackUser):
     return user.calendly_email and user.calendly_authtoken
 
 
-@shared_task(autoretry_for=(SlackApiError,))
 def get_user_count(workspace_slack_id):
     try:
         workspace = Workspace.objects.get(slack_id=workspace_slack_id)
@@ -35,7 +31,6 @@ def get_user_count(workspace_slack_id):
         logger.exception('Could not get workspace size')
 
 
-@shared_task(autoretry_for=(Exception,), max_retries=3)
 def get_calendly_email(user_id):
     su = SlackUser.objects.get(slack_id=user_id)
     calendly = Calendly(su.calendly_authtoken)
@@ -78,6 +73,5 @@ def remove_calendly_hooks(calendly_client):
     return res
 
 
-@shared_task(autoretry_for=(Exception,), max_retries=3)
 def disable_webhook(user_slack_id):
     Webhook.objects.filter(user__slack_id=user_slack_id, enabled=True).update(enabled=False)

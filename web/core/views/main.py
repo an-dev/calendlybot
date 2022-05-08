@@ -1,22 +1,23 @@
 import json
 import logging
 import os
-import slack
 
+import slack
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-
+from web.core.actions import *
 from web.core.decorators import verify_request
 from web.core.messages import STATIC_START_MSG
-from web.core.modals import SlackDisconnectErrorModal, SlackConnectModal, \
-    SlackConnectModalWithError
+from web.core.modals import (SlackConnectModal, SlackConnectModalWithError,
+                             SlackDisconnectErrorModal)
 from web.core.models import SlackUser, Workspace
-from web.core.services import DisconnectUserService, OpenModalService, UpdateHomeMessageService, SetDestinationService, \
-    CreateFiltersService, CreateWebhookService, update_home
-from web.core.actions import *
-from web.utils import get_user_count, mail, get_calendly_email
+from web.core.services import (CreateFiltersService, CreateWebhookService,
+                               DisconnectUserService, OpenModalService,
+                               SetDestinationService, UpdateHomeMessageService,
+                               update_home)
+from web.utils import get_calendly_email, get_user_count, mail
 
 client_id = os.environ["SLACK_CLIENT_ID"]
 client_secret = os.environ["SLACK_CLIENT_SECRET"]
@@ -53,8 +54,6 @@ def auth(request):
         workspace.name = response['team'].get('name')
         workspace.save()
 
-        get_user_count.delay(response['team']['id'])
-
         client = slack.WebClient(token=token)
         user_info = client.users_info(user=user_id)
         su, new_user = SlackUser.objects.get_or_create(slack_id=user_id, workspace=workspace)
@@ -68,7 +67,7 @@ def auth(request):
                 client.chat_postMessage(
                     channel=su.slack_id,
                     text=f"Hi {su.slack_name}, I'm Calenduck. {STATIC_START_MSG}")
-                mail.send_welcome_email.delay(user_id)
+                mail.send_welcome_email(user_id)
             else:
                 client.chat_postMessage(
                     channel=su.slack_id,
@@ -76,6 +75,7 @@ def auth(request):
 
         # Don't forget to let the user know that auth has succeeded!
         msg = "Auth complete!"
+        get_user_count(response['team']['id'])
 
         # UpdateHomeViewService(user_id, team_id)
 

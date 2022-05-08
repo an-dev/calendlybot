@@ -1,13 +1,10 @@
 import logging
 from datetime import timedelta
-from smtplib import SMTPServerDisconnected
 
-from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
-
 from web.core.models import SlackUser
 from web.payments.services import WorkspaceUpgradeService
 
@@ -82,7 +79,6 @@ class SendAbandonedUpgradeEmail(SendUpgradeEmail):
         return "abandoned-upgrade"
 
 
-@shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_welcome_email(user_id):
     try:
         email = SlackUser.objects.get(slack_id=user_id).slack_email
@@ -91,7 +87,6 @@ def send_welcome_email(user_id):
         logger.exception("Could not send welcome email")
 
 
-@shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_trial_end_email():
     try:
         slack_users = SlackUser.objects \
@@ -102,7 +97,6 @@ def send_trial_end_email():
         logger.exception("Could not send trial end email")
 
 
-@shared_task(autoretry_for=(ValueError, SMTPServerDisconnected))
 def send_abandoned_upgrade_email(user_id):
     try:
         su = SlackUser.objects.get(workspace__subscription__isnull=True, slack_id=user_id)

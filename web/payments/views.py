@@ -1,15 +1,13 @@
 import logging
 
 import stripe
-from celery import shared_task
 from django.conf import settings
 from django.core import signing
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from stripe.error import InvalidRequestError
-
-from web.core.models import Subscription, SlackUser
+from web.core.models import SlackUser, Subscription
 from web.utils.mail import send_abandoned_upgrade_email
 
 logger = logging.getLogger(__name__)
@@ -74,10 +72,9 @@ def success(request):
     return TemplateResponse(request, 'web/success.html')
 
 
-@shared_task()
 def check_abandoned_upgrade(user_id, workspace_id):
     su = SlackUser.objects.get(slack_id=user_id, workspace__slack_id=workspace_id)
     if timezone.now().date() > su.workspace.trial_end and not hasattr(su.workspace, 'subscription'):
-        send_abandoned_upgrade_email.delay(su.slack_id)
+        send_abandoned_upgrade_email(su.slack_id)
     else:
         logger.info(f'Looks like {user_id} upgraded after all. Double check this!')
