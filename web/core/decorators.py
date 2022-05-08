@@ -1,15 +1,14 @@
+import functools
 import hashlib
 import hmac
 import logging
 import os
 import time
-import functools
 
 from django.core import signing
 from django.http import HttpResponse
 from django.utils import timezone
 from slack.errors import SlackApiError
-
 from web.core.messages import SlackMarkdownUpgradePromptMessage
 from web.core.models import Workspace
 from web.core.services import SlackMessageService
@@ -74,7 +73,7 @@ def requires_subscription(func):
         except SlackApiError as sae:
             logger.warning(f"Slack error: {sae}")
             if sae.response['error'] == 'account_inactive':
-                disable_webhook.delay(user_slack_id)
+                disable_webhook(user_slack_id)
         except Exception:
             logger.exception("Could not verify if view needs subscription")
         return HttpResponse(status=400)
