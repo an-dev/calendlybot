@@ -21,7 +21,7 @@ STATIC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__f
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ***REMOVED***
+SECRET_KEY = 'xxa4o8xd@%-c^^m#ui6x-ty4fm@ib&v5dr2ulpcwbn3(f(b*x$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
