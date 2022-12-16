@@ -1,16 +1,17 @@
-from .staging import *
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+
+from .staging import *
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
 
 DEBUG = False
 SITE_URL = 'https://www.calenduck.co'
-GTAG_ID = ***REMOVED***
+GTAG_ID = ''
 
-SENTRY_KEY = ***REMOVED***
-SENTRY_PROJECT = ***REMOVED***
+SENTRY_KEY = ''
+SENTRY_PROJECT = ''
 
 sentry_sdk.init(
     dsn=f"https://{SENTRY_KEY}@o378137.ingest.sentry.io/{SENTRY_PROJECT}",
